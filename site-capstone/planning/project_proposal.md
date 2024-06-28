@@ -31,8 +31,34 @@ General Users: Anyone who feels anxious or unprepared for interviews can use the
 
 ## Related Work
 
-What similar apps and websites? How will your project stand out from these other websites?
+## Similar Apps and Websites
+
+Pramp: Provides peer-to-peer mock interviews for various types of interviews including technical and behavioral.
+Big Interview: Offers video-based interview practice with a variety of questions and feedback.
+InterviewBuddy: Provides live mock interviews with experts and instant feedback.
+MyInterview: Allows users to practice with pre-recorded video interview questions.
+
+## How Our Project Will Stand Out
+
+Voice-Enabled Interaction: Unlike many platforms that focus on text or video, our project emphasizes voice-enabled interaction, allowing users to practice speaking and manage their speech-related anxiety more effectively.
+
+Real-Time, AI-Driven Feedback: Our AI provides instant, personalized feedback during the interview, helping users make immediate improvements. This contrasts with platforms that offer delayed feedback or rely on peer reviews.
+
+Focus on Behavioral Interviews: While many platforms cater to various interview types, our project specializes in behavioral interviews, providing targeted resources and questions to prepare users for this specific format.
+
+Anxiety Management Resources: In addition to mock interviews, we offer comprehensive resources to help users manage anxiety, including relaxation techniques and confidence-building exercises, which are often overlooked by other platforms.
+
+Progress Tracking and Analytics: Our project includes detailed performance analytics, allowing users to track their progress over time and identify areas for improvement with greater precision.
+
+Inclusive Target Audience: While focusing on young adults, our platform is designed to be beneficial for anyone needing interview practice, including career changers, unemployed individuals, and those re-entering the workforce.
+
+Low-Pressure Environment: By creating a supportive and non-judgmental platform, we aim to reduce the fear of making mistakes and sounding unprepared, which can be a significant barrier to effective practice on other platforms.
 
 ## Open Questions
 
-What questions do you still have? What topics do you need to research more for your project?
+Data Privacy and Security: Regulations and best practices for handling and storing user data securely. Strategies for ensuring user trust and compliance with data protection laws.
+
+Feedback Rubric: Ensuring the 'grading' proccess improves technique and defining the standard for a effective behavioral response. 
+
+
+
