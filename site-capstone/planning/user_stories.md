@@ -12,13 +12,14 @@ Interviewee: Person coming to the website to practice their interviewing skills 
 
 ## User Personas
 
-- Bailey is an unemployed person (of any age) looking to get a Job. While his resume is good enough to get past the screens, he hasn't been able to get past the behavioral interviews. He came to this site because he wants on-demand practice with interviewing that gives him feedback immediately. He doesn't if his shortcombings are rooting in his anxiety caused by the human interviewer or the fact that he just needs interviewing practice. Either way, this site will help him develop a routine with interviewing that allows him to get past the cause of his failures.
+- Bailey is an unemployed person (of any age) looking to get a Job. While his resume is good enough to get past the screens, he hasn't been able to get past the behavioral interviews. He came to this site because he wants on-demand practice with interviewing that gives him feedback immediately. He doesn't if his shortcombings are rooting in his anxiety caused by the human interviewer or the fact that he just needs interviewing practice. This site will help him develop a routine with interviewing that allows him to get past the cause of his failures whatever they may be.
 
 ## User Stories
 
 Include at least 10 user stories.
 
-1. **As a [user role], I want to [what], so that [why]**
+1. As an interviewee, I want to be able to save my progress, so that I can see whether or not I'm making improvements.
+2. As an interviewee, I want to see my cumulative interview stats in a dashboard so I can understand what I need (or don't need) to focus on. 
 
 ## Wireframe (Bonus)
 
