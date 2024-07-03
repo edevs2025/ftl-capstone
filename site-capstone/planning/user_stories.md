@@ -24,6 +24,10 @@ Include at least 10 user stories.
 4. As an interviewee, I want to have accessibility to mock interviews, so I can practice on my own time.
 5. As an interviewee, I want to choose interview questions to my liking, so I can focus on improving in my own career path.
 6. As an interviewee, I want to simulate talking with a person, so I understand the flow of an interview better.
+7. As an interviewee, I want the option to receive instant feedback on my responses, so I can immediately correct any mistakes and improve my answers.
+8. As an interviewee, I want to be able to record my practice sessions, so I can review them later and observe my body language and speech patterns.
+9. As an interviewee, I want to access expert tips and strategies, so I can learn the best practices for answering common interview questions.
+10. As an interviewee, I want to receive tailored question sets based on the job roles I am applying for, so I can practice with the most relevant and challenging questions for my field.
 
 
 ## Wireframe (Bonus)
