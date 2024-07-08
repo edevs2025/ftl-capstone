@@ -16,11 +16,11 @@ List the current user stories you will implement.
 
 ## Pages/Screens
 
-Landing (Home) Page 
-Questions List Page
-AI Mock Interview Page
-User profile Page
-Login / Signup Page
+* Landing (Home) Page 
+* Questions List Page
+* AI Mock Interview Page
+* User profile Page
+* Login / Signup Page
 
 ## Data Model
 
