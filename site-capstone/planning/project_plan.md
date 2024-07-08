@@ -24,6 +24,6 @@ Describe your app's data model using diagrams or tables
 
 ## Endpoints
 
-List the API endpoints you will need to implement.
+Open AI GPT4o, possibly 4turbo for ensembling.
 
 ***Don't forget to set up your Issues, Milestones, and Project Board!***
