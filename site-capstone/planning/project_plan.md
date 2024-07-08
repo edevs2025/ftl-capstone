@@ -1,6 +1,6 @@
 # Project Plan
 
-Pod Members: **Add Pod Members Names**
+Pod Members: **Christopher Adeniji, Bailey Williams, Kenneth Jiang**
 
 ## Problem Statement and Description
 
