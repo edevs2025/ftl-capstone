@@ -8,7 +8,9 @@ Many individuals, particularly young adults, experience significant anxiety and 
 
 ## User Roles and Personas
 
-Include the most up-to-date user roles and personas.
+Interviewee: Person coming to the website to practice their interviewing skills and learn what they do well/need to improve on.
+
+Bailey is an unemployed person (of any age) looking to get a Job. While his resume is good enough to get past the screens, he hasn't been able to get past the behavioral interviews. He came to this site because he wants on-demand practice with interviewing that gives him feedback immediately. He doesn't if his shortcombings are rooting in his anxiety caused by the human interviewer or the fact that he just needs interviewing practice. This site will help him develop a routine with interviewing that allows him to get past the cause of his failures whatever they may be.
 
 ## User Stories
 
