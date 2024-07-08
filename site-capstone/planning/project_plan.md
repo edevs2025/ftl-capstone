@@ -4,7 +4,7 @@ Pod Members: **Christopher Adeniji, Bailey Williams, Kenneth Jiang**
 
 ## Problem Statement and Description
 
-Insert the latest summary of your problem statement and app description.
+Many individuals, particularly young adults, experience significant anxiety and stress when preparing for behavioral interviews. Traditional mock interview resources often lack real-time, personalized feedback and are not always accessible or effective in reducing interview-related anxiety. The primary target audience for this project is young adults who are entering the job market or transitioning to new career opportunities. This includes recent graduates, individuals preparing for internships, and young professionals seeking career advancement. Additionally, the platform aims to be inclusive and beneficial for anyone who needs interview pra
 
 ## User Roles and Personas
 
