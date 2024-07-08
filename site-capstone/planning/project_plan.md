@@ -16,7 +16,11 @@ List the current user stories you will implement.
 
 ## Pages/Screens
 
-List all the pages and screens in the app. Include wireframes for at least 3 of them.
+Landing (Home) Page 
+Questions List Page
+AI Mock Interview Page
+User profile Page
+Login / Signup Page
 
 ## Data Model
 
