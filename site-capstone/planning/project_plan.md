@@ -40,5 +40,9 @@ Describe your app's data model using diagrams or tables
 ## Endpoints
 
 Open AI GPT4o, possibly 4turbo for ensembling.
+| CRUD         | HTTP Verb    | Description  | Model this applies to  |
+| ------------ | ------------ | ------------ | ---------------------- |
+| Content Cell | Content Cell | Content Cell | Content Cell           |
+| Content Cell | Content Cell | Content Cell | Content Cell           |
 
 ***Don't forget to set up your Issues, Milestones, and Project Board!***
