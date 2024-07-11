@@ -40,9 +40,38 @@ Describe your app's data model using diagrams or tables
 ## Endpoints
 
 Open AI GPT4o, possibly 4turbo for ensembling.
-| CRUD         | HTTP Verb    | Description  | Model this applies to  |
-| ------------ | ------------ | ------------ | ---------------------- |
-| Content Cell | Content Cell | Content Cell | Content Cell           |
-| Content Cell | Content Cell | Content Cell | Content Cell           |
+| CRUD         | HTTP Verb    | Description                             | Model this applies to  |
+| ------------ | ------------ | --------------------------------------- | ---------------------- |
+| Create       | POST         | Create a new user                       | User                   |
+| Read         | GET          | Get a user by ID                        | User                   |
+| Read         | GET          | Get all users                           | User                   |
+| Update       | PUT          | Update a user by ID                     | User                   |
+| Delete       | DELETE       | Delete a user by ID                     | User                   |
+| Create       | POST         | Create a new industry                   | Industry               |
+| Read         | GET          | Get an industry by ID                   | Industry               |
+| Read         | GET          | Get all industries                      | Industry               |
+| Update       | PUT          | Update an industry by ID                | Industry               |
+| Delete       | DELETE       | Delete an industry by ID                | Industry               |
+| Create       | POST         | Create a new session                    | Session                |
+| Read         | GET          | Get a session by ID                     | Session                |
+| Read         | GET          | Get all sessions                        | Session                |
+| Update       | PUT          | Update a session by ID                  | Session                |
+| Delete       | DELETE       | Delete a session by ID                  | Session                |
+| Create       | POST         | Create a new question                   | Question               |
+| Read         | GET          | Get a question by ID                    | Question               |
+| Read         | GET          | Get all questions                       | Question               |
+| Update       | PUT          | Update a question by ID                 | Question               |
+| Delete       | DELETE       | Delete a question by ID                 | Question               |
+| Create       | POST         | Create a new session question           | SessionQuestion        |
+| Read         | GET          | Get a session question by session ID    | SessionQuestion        |
+| Read         | GET          | Get all session questions               | SessionQuestion        |
+| Update       | PUT          | Update a session question by session ID | SessionQuestion        |
+| Delete       | DELETE       | Delete a session question by session ID | SessionQuestion        |
+| Create       | POST         | Create a new feedback                   | Feedback               |
+| Read         | GET          | Get feedback by ID                      | Feedback               |
+| Read         | GET          | Get all feedbacks                       | Feedback               |
+| Update       | PUT          | Update feedback by ID                   | Feedback               |
+| Delete       | DELETE       | Delete feedback by ID                   | Feedback               |
+
 
 ***Don't forget to set up your Issues, Milestones, and Project Board!***
