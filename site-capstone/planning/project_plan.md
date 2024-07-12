@@ -29,11 +29,11 @@ As an interviewee, I want to receive tailored question sets based on the job rol
 
 ## Pages/Screens
 
-* Landing (Home) Page 
-* Questions List Page
-* AI Mock Interview Page
-* User profile Page
-* Login / Signup Page
+* Landing (Home) Page: https://drive.google.com/file/d/1yPR9y0QN6V_G6kjdpFdFjoBQFs6y_Zdz/view?usp=sharing 
+* Questions List Page: https://drive.google.com/file/d/1aJOAUaj2OLUV-sffOUWWqS-Xaop25jbO/view?usp=sharing , https://drive.google.com/file/d/19TmQZSFx0Hf6x548XQq80Cm9BioQljnF/view?usp=sharing
+* AI Mock Interview Page: https://drive.google.com/file/d/19HShyfpUXsYFe-TPe113wRnUpgssx142/view?usp=sharing
+* User profile Page: https://drive.google.com/file/d/19DUVrg1_9YcntgbG7Fd6UOETRWwG8RK7/view?usp=sharing
+* Login / Signup Page: https://drive.google.com/file/d/19Ato3KcyaAayaqJhUt3-BzBno0YtrVP_/view?usp=sharing
 
 ## Data Model
 
