@@ -35,7 +35,72 @@ As an interviewee, I want to receive tailored question sets based on the job rol
 
 ## Data Model
 
-Describe your app's data model using diagrams or tables
+model User {
+ userId  Int    @id @default(autoincrement())
+ username String  @unique
+ name   String
+ email   String  @unique
+ password String
+ age    Int?
+ employed Boolean?
+ createdAt DateTime @default(now())
+ updatedAt DateTime @updatedAt
+ industries Industry[] @relation("userIndustries")
+ questions Question[] @relation("userQuestions")
+ sessions  Session[]
+}
+
+model Industry {
+ industryId  Int    @id @default(autoincrement())
+ industryName String
+ users    User[] @relation("userIndustries")
+ questions  Question[] @relation("questionIndustries")
+}
+
+Figure out @relation for many to many session -> question
+Check how to track question order in session
+
+model Session {
+  sessionId Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [userId])
+  userId    Int
+  createdAt DateTime  @default(now())
+  questions SessionQuestion[]
+  feedback  Feedback[]
+}
+
+model Question {
+  questionId      Int       @id @default(autoincrement())
+  questionContent String
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  users           User[] @relation("userQuestion")
+  industries      Industry[] @relation("questionIndustries")
+  sessions        SessionQuestion[]
+  feedback        Feedback[]
+}
+
+model SessionQuestion {
+  session    Session  @relation(fields: [sessionId], references: [sessionId])
+  sessionId  Int
+  question   Question? @relation(fields: [questionId], references: [questionId])
+  questionId Int
+  askedAt  DateTime
+  isGenerated Boolean @default(false)
+
+  @@id(name: "sessionQuestionId",[sessionId, questionId])
+}
+
+model Feedback {
+ feedbackId Int   @id @default(autoincrement())
+ score    Float
+ gptResponse String
+ userAnswer String
+ sessionQuestion  SessionQuestion @relation(fields: [sessionQuestionId], references: [sessionQuestionId])
+ sessionQuestionId Int
+ session   Session @relation(fields: [sessionId], references: [sessionId])
+ sessionId  Int
+}
 
 ## Endpoints
 
