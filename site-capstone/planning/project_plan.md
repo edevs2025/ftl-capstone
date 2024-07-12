@@ -106,7 +106,6 @@ model Feedback {
 
 ## Endpoints
 
-Open AI GPT4o, possibly 4turbo for ensembling.
 | CRUD         | HTTP Verb    | Description                             | Model this applies to  |
 | ------------ | ------------ | --------------------------------------- | ---------------------- |
 | Create       | POST         | Create a new user                       | User                   |
