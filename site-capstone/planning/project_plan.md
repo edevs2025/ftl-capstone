@@ -1,6 +1,7 @@
 # Project Plan
 
-Pod Members: **Christopher Adeniji, Bailey Williams, Kenneth Jiang**
+Pod Members: **Christopher Adeniji, Bailey Williams, Kenneth Jiang** 
+
 Project Name: **muso.ai by reverie**
 
 ## Problem Statement and Description
