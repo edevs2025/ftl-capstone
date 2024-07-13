@@ -1,11 +1,9 @@
 import { useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
 import "./App.css";
-import MockAI from "./components/MockAI/mockAI";
+import MockAI from "./Pages/MockAI/mockAI";
 
 function App() {
-  const [count, setCount] = useState(0);
-
   return (
     <Router>
       <div>
@@ -21,9 +19,6 @@ function App() {
             element={
               <>
                 <h1>Home Page</h1>
-                <button onClick={() => setCount((count) => count + 1)}>
-                  Count is {count}
-                </button>
               </>
             }
           />

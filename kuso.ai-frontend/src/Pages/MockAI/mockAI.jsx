@@ -220,69 +220,72 @@ function MockAI() {
     },
   };
   return (
-    <Box sx={{ p: 2 }}>
-      <Typography variant="h4" gutterBottom>
-        Mock AI Interview
-      </Typography>
-      <FormControl fullWidth sx={{ mb: 2, backgroundColor: "white" }}>
-        <InputLabel id="question-select-label">Select a question</InputLabel>
-        <Select
-          labelId="question-select-label"
-          id="question-select"
-          value={selectedQuestion}
-          onChange={handleQuestionSelect}
+    <>
+      <button>Go to Conversational</button>
+      <Box sx={{ p: 2 }}>
+        <Typography variant="h4" gutterBottom>
+          Mock AI Interview
+        </Typography>
+        <FormControl fullWidth sx={{ mb: 2, backgroundColor: "white" }}>
+          <InputLabel id="question-select-label">Select a question</InputLabel>
+          <Select
+            labelId="question-select-label"
+            id="question-select"
+            value={selectedQuestion}
+            onChange={handleQuestionSelect}
+          >
+            <MenuItem value="">--Select a question--</MenuItem>
+            {questionsData.questions.map((question, index) => (
+              <MenuItem key={index} value={question}>
+                {question}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        <Button
+          variant="contained"
+          onClick={startRecording}
+          disabled={recording}
+          sx={{ mr: 2 }}
         >
-          <MenuItem value="">--Select a question--</MenuItem>
-          {questionsData.questions.map((question, index) => (
-            <MenuItem key={index} value={question}>
-              {question}
-            </MenuItem>
-          ))}
-        </Select>
-      </FormControl>
-      <Button
-        variant="contained"
-        onClick={startRecording}
-        disabled={recording}
-        sx={{ mr: 2 }}
-      >
-        Start Recording
-      </Button>
-      <Button
-        variant="contained"
-        onClick={stopRecording}
-        disabled={!recording}
-        sx={{ mr: 2, color: "white" }}
-      >
-        Stop Recording
-      </Button>
-      <Button
-        variant="contained"
-        onClick={handleSubmit}
-        disabled={recording || !transcript}
-        sx={{ mr: 2, color: "white" }}
-      >
-        Submit
-      </Button>
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6">Selected Question:</Typography>
-        <Typography>{selectedQuestion}</Typography>
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h6">Transcript:</Typography>
-        <Typography>{transcript}</Typography>
-      </Box>
-      <Box sx={{ mt: 2 }}>
-        <Typography variant="h6">AI Response:</Typography>
-        <ReactMarkdown>{response}</ReactMarkdown>
-      </Box>
-      {grades && (
+          Start Recording
+        </Button>
+        <Button
+          variant="contained"
+          onClick={stopRecording}
+          disabled={!recording}
+          sx={{ mr: 2, color: "white" }}
+        >
+          Stop Recording
+        </Button>
+        <Button
+          variant="contained"
+          onClick={handleSubmit}
+          disabled={recording || !transcript}
+          sx={{ mr: 2, color: "white" }}
+        >
+          Submit
+        </Button>
         <Box sx={{ mt: 4 }}>
-          <Typography variant="h6">Grades:</Typography>
-          <Bar data={data} options={options} />
+          <Typography variant="h6">Selected Question:</Typography>
+          <Typography>{selectedQuestion}</Typography>
         </Box>
-      )}
-    </Box>
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="h6">Transcript:</Typography>
+          <Typography>{transcript}</Typography>
+        </Box>
+        <Box sx={{ mt: 2 }}>
+          <Typography variant="h6">AI Response:</Typography>
+          <ReactMarkdown>{response}</ReactMarkdown>
+        </Box>
+        {grades && (
+          <Box sx={{ mt: 4 }}>
+            <Typography variant="h6">Grades:</Typography>
+            <Bar data={data} options={options} />
+          </Box>
+        )}
+      </Box>
+    </>
   );
 }
 
