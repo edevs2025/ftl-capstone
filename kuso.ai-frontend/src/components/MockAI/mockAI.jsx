@@ -1,5 +1,4 @@
 import React, { useState, useRef, useEffect } from "react";
-import axios from "axios";
 import ReactMarkdown from "react-markdown";
 import {
   Box,
@@ -87,7 +86,7 @@ function MockAI() {
 
   const fetchAIResponse = async (prompt) => {
     const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-    const fullPrompt = `You are a mock interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback in a paragraph format. Make sure to respond like you're talking to the candidate and grade the response in the following categories: Problem-Solving, Teamwork, Communication, Learning Ability, and Accountability.`;
+    const fullPrompt = `You are a interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 1.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
       const result = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -99,10 +98,14 @@ function MockAI() {
         body: JSON.stringify({
           model: "gpt-4o",
           messages: [
-            { role: "system", content: "You are a helpful assistant." },
+            {
+              role: "system",
+              content:
+                "You are an interviewer conducting a behavioral interview.",
+            },
             { role: "user", content: fullPrompt },
           ],
-          max_tokens: 300,
+          max_tokens: 500,
         }),
       });
 
@@ -113,43 +116,35 @@ function MockAI() {
       const data = await result.json();
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const responseContent = data.choices[0].message.content;
-        console.log("Full AI Response:", responseContent); // Log the full AI response
-        simulateRealTimeResponse(responseContent);
+        console.log("Full AI Response:", responseContent);
 
-        // Extract grades from the response
-        const problemSolvingRegex = /Problem-Solving:\s*(\d+)/i;
-        const teamworkRegex = /Teamwork:\s*(\d+)/i;
-        const communicationRegex = /Communication:\s*(\d+)/i;
-        const learningAbilityRegex = /Learning Ability:\s*(\d+)/i;
-        const accountabilityRegex = /Accountability:\s*(\d+)/i;
+        // Parse the JSON response
+        const parsedResponse = JSON.parse(responseContent);
+        const feedback = parsedResponse.feedback;
+        const grades = parsedResponse.grades;
 
-        const problemSolving = responseContent.match(problemSolvingRegex)?.[1];
-        const teamwork = responseContent.match(teamworkRegex)?.[1];
-        const communication = responseContent.match(communicationRegex)?.[1];
-        const learningAbility =
-          responseContent.match(learningAbilityRegex)?.[1];
-        const accountability = responseContent.match(accountabilityRegex)?.[1];
+        // Simulate real-time response with only the feedback
+        simulateRealTimeResponse(feedback);
 
-        const parsedGrades = {
-          problemSolving: problemSolving ? parseInt(problemSolving, 10) : 0,
-          teamwork: teamwork ? parseInt(teamwork, 10) : 0,
-          communication: communication ? parseInt(communication, 10) : 0,
-          learningAbility: learningAbility ? parseInt(learningAbility, 10) : 0,
-          accountability: accountability ? parseInt(accountability, 10) : 0,
-        };
+        // Update the grades state
+        setGrades({
+          problemSolving: grades["Problem-Solving"] || 0,
+          relevance: grades["Relevance"] || 0,
+          clarity: grades["Clarity"] || 0,
+        });
 
-        console.log("Extracted Grades:", parsedGrades); // Log the extracted grades
-        setGrades(parsedGrades);
+        console.log("Extracted Grades:", grades);
       } else {
         setResponse("No message found in the AI response.");
       }
     } catch (error) {
+      console.error("Error parsing response:", error);
       setResponse("An error occurred while fetching the response.");
     }
   };
 
-  const simulateRealTimeResponse = (fullResponse) => {
-    const words = fullResponse.split(" ");
+  const simulateRealTimeResponse = (feedback) => {
+    const words = feedback.split(" ");
     let currentResponse = "";
     words.forEach((word, index) => {
       setTimeout(() => {
@@ -172,42 +167,64 @@ function MockAI() {
   const handleSubmit = () => {
     fetchAIResponse(transcript);
   };
+  const barColors = [
+    "rgba(255, 99, 132, 0.6)", // Red
+    "rgba(54, 162, 235, 0.6)", // Blue
+    "rgba(255, 206, 86, 0.6)", // Yellow
+    "rgba(75, 192, 192, 0.6)", // Green
+    "rgba(153, 102, 255, 0.6)", // Purple
+    "rgba(255, 159, 64, 0.6)", // Orange
+  ];
 
   const data = {
-    labels: [
-      "Problem-Solving",
-      "Teamwork",
-      "Communication",
-      "Learning Ability",
-      "Accountability",
-    ],
+    labels: ["Problem-Solving", "Relevance", "Clarity"],
     datasets: [
       {
         label: "Grades",
         data: grades
-          ? [
-              grades.problemSolving,
-              grades.teamwork,
-              grades.communication,
-              grades.learningAbility,
-              grades.accountability,
-            ]
-          : [0, 0, 0, 0, 0],
-        backgroundColor: "rgba(75, 192, 192, 0.6)",
-        borderColor: "rgba(75, 192, 192, 1)",
+          ? [grades.problemSolving, grades.relevance, grades.clarity]
+          : [0, 0, 0],
+        backgroundColor: barColors.slice(0, 3), // Use the first 3 colors
+        borderColor: barColors
+          .slice(0, 3)
+          .map((color) => color.replace("0.6", "1")),
         borderWidth: 1,
       },
     ],
   };
-
-  console.log("Chart Data:", data); // Log the data object being passed to the chart
-
+  const options = {
+    scales: {
+      y: {
+        beginAtZero: true,
+        max: 5,
+        ticks: {
+          stepSize: 1,
+          callback: function (value) {
+            return value.toFixed(1);
+          },
+        },
+        title: {
+          display: true,
+          text: "Score",
+        },
+      },
+    },
+    plugins: {
+      legend: {
+        display: false, // This hides the legend, which is usually not needed for a single dataset
+      },
+      title: {
+        display: true,
+        text: "Interview Performance Scores",
+      },
+    },
+  };
   return (
     <Box sx={{ p: 2 }}>
       <Typography variant="h4" gutterBottom>
         Mock AI Interview
       </Typography>
-      <FormControl fullWidth sx={{ mb: 2 }}>
+      <FormControl fullWidth sx={{ mb: 2, backgroundColor: "white" }}>
         <InputLabel id="question-select-label">Select a question</InputLabel>
         <Select
           labelId="question-select-label"
@@ -235,7 +252,7 @@ function MockAI() {
         variant="contained"
         onClick={stopRecording}
         disabled={!recording}
-        sx={{ mr: 2 }}
+        sx={{ mr: 2, color: "white" }}
       >
         Stop Recording
       </Button>
@@ -243,7 +260,7 @@ function MockAI() {
         variant="contained"
         onClick={handleSubmit}
         disabled={recording || !transcript}
-        sx={{ mr: 2 }}
+        sx={{ mr: 2, color: "white" }}
       >
         Submit
       </Button>
@@ -262,7 +279,7 @@ function MockAI() {
       {grades && (
         <Box sx={{ mt: 4 }}>
           <Typography variant="h6">Grades:</Typography>
-          <Bar data={data} />
+          <Bar data={data} options={options} />
         </Box>
       )}
     </Box>
