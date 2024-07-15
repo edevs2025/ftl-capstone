@@ -4,9 +4,9 @@ import OpenAI from "openai";
 import dotenv from "dotenv";
 
 dotenv.config();
-
+API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
 const openai = new OpenAI({
-  apiKey: "sk-proj-sNfRUWMn9Myrg0sJbUDuT3BlbkFJpvgsZ6X7YH6zrSBrr0tb",
+  apiKey: API_KEY,
 });
 
 const speechFile = path.resolve("speech2.mp3");
