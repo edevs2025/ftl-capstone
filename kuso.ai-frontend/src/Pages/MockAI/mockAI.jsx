@@ -20,6 +20,7 @@ import {
   Legend,
 } from "chart.js";
 import questionsData from "./questions.json";
+import axios from "axios";
 
 ChartJS.register(
   CategoryScale,
@@ -93,7 +94,7 @@ function MockAI() {
 
   const fetchAIResponse = async (prompt) => {
     const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-    const fullPrompt = `You are a interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
+    const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
       const result = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -200,6 +201,7 @@ function MockAI() {
       },
     ],
   };
+
   const options = {
     scales: {
       y: {
@@ -219,7 +221,7 @@ function MockAI() {
     },
     plugins: {
       legend: {
-        display: false, // This hides the legend, which is usually not needed for a single dataset
+        display: false,
       },
       title: {
         display: true,
@@ -227,6 +229,7 @@ function MockAI() {
       },
     },
   };
+
   return (
     <>
       <button>Go to Conversational</button>
