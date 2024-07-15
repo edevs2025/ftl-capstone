@@ -55,16 +55,22 @@ function MockAI() {
       let finalTranscript = "";
 
       for (let i = event.resultIndex; i < event.results.length; ++i) {
+        const transcript = event.results[i][0].transcript;
         if (event.results[i].isFinal) {
-          finalTranscript += event.results[i][0].transcript;
+          finalTranscript += transcript;
         } else {
-          interimTranscript += event.results[i][0].transcript;
+          interimTranscript += transcript;
         }
       }
 
-      setTranscript(finalTranscript + interimTranscript);
+      setTranscript((prevTranscript) => {
+        const lastFinalIndex = prevTranscript.lastIndexOf(finalTranscript);
+        if (lastFinalIndex !== -1) {
+          return prevTranscript.substring(0, lastFinalIndex);
+        }
+        return prevTranscript + finalTranscript + interimTranscript;
+      });
     };
-
     recognitionRef.current.onerror = (event) => {
       console.error("Speech recognition error", event.error);
     };
@@ -76,6 +82,7 @@ function MockAI() {
 
   const startRecording = () => {
     setRecording(true);
+    setTranscript(""); // Reset the transcript when starting a new recording
     recognitionRef.current.start();
   };
 
@@ -86,7 +93,7 @@ function MockAI() {
 
   const fetchAIResponse = async (prompt) => {
     const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
-    const fullPrompt = `You are a interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 1.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
+    const fullPrompt = `You are a interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
       const result = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -167,6 +174,7 @@ function MockAI() {
   const handleSubmit = () => {
     fetchAIResponse(transcript);
   };
+
   const barColors = [
     "rgba(255, 99, 132, 0.6)", // Red
     "rgba(54, 162, 235, 0.6)", // Blue
