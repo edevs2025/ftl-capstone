@@ -88,7 +88,7 @@ const HeroSection = () => {
             sx={{
               backgroundColor: "white",
               color: "black",
-              "&:hover": { backgroundColor: "black" },
+              "&:hover": { backgroundColor: "black", color: "#646cff" },
             }}
           >
             take me there

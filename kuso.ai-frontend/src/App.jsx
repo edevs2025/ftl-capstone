@@ -3,6 +3,7 @@ import "./App.css";
 import MockAI from "./Pages/MockAI/mockAI";
 import LandingPage from "./Pages/Landing/landing";
 import QuestionBank from "./Pages/QuestionBank/QuestionBank";
+import Navbar from "./components/Navbar/Navbar";
 
 function App() {
   return (

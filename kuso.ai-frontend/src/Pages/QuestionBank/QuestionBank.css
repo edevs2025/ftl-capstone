@@ -1,0 +1,23 @@
+body,
+html {
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  overflow: auto;
+  background-color: black;
+  font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
+    "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
+}
+
+.question-bank-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  height: 100vh;
+  color: white;
+  align-items: center;
+}
+
+h1 {
+  color: #fff;
+}
