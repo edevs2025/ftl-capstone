@@ -29,6 +29,8 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+import "./mockAI.css";
+import Navbar from "../../components/Navbar/Navbar";
 
 function MockAI() {
   const [response, setResponse] = useState("");
@@ -39,7 +41,6 @@ function MockAI() {
   const [selectedQuestion, setSelectedQuestion] = useState("");
   const [grades, setGrades] = useState(null);
   const [audio] = useState(new Audio());
-
   const recognitionRef = useRef(null);
 
   useEffect(() => {
@@ -84,7 +85,7 @@ function MockAI() {
 
   const startRecording = () => {
     setRecording(true);
-    setTranscript(""); 
+    setTranscript("");
     recognitionRef.current.start();
   };
 
@@ -94,7 +95,7 @@ function MockAI() {
   };
 
   const fetchAIResponse = async (prompt) => {
-    const API_KEY = "sk-proj-sNfRUWMn9Myrg0sJbUDuT3BlbkFJpvgsZ6X7YH6zrSBrr0tb";
+    const API_KEY = "sk-None-2xKjUDJ4kWP0GY9SY8yiT3BlbkFJMyK309sQd8PwLP7PsPLb";
     const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
@@ -105,7 +106,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
@@ -258,6 +259,7 @@ function MockAI() {
 
   return (
     <>
+      <Navbar />
       <button>Go to Conversational</button>
       <Box sx={{ p: 2 }}>
         <Typography variant="h4" gutterBottom>
