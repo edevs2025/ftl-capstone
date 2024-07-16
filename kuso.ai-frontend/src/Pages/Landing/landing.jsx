@@ -82,7 +82,7 @@ const HeroSection = () => (
           muso.ai
         </Typography>
         <Typography variant="h5" gutterBottom>
-          practice mock interviews.
+          practice mock <span style={{ color: "#646cff" }}>interviews</span>.
         </Typography>
         <Button
           variant="contained"
@@ -158,11 +158,7 @@ const Footer = () => (
 
 const LandingPage = () => (
   <>
-    <Header />
     <HeroSection />
-    <FeaturesSection />
-    <TestimonialsSection />
-    <Footer />
   </>
 );
 
