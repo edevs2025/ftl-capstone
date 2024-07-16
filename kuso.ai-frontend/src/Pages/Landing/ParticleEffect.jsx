@@ -67,7 +67,7 @@ const ParticleEffect = () => {
         varying float vPositionZ;
         varying float vColor;
         void main() {
-          float strength = (vPositionY + 0.25) * 0.3;
+          float strength = (vPositionY + 0.25) * 0.9;
           vec3 color = mix(vec3(1.0, 1.0, 1.0), vec3(0.392, 0.424, 1.0), vColor); // Interpolate between white and #646cff
           gl_FragColor = vec4(color, strength);
         }
