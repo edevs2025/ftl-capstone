@@ -7,7 +7,7 @@ import ParticleEffect from "./ParticleEffect";
 
 const HeroSection = () => {
   const [textIndex, setTextIndex] = useState(0);
-  const texts = ["mock interviews.", "behavioral interviews."];
+  const texts = ["behavioral interviews.", "corporate interviews."];
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -20,10 +20,12 @@ const HeroSection = () => {
   return (
     <Box sx={{ height: "100vh", position: "relative", overflow: "hidden" }}>
       <div className="landing-page-navbar">
-        <Link to="/mock-ai">
+        <Link to="question-bank">
           <button>questions</button>
         </Link>
-        <button>get started</button>
+        <Link to="question-bank">
+          <button>get started</button>
+        </Link>
       </div>
       <Box
         sx={{
@@ -58,7 +60,7 @@ const HeroSection = () => {
           transition={{ duration: 1 }}
           sx={{ top: "-20rem" }}
         >
-          <Typography variant="h2" gutterBottom>
+          <Typography variant="h2" gutterBottom sx={{ fontSize: "5.5rem" }}>
             muso.ai
           </Typography>
           <Typography variant="h5" gutterBottom>
@@ -70,7 +72,7 @@ const HeroSection = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.3 }} // Reduced to 0.3 seconds
+                  transition={{ duration: 0.3 }}
                 >
                   {texts[textIndex]}
                 </motion.span>
