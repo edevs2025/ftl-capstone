@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
 import { Box, Button, Typography } from "@mui/material";
 import { Bar } from "react-chartjs-2";
@@ -24,6 +24,7 @@ ChartJS.register(
 );
 import "./mockAI.css";
 import Navbar from "../../components/Navbar/Navbar";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 
 function MockAI() {
   const { id } = useParams();
@@ -47,8 +48,6 @@ function MockAI() {
     } else {
     }
   }, [id]);
-
-  console.log("Selected Question:", selectedQuestion);
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) {
@@ -102,7 +101,7 @@ function MockAI() {
   };
 
   const fetchAIResponse = async (prompt) => {
-    const API_KEY = "YOUR_API_KEY"; // Replace with your OpenAI API key
+    const API_KEY = "sk-None-2xKjUDJ4kWP0GY9SY8yiT3BlbkFJMyK309sQd8PwLP7PsPLb";
     const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
@@ -258,12 +257,32 @@ function MockAI() {
     <>
       <Navbar />
       <Box sx={{ p: 2 }}>
-        <Typography variant="h4" gutterBottom>
-          Mock AI Interview
-        </Typography>
         <Box sx={{ mb: 2, backgroundColor: "inherit", p: 2, borderRadius: 1 }}>
-          <Typography variant="h6">Selected Question:</Typography>
-          <Typography>{selectedQuestion}</Typography>
+          <Link
+            to="/question-bank"
+            style={{ textDecoration: "none", color: "inherit" }}
+          >
+            {" "}
+            <Typography
+              variant="subtitle1"
+              sx={{
+                display: "flex",
+                flexDirection: "row",
+                alignItems: "center",
+                cursor: "pointer",
+                "&:hover": {
+                  textDecoration: "underline",
+                },
+              }}
+            >
+              <ArrowBackIosIcon fontSize="small" />
+              <Typography sx={{ fontSize: "medium" }}>All Questions</Typography>
+            </Typography>
+          </Link>
+          <Typography variant="h6" sx={{ mt: 4 }}>
+            Selected Question:
+          </Typography>
+          <Typography sx={{ fontSize: "2rem" }}>{selectedQuestion}</Typography>
         </Box>
         <Button
           variant="contained"
@@ -289,7 +308,7 @@ function MockAI() {
         >
           Submit
         </Button>
-        <Box sx={{ mt: 4 }}>
+        <Box sx={{ mt: 6, width: "700px", margin: "0 auto" }}>
           <Typography variant="h6">Transcript:</Typography>
           <Typography>{transcript}</Typography>
         </Box>
@@ -298,7 +317,14 @@ function MockAI() {
           <ReactMarkdown>{response}</ReactMarkdown>
         </Box>
         {grades && (
-          <Box sx={{ mt: 4 }}>
+          <Box
+            sx={{
+              width: "1000px",
+              margin: "0 auto",
+              marginTop: "4rem",
+              color: "white",
+            }}
+          >
             <Typography variant="h6">Grades:</Typography>
             <Bar data={data} options={options} />
           </Box>

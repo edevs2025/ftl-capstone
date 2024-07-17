@@ -2,21 +2,21 @@
   "questions": [
     {
       "id": 1,
-      "question": "1. Tell me a time where you worked as a team",
+      "question": "Tell me a time where you worked as a team",
       "topic": "Behavioral",
       "industry": "Technical",
       "keywords": ["teamwork", "collaboration"]
     },
     {
       "id": 2,
-      "question": "2. Describe a challenging project you worked on",
+      "question": "Describe a challenging project you worked on",
       "topic": "Behavioral",
       "industry": "Technical",
       "keywords": ["project", "challenge"]
     },
     {
       "id": 3,
-      "question": "3. How do you handle tight deadlines?",
+      "question": "How do you handle tight deadlines?",
       "topic": "Behavioral",
       "industry": "Technical",
       "keywords": ["deadline", "stress"]

@@ -50,7 +50,7 @@ const Navbar = () => {
         </div>
       </Link>
       <div className="navbar-middle-content">
-        <Link to="/mock-ai">questions</Link>
+        <Link to="/question-bank">questions</Link>
         <Link to="/profile">profile</Link>
       </div>
       <Link to="/signup" className="navbar-signup">

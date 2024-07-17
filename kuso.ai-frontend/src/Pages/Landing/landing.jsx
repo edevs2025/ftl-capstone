@@ -23,7 +23,7 @@ const HeroSection = () => {
         <Link to="question-bank">
           <button>questions</button>
         </Link>
-        <Link to="question-bank">
+        <Link to="signup">
           <button>get started</button>
         </Link>
       </div>
@@ -84,7 +84,7 @@ const HeroSection = () => {
             color="primary"
             size="large"
             component={Link}
-            to="/mock-ai"
+            to="/question-bank"
             sx={{
               backgroundColor: "white",
               color: "black",

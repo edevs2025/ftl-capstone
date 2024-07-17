@@ -3,7 +3,7 @@ import "./App.css";
 import MockAI from "./Pages/MockAI/mockAI";
 import LandingPage from "./Pages/Landing/landing";
 import QuestionBank from "./Pages/QuestionBank/QuestionBank";
-import Navbar from "./components/Navbar/Navbar";
+import Signup from "./Pages/Signup/Signup";
 
 function App() {
   return (
@@ -13,6 +13,7 @@ function App() {
         <Route path="/mock-ai" element={<MockAI />} />
         <Route path="/mockai/:id" element={<MockAI />} />
         <Route path="/question-bank" element={<QuestionBank />} />
+        <Route path="/signup" element={<Signup />} />
       </Routes>
     </Router>
   );
