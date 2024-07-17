@@ -8,7 +8,7 @@ router.get('/:id', questionController.getQuestionById);
 router.delete('/:id', questionController.deleteQuestion);
 router.put('/:id', questionController.updateQuestion);
 router.post('/:id/session', questionController.addSessionQuestion);
-router.post('/:id/industry', questionController.addIndustry);
+router.post('/:id/industry/:id', questionController.addIndustry);
 router.post('/:id/feedback', questionController.addFeedback);
 
 
