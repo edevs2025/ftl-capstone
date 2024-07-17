@@ -1,4 +1,4 @@
-const sessionQuestionModel = require("../models/sessionQuestionModel");
+const sessionQuestionModel = require("../models/sessionQuestion");
 
 // Create a new SessionQuestion
 const createSessionQuestion = async (req, res) => {
