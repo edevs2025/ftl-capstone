@@ -6,6 +6,7 @@ const createQuestion = async (data) => {
     return prisma.question.create({
         data: {
             questionContent: data.questionContent,
+            //keywords: data.keywords,
             users: data.users ? { connect: data.users.map(id => ({ userId: id })) } : undefined,
             industries: data.industries ? { connect: data.industries.map(id => ({ industryId: id })) } : undefined,
         },

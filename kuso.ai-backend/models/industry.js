@@ -21,7 +21,6 @@ const getAllIndustries = async (filters) => {
     if (filters.industryName) {
         where.industryName = { contains: filters.industryName };
     }
-    
     return prisma.industry.findMany({
         where: Object.keys(where).length ? where : undefined,
         include: {

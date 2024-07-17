@@ -32,12 +32,20 @@ model Session {
 model Question {
   questionId      Int       @id @default(autoincrement())
   questionContent String
+  keywords        Keyword[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   users           User[]    @relation("userQuestions")
   industries      Industry[] @relation("questionIndustries")
   sessions        SessionQuestion[]
   feedback        Feedback[]
+}
+
+model Keyword {
+  id        Int      @id @default(autoincrement())
+  word      String
+  question  Question @relation(fields: [questionId], references: [questionId])
+  questionId Int
 }
 
 model SessionQuestion {
