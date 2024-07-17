@@ -11,6 +11,7 @@ function App() {
       <Routes>
         <Route path="/" element={<LandingPage />} />
         <Route path="/mock-ai" element={<MockAI />} />
+        <Route path="/mockai/:id" element={<MockAI />} />
         <Route path="/question-bank" element={<QuestionBank />} />
       </Routes>
     </Router>

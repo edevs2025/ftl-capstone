@@ -1,43 +1,27 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import "./QuestionBank.css";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
 import InputAdornment from "@mui/material/InputAdornment";
 import SearchIcon from "@mui/icons-material/Search";
-
-function createData(question, topic, industry, keywords) {
-  return { question, topic, industry, keywords };
-}
-
-const rows = [
-  createData(
-    "1. Tell me a time where you worked as a team",
-    "Behavioral",
-    "Technical",
-    ["teamwork", "collaboration"]
-  ),
-  createData(
-    "2. Describe a challenging project you worked on",
-    "Behavioral",
-    "Technical",
-    ["project", "challenge"]
-  ),
-  createData(
-    "3. How do you handle tight deadlines?",
-    "Behavioral",
-    "Technical",
-    ["deadline", "stress"]
-  ),
-];
-
-const topics = ["Behavioral", "Technical", "Case Study"];
-const industries = ["Technical", "Finance", "Healthcare", "Education"];
+import questionData from "./questionData.json";
 
 function QuestionBank() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedIndustry, setSelectedIndustry] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [topics, setTopics] = useState([]);
+  const [industries, setIndustries] = useState([]);
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    setRows(questionData.questions);
+    setTopics(questionData.topics);
+    setIndustries(questionData.industries);
+  }, []);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -49,6 +33,10 @@ function QuestionBank() {
 
   const handleIndustryChange = (event, newValue) => {
     setSelectedIndustry(newValue);
+  };
+
+  const handleQuestionClick = (id) => {
+    navigate(`/mockai/${id}`);
   };
 
   const filteredRows = rows.filter(
@@ -102,8 +90,12 @@ function QuestionBank() {
           </div>
           <div className="question-list-container">
             <ul>
-              {filteredRows.map((row, index) => (
-                <li key={index} className="question-container">
+              {filteredRows.map((row) => (
+                <li
+                  key={row.id}
+                  className="question-container"
+                  onClick={() => handleQuestionClick(row.id)}
+                >
                   <div>{row.question}</div>
                   <div className="question-details">
                     <p>{row.topic}</p>

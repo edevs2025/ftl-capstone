@@ -1,14 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useParams } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import {
-  Box,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -19,7 +12,7 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import questionsData from "./questions.json";
+import questionsData from "../QuestionBank/questionData.json";
 
 ChartJS.register(
   CategoryScale,
@@ -33,15 +26,29 @@ import "./mockAI.css";
 import Navbar from "../../components/Navbar/Navbar";
 
 function MockAI() {
+  const { id } = useParams();
+  const [selectedQuestion, setSelectedQuestion] = useState("");
   const [response, setResponse] = useState("");
   const [transcript, setTranscript] = useState(
     "At my previous job, we faced a significant challenge when our main product experienced a critical bug just before an important client presentation. The bug caused the software to crash, and we had less than 24 hours to fix it. I coordinated with the development team to identify the root cause and worked overnight to implement and test the solution. We managed to resolve the issue and successfully delivered the presentation on time. This experience taught me the importance of teamwork and staying calm under pressure."
   );
   const [recording, setRecording] = useState(false);
-  const [selectedQuestion, setSelectedQuestion] = useState("");
   const [grades, setGrades] = useState(null);
   const [audio] = useState(new Audio());
   const recognitionRef = useRef(null);
+
+  useEffect(() => {
+    const question = questionsData.questions.find(
+      (q) => q.id === parseInt(id, 10)
+    );
+
+    if (question) {
+      setSelectedQuestion(question.question);
+    } else {
+    }
+  }, [id]);
+
+  console.log("Selected Question:", selectedQuestion);
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) {
@@ -95,7 +102,7 @@ function MockAI() {
   };
 
   const fetchAIResponse = async (prompt) => {
-    const API_KEY = "sk-None-2xKjUDJ4kWP0GY9SY8yiT3BlbkFJMyK309sQd8PwLP7PsPLb";
+    const API_KEY = "YOUR_API_KEY"; // Replace with your OpenAI API key
     const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
@@ -189,16 +196,6 @@ function MockAI() {
     });
   };
 
-  const handleQuestionSelect = (event) => {
-    setSelectedQuestion(event.target.value);
-    setTranscript("");
-    setResponse("");
-    setGrades(null);
-    setTranscript(
-      "At my previous job, we faced a significant challenge when our main product experienced a critical bug just before an important client presentation. The bug caused the software to crash, and we had less than 24 hours to fix it. I coordinated with the development team to identify the root cause and worked overnight to implement and test the solution. We managed to resolve the issue and successfully delivered the presentation on time. This experience taught me the importance of teamwork and staying calm under pressure."
-    );
-  };
-
   const handleSubmit = () => {
     fetchAIResponse(transcript);
   };
@@ -260,27 +257,14 @@ function MockAI() {
   return (
     <>
       <Navbar />
-      <button>Go to Conversational</button>
       <Box sx={{ p: 2 }}>
         <Typography variant="h4" gutterBottom>
           Mock AI Interview
         </Typography>
-        <FormControl fullWidth sx={{ mb: 2, backgroundColor: "white" }}>
-          <InputLabel id="question-select-label">Select a question</InputLabel>
-          <Select
-            labelId="question-select-label"
-            id="question-select"
-            value={selectedQuestion}
-            onChange={handleQuestionSelect}
-          >
-            <MenuItem value="">--Select a question--</MenuItem>
-            {questionsData.questions.map((question, index) => (
-              <MenuItem key={index} value={question}>
-                {question}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
+        <Box sx={{ mb: 2, backgroundColor: "inherit", p: 2, borderRadius: 1 }}>
+          <Typography variant="h6">Selected Question:</Typography>
+          <Typography>{selectedQuestion}</Typography>
+        </Box>
         <Button
           variant="contained"
           onClick={startRecording}
@@ -306,10 +290,6 @@ function MockAI() {
           Submit
         </Button>
         <Box sx={{ mt: 4 }}>
-          <Typography variant="h6">Selected Question:</Typography>
-          <Typography>{selectedQuestion}</Typography>
-        </Box>
-        <Box sx={{ mt: 2 }}>
           <Typography variant="h6">Transcript:</Typography>
           <Typography>{transcript}</Typography>
         </Box>
