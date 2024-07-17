@@ -20,7 +20,6 @@ import {
   Legend,
 } from "chart.js";
 import questionsData from "./questions.json";
-import axios from "axios";
 
 ChartJS.register(
   CategoryScale,
@@ -39,6 +38,8 @@ function MockAI() {
   const [recording, setRecording] = useState(false);
   const [selectedQuestion, setSelectedQuestion] = useState("");
   const [grades, setGrades] = useState(null);
+  const [audio] = useState(new Audio());
+
   const recognitionRef = useRef(null);
 
   useEffect(() => {
@@ -83,7 +84,7 @@ function MockAI() {
 
   const startRecording = () => {
     setRecording(true);
-    setTranscript(""); // Reset the transcript when starting a new recording
+    setTranscript(""); 
     recognitionRef.current.start();
   };
 
@@ -93,7 +94,7 @@ function MockAI() {
   };
 
   const fetchAIResponse = async (prompt) => {
-    const API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+    const API_KEY = "sk-proj-sNfRUWMn9Myrg0sJbUDuT3BlbkFJpvgsZ6X7YH6zrSBrr0tb";
     const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
@@ -104,7 +105,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model: "gpt-4",
           messages: [
             {
               role: "system",
@@ -126,15 +127,14 @@ function MockAI() {
         const responseContent = data.choices[0].message.content;
         console.log("Full AI Response:", responseContent);
 
-        // Parse the JSON response
         const parsedResponse = JSON.parse(responseContent);
         const feedback = parsedResponse.feedback;
         const grades = parsedResponse.grades;
 
-        // Simulate real-time response with only the feedback
+        await fetchTTS(feedback);
+
         simulateRealTimeResponse(feedback);
 
-        // Update the grades state
         setGrades({
           problemSolving: grades["Problem-Solving"] || 0,
           relevance: grades["Relevance"] || 0,
@@ -151,6 +151,29 @@ function MockAI() {
     }
   };
 
+  const fetchTTS = async (text) => {
+    try {
+      const response = await fetch("http://localhost:3001/generate-tts", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text }),
+      });
+
+      if (!response.ok) {
+        throw new Error("Network response was not ok");
+      }
+
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      audio.src = url;
+      audio.play();
+    } catch (error) {
+      console.error("Error fetching TTS:", error);
+    }
+  };
+
   const simulateRealTimeResponse = (feedback) => {
     const words = feedback.split(" ");
     let currentResponse = "";
@@ -158,6 +181,9 @@ function MockAI() {
       setTimeout(() => {
         currentResponse += `${word} `;
         setResponse(currentResponse);
+        if (index === words.length - 1) {
+          audio.play();
+        }
       }, index * 100);
     });
   };
