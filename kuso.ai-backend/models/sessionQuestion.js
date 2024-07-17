@@ -40,6 +40,23 @@ const getAllSessionQuestions = async (filters) => {
 
 // Function to update sessionQuestion
 const updateSessionQuestion = async (sessionId, questionId, data) => {
+    const existingData = await prisma.sessionQuestion.findUnique({
+        where: { 
+            sessionId_questionId: {
+                sessionId: parseInt(sessionId),
+                questionId: parseInt(questionId)
+            }
+        },
+    });
+
+    if (!existingData) {
+        throw new Error('User not found');
+    }
+
+    const updatedData = {
+        ...existingData,
+        ...industryData,
+    };
     return prisma.sessionQuestion.update({
         where: {
             sessionId_questionId: {
@@ -47,10 +64,12 @@ const updateSessionQuestion = async (sessionId, questionId, data) => {
                 questionId: parseInt(questionId)
             }
         },
-        data: {
-            askedAt: data.askedAt,
-            isGenerated: data.isGenerated,
-        },
+        data: updatedData
+        // {
+        //     askedAt: data.askedAt,
+        //     isGenerated: data.isGenerated,
+        // }
+        ,
         include: {
             session: true,
             question: true,

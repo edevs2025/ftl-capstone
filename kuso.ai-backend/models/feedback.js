@@ -14,9 +14,21 @@ const createFeedback = async (feedbackData) => {
 };
 
 const updateFeedback = async (id, feedbackData) => {
+  const existingData = await prisma.feedback.findUnique({
+    where: { feedbackId: parseInt(id) },
+});
+
+if (!existingData) {
+    throw new Error('User not found');
+}
+
+const updatedData = {
+    ...existingData,
+    ...feedbackData,
+};
   return prisma.feedback.update({
     where: { feedbackId: parseInt(id) },
-    data: feedbackData,
+    data: updatedData,
   });
 };
 
