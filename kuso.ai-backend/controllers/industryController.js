@@ -1,4 +1,4 @@
-const industryModel = require("../models/industryModel");
+const industryModel = require("../models/industry");
 
 // Create a new Industry
 const createIndustry = async (req, res) => {

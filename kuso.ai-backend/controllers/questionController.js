@@ -1,4 +1,4 @@
-const questionModel = require("../models/questionModel");
+const questionModel = require("../models/question");
 
 // Create a new Question
 const createQuestion = async (req, res) => {
