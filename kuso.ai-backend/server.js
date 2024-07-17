@@ -4,8 +4,13 @@ const cors = require('cors');
 const morgan = require("morgan");
 // const bodyParser = require('body-parser');
 
-const questionRoute = require('./routes/questionRoutes');
-const sessionRoute = require('./routes/sessionRoutes')
+const userRoute = require('./routes/userRoutes');
+const industryRoute = require('./routes/industryRoutes');
+const sessionRoutes = require('./routes/sessionRoutes');
+const questionRoutes = require('./routes/questionRoutes');
+const sessionQuestionRoutes = require('./routes/sessionQuestionRoutes');
+const feedbackRoutes = require('./routes/feedbackRoutes');
+
 
 const app = express();
 
@@ -19,8 +24,13 @@ app.get('/', (req, res) =>
     res.send("Hello World!")
 )
 
-app.use('/question', questionRoute);
-app.use('/session', sessionRoute);
+app.use('/user', userRoute);
+app.use('/industry', industryRoute);
+app.use('/session', sessionRoutes);
+app.use('/question', questionRoutes);
+app.use('/session-question', sessionQuestionRoutes);
+app.use('/feedback', feedbackRoutes);
+
 
 app.listen(PORT,()=>{
     console.log(`Server is running on port: http://localhost:${PORT}/`);
