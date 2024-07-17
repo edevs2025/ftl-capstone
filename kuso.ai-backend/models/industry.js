@@ -15,6 +15,7 @@ const createIndustry = async (data) => {
     });
 };
 
+
 const getAllIndustries = async (filters) => {    
     let where = {}
 
