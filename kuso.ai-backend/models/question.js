@@ -41,17 +41,31 @@ const getAllQuestions = async (filters) => {
 
 // Function to update question
 const updateQuestion = async (id, questionData) => {
+    const existingData = await prisma.question.findUnique({
+        where: { questionId: parseInt(id) },
+    });
+
+    if (!existingData) {
+        throw new Error('User not found');
+    }
+
+    const updatedData = {
+        ...existingData,
+        ...questionData,
+    };
     return prisma.question.update({
         where: { questionId: parseInt(id) },
-        data: {
-            questionContent: questionData.questionContent,
-            users: questionData.users ? {
-                set: questionData.users.map(id => ({ userId: id }))
-            } : undefined,
-            industries: questionData.industries ? {
-                set: questionData.industries.map(id => ({ industryId: id }))
-            } : undefined,
-        },
+        data: updatedData
+        // {
+        //     questionContent: questionData.questionContent,
+        //     users: questionData.users ? {
+        //         set: questionData.users.map(id => ({ userId: id }))
+        //     } : undefined,
+        //     industries: questionData.industries ? {
+        //         set: questionData.industries.map(id => ({ industryId: id }))
+        //     } : undefined,
+        // }
+        ,
         include: {
             users: true,
             industries: true,

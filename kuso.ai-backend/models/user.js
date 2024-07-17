@@ -43,9 +43,21 @@ const getAllUsers = async (filters) => {
 
 // Function to update user
 const updateUser = async (id, userData) => {
+    const existingUser = await prisma.user.findUnique({
+        where: { userId: parseInt(id) },
+    });
+
+    if (!existingUser) {
+        throw new Error('User not found');
+    }
+
+    const updatedData = {
+        ...existingUser,
+        ...userData,
+    };
     return prisma.user.update({
         where: { userId: parseInt(id) },
-        data: userData,
+        data: updatedData,
         include: {
             industries: true,
             questions: true,

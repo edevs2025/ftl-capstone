@@ -40,9 +40,21 @@ const getAllSessions = async (filters) => {
 
 // Function to update session
 const updateSession = async (id, sessionData) => {
+    const existingData = await prisma.session.findUnique({
+        where: { sessionId: parseInt(id) },
+    });
+
+    if (!existingData) {
+        throw new Error('User not found');
+    }
+
+    const updatedData = {
+        ...existingData,
+        ...sessionData,
+    };
     return prisma.session.update({
         where: { sessionId: parseInt(id) },
-        data: sessionData,
+        data: updatedData,
         include: {
             user: true,
             questions: {

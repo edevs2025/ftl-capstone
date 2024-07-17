@@ -32,17 +32,30 @@ const getAllIndustries = async (filters) => {
 };
 
 const updateIndustry = async (id, industryData) => {
+    const existingData = await prisma.industry.findUnique({
+        where: { industryId: parseInt(id) },
+    });
+
+    if (!existingData) {
+        throw new Error('User not found');
+    }
+
+    const updatedData = {
+        ...existingData,
+        ...industryData,
+    };
     return prisma.industry.update({
         where: { industryId: parseInt(id) },
-        data: {
-            industryName: industryData.industryName,
-            users: industryData.users ? {
-                set: industryData.users.map(id => ({ userId: id }))
-            } : undefined,
-            questions: industryData.questions ? {
-                set: industryData.questions.map(id => ({ questionId: id }))
-            } : undefined,
-        },
+        data: updatedData,
+        // {
+        //     industryName: industryData.industryName,
+        //     users: industryData.users ? {
+        //         set: industryData.users.map(id => ({ userId: id }))
+        //     } : undefined,
+        //     questions: industryData.questions ? {
+        //         set: industryData.questions.map(id => ({ questionId: id }))
+        //     } : undefined,
+        // },
         include: {
             users: true,
             questions: true,
