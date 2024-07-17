@@ -121,12 +121,7 @@ const addIndustry = async (questionId, industryData) => {
     return prisma.question.update({
         where: { questionId: parseInt(questionId) },
         data: {
-            industries: {
-                connectOrCreate: {
-                    where: { industryName: industryData.industryName },
-                    create: { industryName: industryData.industryName }
-                }
-            }
+            industries: { connect: { industryId: industryData.industryId },            }
         },
         include: { industries: true }
     });
