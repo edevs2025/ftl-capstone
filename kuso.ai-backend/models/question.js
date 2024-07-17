@@ -134,7 +134,7 @@ const addSessionQuestion = async (questionId, sessionQuestionData) => {
     });
 };
 
-// Function to add feedback to sessionQuestion
+// Function to add feedback to Question
 const addFeedback = async (sessionId, questionId, feedbackData) => {
     return prisma.feedback.create({
         data: {
