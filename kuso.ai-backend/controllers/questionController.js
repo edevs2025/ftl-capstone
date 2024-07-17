@@ -111,14 +111,14 @@ const addUser = async (req, res) => {
 // Add an Industry to a Question
 const addIndustry = async (req, res) => {
   const { id: questionId } = req.params;
-  const { industryName } = req.body;
+  const { id: industryId } = req.params;
 
-  if (!industryName) {
-    return res.status(400).json({ error: "industryName is required" });
+  if (!industryId) {
+    return res.status(400).json({ error: "industryId is required" });
   }
 
   try {
-    const updatedQuestion = await questionModel.addIndustry(questionId, { industryName });
+    const updatedQuestion = await questionModel.addIndustry(questionId, { industryId });
     res.json(updatedQuestion);
   } catch (error) {
     console.error("Error adding industry to question:", error);
