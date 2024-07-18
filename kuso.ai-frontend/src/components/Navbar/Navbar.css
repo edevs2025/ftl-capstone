@@ -1,0 +1,105 @@
+.navbar-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  background-color: inherit;
+  z-index: 100;
+  top: 0;
+  width: 100%;
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  color: white;
+  height: 70px;
+  font-size: 1.25rem;
+  transition: top 0.3s; /* Add this line */
+}
+
+.navbar-hidden {
+  top: -70px;
+}
+
+.navbar-logo {
+  color: white;
+  text-decoration: none;
+  position: relative;
+}
+
+.navbar-middle-content {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  cursor: pointer;
+}
+
+.navbar-middle-content a {
+  color: white;
+  text-decoration: none;
+  position: relative;
+}
+
+.navbar-middle-content a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  background-color: #646cff;
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+.navbar-middle-content a:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.navbar-signup {
+  color: white;
+  cursor: pointer;
+}
+
+.navbar-container a {
+  color: white;
+  text-decoration: none;
+  position: relative;
+}
+
+.navbar-container a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -3px;
+  width: 100%;
+  height: 2px;
+  background-color: #646cff;
+  transform: scaleX(0);
+  transform-origin: bottom right;
+  transition: transform 0.3s ease;
+}
+
+.navbar-container a:hover::after {
+  transform: scaleX(1);
+  transform-origin: bottom left;
+}
+
+.navbar-container a::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: -3px;
+  width: 0;
+  height: 2px;
+  background-color: #646cff;
+  transition: width 0.3s ease, left 0.3s ease; /* Modified this */
+}
+
+.navbar-container a:hover::after {
+  width: 100%;
+  left: 0; /* Add this */
+}
+
+.navbar-hidden {
+  top: -70px;
+}
