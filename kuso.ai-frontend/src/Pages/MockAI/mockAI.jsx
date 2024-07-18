@@ -41,6 +41,7 @@ function MockAI() {
   const [audio] = useState(new Audio());
   const recognitionRef = useRef(null);
   const [sessionIsStarted, setSessionIsStarted] = useState(false);
+  const apiKey = import.meta.env.VITE_OPENAI_KEY;
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -108,7 +109,7 @@ function MockAI() {
   };
 
   const fetchAIResponse = async (prompt) => {
-    const API_KEY = "sk-None-2xKjUDJ4kWP0GY9SY8yiT3BlbkFJMyK309sQd8PwLP7PsPLb";
+    const API_KEY = apiKey;
     const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
