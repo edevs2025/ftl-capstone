@@ -14,51 +14,60 @@ datasource db {
 }
 
 model User {
-  userId     Int        @id @default(autoincrement())
-  username   String     @unique
-  name       String
-  email      String     @unique
-  password   String
-  age        Int?
-  employed   Boolean?
-  createdAt  DateTime   @default(now())
-  updatedAt  DateTime   @updatedAt
+  userId    Int       @id @default(autoincrement())
+  username  String    @unique
+  name      String
+  email     String    @unique
+  password  String
+  age       Int?
+  employed  Boolean?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
   industries Industry[] @relation("userIndustries")
   questions  Question[] @relation("userQuestions")
   sessions   Session[]
 }
 
 model Industry {
-  industryId   Int        @id @default(autoincrement())
+  industryId   Int       @id @default(autoincrement())
   industryName String
-  users        User[]     @relation("userIndustries")
+  users        User[]    @relation("userIndustries")
   questions    Question[] @relation("questionIndustries")
 }
 
 model Session {
-  sessionId Int               @id @default(autoincrement())
-  user      User              @relation(fields: [userId], references: [userId])
+  sessionId Int       @id @default(autoincrement())
+  user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
   userId    Int
-  createdAt DateTime          @default(now())
+  createdAt DateTime  @default(now())
   questions SessionQuestion[]
   feedback  Feedback[]
 }
 
 model Question {
-  questionId      Int               @id @default(autoincrement())
+  questionId      Int       @id @default(autoincrement())
   questionContent String
-  createdAt       DateTime          @default(now())
-  updatedAt       DateTime          @updatedAt
-  users           User[]            @relation("userQuestions")
-  industries      Industry[]        @relation("questionIndustries")
+  keywords        Keyword[]
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+  users           User[]    @relation("userQuestions")
+  industries      Industry[] @relation("questionIndustries")
   sessions        SessionQuestion[]
   feedback        Feedback[]
+  keyword         String[]
+}
+
+model Keyword {
+  id        Int      @id @default(autoincrement())
+  word      String
+  question  Question @relation(fields: [questionId], references: [questionId])
+  questionId Int
 }
 
 model SessionQuestion {
-  session     Session  @relation(fields: [sessionId], references: [sessionId])
+  session     Session  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
   sessionId   Int
-  question    Question @relation(fields: [questionId], references: [questionId])
+  question    Question @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
   questionId  Int
   askedAt     DateTime
   isGenerated Boolean  @default(false)
@@ -75,7 +84,7 @@ model Feedback {
   userAnswer      String
   sessionId       Int
   questionId      Int
-  sessionQuestion SessionQuestion @relation(fields: [sessionId, questionId], references: [sessionId, questionId])
-  session         Session         @relation(fields: [sessionId], references: [sessionId])
-  question        Question        @relation(fields: [questionId], references: [questionId])
+  sessionQuestion SessionQuestion @relation(fields: [sessionId, questionId], references: [sessionId, questionId], onDelete: Cascade)
+  session         Session         @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  question        Question        @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
 }
