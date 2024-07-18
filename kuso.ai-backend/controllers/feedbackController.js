@@ -1,10 +1,10 @@
 const feedbackModel = require('../models/feedback')
 
 const createFeedback = async (req, res) => {
-    const { title, message, author, gifUrl } = req.body;
+    const { score, gptResponse, userAnswer } = req.body;
     console.log(req.body);
     try {
-        const feedback = await feedbackModel.createFeedback({ title, message, author, gifUrl });
+        const feedback = await feedbackModel.createFeedback({ score, gptResponse, userAnswer });
         res.json(feedback);
     } catch (error) {
         res.status(500).json({ error: error.message });

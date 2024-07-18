@@ -47,6 +47,7 @@ model Session {
 model Question {
   questionId      Int       @id @default(autoincrement())
   questionContent String
+  keywords        Keyword[]
   createdAt       DateTime  @default(now())
   updatedAt       DateTime  @updatedAt
   users           User[]    @relation("userQuestions")
@@ -54,6 +55,13 @@ model Question {
   sessions        SessionQuestion[]
   feedback        Feedback[]
   keyword         String[]
+}
+
+model Keyword {
+  id        Int      @id @default(autoincrement())
+  word      String
+  question  Question @relation(fields: [questionId], references: [questionId])
+  questionId Int
 }
 
 model SessionQuestion {
