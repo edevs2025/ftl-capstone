@@ -1,13 +1,12 @@
-/* This is the parent container styling, assuming it is the direct parent of form-container */
 .page-container {
   display: flex;
   align-items: center;
   justify-content: center;
-  height: 100vh; /* Use the full height of the viewport */
-  width: 100vw; /* Use the full width of the viewport */
+  height: 100vh;
+  width: 100vw;
   margin: 0;
   padding: 0;
-  background-color: #242424; /* Optional: background color for the whole page */
+  background-color: #242424;
 }
 
 .form-container {
@@ -118,7 +117,7 @@
 }
 .form-container .form-group label {
   display: block;
-  margin-bottom: 10px; /* Adjust this value as needed for your design */
+  margin-bottom: 10px;
   color: #717171;
   font-weight: 600;
   font-size: 12px;
@@ -133,5 +132,5 @@
   font-family: inherit;
   background-color: transparent;
   border: 1px solid #414141;
-  margin-bottom: 16px; /* Adds space after each input/textarea */
+  margin-bottom: 16px;
 }

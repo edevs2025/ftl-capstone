@@ -56,9 +56,10 @@ function QuestionBank() {
             <TextField
               fullWidth
               variant="outlined"
-              placeholder="Search questions..."
+              placeholder="Search questions"
               value={searchQuery}
               onChange={handleSearchChange}
+              sx={{ backgroundColor: "white", borderRadius: "5px" }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -72,10 +73,16 @@ function QuestionBank() {
                 options={topics}
                 value={selectedTopic}
                 onChange={handleTopicChange}
+                sx={{ backgroundColor: "white" }}
                 renderInput={(params) => (
                   <TextField {...params} label="Filter by Topic" />
                 )}
-                style={{ marginTop: "1rem", width: "33%" }}
+                style={{
+                  marginTop: "1rem",
+                  width: "33%",
+                  color: "white",
+                  borderRadius: "5px",
+                }}
               />
               <Autocomplete
                 options={industries}
@@ -85,6 +92,7 @@ function QuestionBank() {
                   <TextField {...params} label="Filter by Industry" />
                 )}
                 style={{ marginTop: "1rem", width: "33%" }}
+                sx={{ backgroundColor: "white", borderRadius: "5px" }}
               />
             </div>
           </div>
@@ -96,7 +104,9 @@ function QuestionBank() {
                   className="question-container"
                   onClick={() => handleQuestionClick(row.id)}
                 >
-                  <div>{row.question}</div>
+                  <div>
+                    {row.id}. {row.question}
+                  </div>
                   <div className="question-details">
                     <p>{row.topic}</p>
                     <p>{row.industry}</p>

@@ -18,7 +18,7 @@ function Signup() {
               <input type="text" id="email" name="email" required />
             </div>
             <div className="form-group">
-              <label htmlFor="textarea">Describe your occupation</label>
+              <label htmlFor="textarea">Occupation</label>
               <textarea
                 name="textarea"
                 id="textarea"

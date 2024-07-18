@@ -2,3 +2,30 @@ body {
   color: white;
 }
 
+.mockai-container {
+  display: flex;
+  width: 100vw;
+}
+
+.ai-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 80%;
+  padding: 2rem;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+}
+
+.ai-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 20%;
+  padding: 2rem;
+  overflow-y: auto;
+  max-height: 100vh;
+  background-color: #373737;
+  min-height: 100vh;
+}
