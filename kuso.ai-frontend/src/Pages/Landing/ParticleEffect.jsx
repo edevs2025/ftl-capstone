@@ -1,4 +1,3 @@
-// ParticleEffect.js
 import React, { useEffect, useRef } from "react";
 import {
   BufferAttribute,
@@ -13,6 +12,9 @@ import {
 
 const ParticleEffect = () => {
   const canvasRef = useRef(null);
+  const sceneRef = useRef(null);
+  const rendererRef = useRef(null);
+  const animationFrameRef = useRef(null);
 
   useEffect(() => {
     const sizes = {
@@ -21,6 +23,7 @@ const ParticleEffect = () => {
     };
     const canvas = canvasRef.current;
     const scene = new Scene();
+    sceneRef.current = scene;
 
     // Camera
     const camera = new PerspectiveCamera(
@@ -29,9 +32,7 @@ const ParticleEffect = () => {
       0.1,
       100
     );
-    camera.position.z = 10;
-    camera.position.y = 1.1;
-    camera.position.x = 0;
+    camera.position.set(0, 1.1, 10);
     scene.add(camera);
 
     // Plane
@@ -42,25 +43,24 @@ const ParticleEffect = () => {
         uElevation: { value: 0.482 },
       },
       vertexShader: `
-      uniform float uTime;
-      uniform float uElevation;
-      attribute float aSize;
-      attribute float aColor;
-      varying float vPositionY;
-      varying float vPositionZ;
-      varying float vColor;
-      void main() {
-        vec4 modelPosition = modelMatrix * vec4(position, 1.0);
-        modelPosition.y = sin(modelPosition.x - uTime) * sin(modelPosition.z * 0.6 + uTime) * uElevation;
-        vec4 viewPosition = viewMatrix * modelPosition;
-        gl_Position = projectionMatrix * viewPosition;
-        gl_PointSize = 4.0 * aSize;
-        gl_PointSize *= (1.0 / - viewPosition.z);
-        vPositionY = modelPosition.y;
-        vPositionZ = modelPosition.z;
-        vColor = aColor;
-      }
-      
+        uniform float uTime;
+        uniform float uElevation;
+        attribute float aSize;
+        attribute float aColor;
+        varying float vPositionY;
+        varying float vPositionZ;
+        varying float vColor;
+        void main() {
+          vec4 modelPosition = modelMatrix * vec4(position, 1.0);
+          modelPosition.y = sin(modelPosition.x - uTime) * sin(modelPosition.z * 0.6 + uTime) * uElevation;
+          vec4 viewPosition = viewMatrix * modelPosition;
+          gl_Position = projectionMatrix * viewPosition;
+          gl_PointSize = 4.0 * aSize;
+          gl_PointSize *= (1.0 / - viewPosition.z);
+          vPositionY = modelPosition.y;
+          vPositionZ = modelPosition.z;
+          vColor = aColor;
+        }
       `,
       fragmentShader: `
         varying float vPositionY;
@@ -68,7 +68,7 @@ const ParticleEffect = () => {
         varying float vColor;
         void main() {
           float strength = (vPositionY + 0.55) * 0.9;
-          vec3 color = mix(vec3(1.0, 1.0, 1.0), vec3(0.392, 0.424, 1.0), vColor); // Interpolate between white and #646cff
+          vec3 color = mix(vec3(1.0, 1.0, 1.0), vec3(0.392, 0.424, 1.0), vColor);
           gl_FragColor = vec4(color, strength);
         }
       `,
@@ -83,7 +83,7 @@ const ParticleEffect = () => {
     );
     for (let i = 0; i < planeSizesArray.length; i++) {
       planeSizesArray[i] = Math.random() * 4.0;
-      planeColorsArray[i] = Math.random() > 0.5 ? 1.0 : 0.0; // Randomly choose between white and #646cff
+      planeColorsArray[i] = Math.random() > 0.5 ? 1.0 : 0.0;
     }
     planeGeometry.setAttribute(
       "aSize",
@@ -99,20 +99,21 @@ const ParticleEffect = () => {
     scene.add(plane);
 
     // Renderer
-    const renderer = new WebGLRenderer({
-      canvas: canvas,
-    });
+    const renderer = new WebGLRenderer({ canvas: canvas });
+    rendererRef.current = renderer;
     renderer.setSize(sizes.width, sizes.height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    window.addEventListener("resize", () => {
+    const handleResize = () => {
       sizes.width = window.innerWidth;
       sizes.height = window.innerHeight;
       camera.aspect = sizes.width / sizes.height;
       camera.updateProjectionMatrix();
       renderer.setSize(sizes.width, sizes.height);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-    });
+    };
+
+    window.addEventListener("resize", handleResize);
 
     const clock = new Clock();
     const animate = () => {
@@ -120,9 +121,32 @@ const ParticleEffect = () => {
       planeMaterial.uniforms.uTime.value = elapsedTime;
 
       renderer.render(scene, camera);
-      window.requestAnimationFrame(animate);
+      animationFrameRef.current = window.requestAnimationFrame(animate);
     };
     animate();
+
+    // Cleanup function
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      if (animationFrameRef.current) {
+        window.cancelAnimationFrame(animationFrameRef.current);
+      }
+      if (rendererRef.current) {
+        rendererRef.current.dispose();
+      }
+      if (sceneRef.current) {
+        sceneRef.current.traverse((object) => {
+          if (object.geometry) object.geometry.dispose();
+          if (object.material) {
+            if (Array.isArray(object.material)) {
+              object.material.forEach((material) => material.dispose());
+            } else {
+              object.material.dispose();
+            }
+          }
+        });
+      }
+    };
   }, []);
 
   return <canvas ref={canvasRef} className="webgl" />;

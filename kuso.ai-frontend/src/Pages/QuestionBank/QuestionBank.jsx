@@ -35,6 +35,8 @@ function QuestionBank() {
     setSelectedIndustry(newValue);
   };
 
+
+
   const handleQuestionClick = (id) => {
     navigate(`/mockai/${id}`);
   };
@@ -59,7 +61,27 @@ function QuestionBank() {
               placeholder="Search questions"
               value={searchQuery}
               onChange={handleSearchChange}
-              sx={{ backgroundColor: "white", borderRadius: "5px" }}
+              sx={{
+                "& .MuiOutlinedInput-root": {
+                  backgroundColor: "#212121",
+                  color: "white",
+                  "& fieldset": {
+                    borderColor: "rgba(255, 255, 255, 0.3)",
+                  },
+                  "&:hover fieldset": {
+                    borderColor: "rgba(255, 255, 255, 0.5)",
+                  },
+                  "&.Mui-focused fieldset": {
+                    borderColor: "#40c9ff",
+                  },
+                },
+                "& .MuiInputLabel-root": {
+                  color: "rgba(255, 255, 255, 0.7)",
+                },
+                "& .MuiInputAdornment-root": {
+                  color: "rgba(255, 255, 255, 0.7)",
+                },
+              }}
               InputProps={{
                 startAdornment: (
                   <InputAdornment position="start">
@@ -73,26 +95,48 @@ function QuestionBank() {
                 options={topics}
                 value={selectedTopic}
                 onChange={handleTopicChange}
-                sx={{ backgroundColor: "white" }}
                 renderInput={(params) => (
-                  <TextField {...params} label="Filter by Topic" />
+                  <TextField
+                    {...params}
+                    label="Filter by Topic"
+                    sx={{
+                      "& .MuiOutlinedInput-root": {
+                        backgroundColor: "#212121",
+                        color: "white",
+                        "& fieldset": {
+                          borderColor: "rgba(255, 255, 255, 0.3)",
+                        },
+                        "&:hover fieldset": {
+                          borderColor: "rgba(255, 255, 255, 0.5)",
+                        },
+                        "&.Mui-focused fieldset": {
+                          borderColor: "#40c9ff",
+                        },
+                      },
+                      "& .MuiInputLabel-root": {
+                        color: "rgba(255, 255, 255, 0.7)",
+                      },
+                    }}
+                  />
                 )}
                 style={{
                   marginTop: "1rem",
                   width: "33%",
-                  color: "white",
-                  borderRadius: "5px",
                 }}
-              />
-              <Autocomplete
-                options={industries}
-                value={selectedIndustry}
-                onChange={handleIndustryChange}
-                renderInput={(params) => (
-                  <TextField {...params} label="Filter by Industry" />
-                )}
-                style={{ marginTop: "1rem", width: "33%" }}
-                sx={{ backgroundColor: "white", borderRadius: "5px" }}
+                sx={{
+                  "& .MuiAutocomplete-paper": {
+                    backgroundColor: "#212121",
+                    color: "white",
+                  },
+                  "& .MuiAutocomplete-option": {
+                    "&:hover": {
+                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    },
+                    '&[aria-selected="true"]': {
+                      backgroundColor: "rgba(64, 201, 255, 0.3)",
+                    },
+                  },
+                }}
               />
             </div>
           </div>

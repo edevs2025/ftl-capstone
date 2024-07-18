@@ -13,6 +13,10 @@ import {
   Legend,
 } from "chart.js";
 import questionsData from "../QuestionBank/questionData.json";
+import Navbar from "../../components/Navbar/Navbar";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
 
 ChartJS.register(
   CategoryScale,
@@ -22,11 +26,8 @@ ChartJS.register(
   Tooltip,
   Legend
 );
+
 import "./mockAI.css";
-import Navbar from "../../components/Navbar/Navbar";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
-import Avatar from "@mui/material/Avatar";
-import Stack from "@mui/material/Stack";
 
 function MockAI() {
   const { id } = useParams();
@@ -39,6 +40,7 @@ function MockAI() {
   const [grades, setGrades] = useState(null);
   const [audio] = useState(new Audio());
   const recognitionRef = useRef(null);
+  const [sessionIsStarted, setSessionIsStarted] = useState(false);
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -47,9 +49,12 @@ function MockAI() {
 
     if (question) {
       setSelectedQuestion(question.question);
-    } else {
     }
   }, [id]);
+
+  const toggleSessionStatus = () => {
+    setSessionIsStarted(!sessionIsStarted);
+  };
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) {
@@ -258,107 +263,141 @@ function MockAI() {
   return (
     <>
       <Navbar />
-      <div className="mockai-container">
-        <div className="ai-content">
-          <Stack direction="row" spacing={2}>
-            <Avatar
-              alt="Remy Sharp"
-              src=""
-              sx={{
-                width: "400px",
-                height: "400px",
-                fontSize: "10rem",
-                margin: "0 auto",
-              }}
-            />
-          </Stack>
-          <Button
-            variant="contained"
-            onClick={startRecording}
-            disabled={recording}
-            sx={{ mr: 2 }}
-          >
-            Start Recording
-          </Button>
-          <Button
-            variant="contained"
-            onClick={stopRecording}
-            disabled={!recording}
-            sx={{ mr: 2, color: "white" }}
-          >
-            Stop Recording
-          </Button>
-          <Button
-            variant="contained"
-            onClick={handleSubmit}
-            disabled={recording || !transcript}
-            sx={{ mr: 2, color: "white" }}
-          >
-            Submit
-          </Button>
-        </div>
-        <div className="ai-feedback">
-          <Box sx={{ p: 2 }}>
-            <Box
-              sx={{ mb: 2, backgroundColor: "inherit", p: 2, borderRadius: 1 }}
-            >
-              <Link
-                to="/question-bank"
-                style={{ textDecoration: "none", color: "inherit" }}
-              >
-                {" "}
-                <Typography
-                  variant="subtitle1"
+      {!sessionIsStarted ? (
+        <>
+          <div className="pre-mockai-container">
+            <div className="pre-mockai-content">
+              <Stack direction="row" spacing={2}>
+                <Avatar
+                  alt="Remy Sharp"
+                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
                   sx={{
-                    display: "flex",
-                    flexDirection: "row",
-                    alignItems: "center",
-                    cursor: "pointer",
-                    "&:hover": {
-                      textDecoration: "underline",
-                    },
+                    width: "200px",
+                    height: "200px",
+                    fontSize: "10rem",
+                    margin: "0 auto",
                   }}
-                >
-                  <ArrowBackIosIcon fontSize="small" />
-                  <Typography sx={{ fontSize: "medium" }}>
-                    All Questions
-                  </Typography>
-                </Typography>
-              </Link>
-              <Typography variant="h6" sx={{ mt: 4 }}></Typography>
-              <Typography sx={{ fontSize: "2rem" }}>
-                {selectedQuestion}
-              </Typography>
-            </Box>
-
-            <Box sx={{ mt: 6, width: "100%", margin: "0 auto" }}>
-              <Typography variant="h6" sx={{ textAlign: "center" }}>
-                Transcript:
-              </Typography>
-              <Typography>{transcript}</Typography>
-            </Box>
-            <Box sx={{ mt: 2, width: "100%" }}>
-              <Typography variant="h6" sx={{ textAlign: "center" }}>
-                AI Response:
-              </Typography>
-              <ReactMarkdown>{response}</ReactMarkdown>
-            </Box>
-            {grades && (
+                />
+              </Stack>
+              <p>Interviewer D. Dog</p>
+              <Button
+                className="start-session-button"
+                onClick={toggleSessionStatus}
+                sx={{ color: "black ", backgroundColor: "white" }}
+              >
+                Start Session
+              </Button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="mockai-container">
+          <div className="ai-content">
+            <Stack direction="row" spacing={2}>
+              <Avatar
+                alt="Remy Sharp"
+                src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                sx={{
+                  width: "400px",
+                  height: "400px",
+                  fontSize: "10rem",
+                  margin: "0 auto",
+                }}
+              />
+            </Stack>
+            <Button
+              variant="contained"
+              onClick={startRecording}
+              disabled={recording}
+              sx={{ mr: 2 }}
+            >
+              Start Recording
+            </Button>
+            <Button
+              variant="contained"
+              onClick={stopRecording}
+              disabled={!recording}
+              sx={{ mr: 2, color: "white" }}
+            >
+              Stop Recording
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={recording || !transcript}
+              sx={{ mr: 2, color: "white" }}
+            >
+              Submit
+            </Button>
+          </div>
+          <div className="ai-feedback">
+            <Box sx={{ p: 2 }}>
               <Box
                 sx={{
-                  width: "1000px",
-                  margin: "0 auto",
-                  marginTop: "4rem",
-                  color: "white",
+                  mb: 2,
+                  backgroundColor: "inherit",
+                  p: 2,
+                  borderRadius: 1,
                 }}
               >
-                <Typography variant="h6">Grades:</Typography>
-                <Bar data={data} options={options} />
+                <Link
+                  to="/question-bank"
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  {" "}
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    <ArrowBackIosIcon fontSize="small" />
+                    <Typography sx={{ fontSize: "medium" }}>
+                      All Questions
+                    </Typography>
+                  </Typography>
+                </Link>
+                <Typography variant="h6" sx={{ mt: 4 }}></Typography>
+                <Typography sx={{ fontSize: "2rem" }}>
+                  {selectedQuestion}
+                </Typography>
               </Box>
-            )}
-          </Box>
+
+              <Box sx={{ mt: 6, width: "100%", margin: "0 auto" }}>
+                <Typography variant="h6" sx={{ textAlign: "center" }}>
+                  Transcript:
+                </Typography>
+                <Typography>{transcript}</Typography>
+              </Box>
+              <Box sx={{ mt: 2, width: "100%" }}>
+                <Typography variant="h6" sx={{ textAlign: "center" }}>
+                  AI Response:
+                </Typography>
+                <ReactMarkdown>{response}</ReactMarkdown>
+              </Box>
+              {grades && (
+                <Box
+                  sx={{
+                    width: "1000px",
+                    margin: "0 auto",
+                    marginTop: "4rem",
+                    color: "white",
+                  }}
+                >
+                  <Typography variant="h6">Grades:</Typography>
+                  <Bar data={data} options={options} />
+                </Box>
+              )}
+            </Box>
+          </div>
         </div>
-      </div>
+      )}
     </>
   );
 }
