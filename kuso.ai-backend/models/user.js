@@ -67,6 +67,19 @@ const updateUser = async (id, userData) => {
 };
 
 // Function to get user by id
+const getUserSessions = async (id) => {
+    const userInfo = prisma.user.findUnique({
+        where: { userId: parseInt(id) },
+        include: {
+            industries: true,
+            questions: true,
+            sessions: true,
+        }
+    });
+    return userInfo.sessions;
+};
+
+// Function to get user by id
 const getUserById = async (id) => {
     return prisma.user.findUnique({
         where: { userId: parseInt(id) },
@@ -198,4 +211,5 @@ module.exports = {
     addSession,
     removeIndustry,
     removeQuestion,
+    getUserSessions,
 };
