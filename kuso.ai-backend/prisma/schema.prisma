@@ -57,13 +57,6 @@ model Question {
   keyword         String[]
 }
 
-model Keyword {
-  id        Int      @id @default(autoincrement())
-  word      String
-  question  Question @relation(fields: [questionId], references: [questionId])
-  questionId Int
-}
-
 model SessionQuestion {
   session     Session  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
   sessionId   Int
