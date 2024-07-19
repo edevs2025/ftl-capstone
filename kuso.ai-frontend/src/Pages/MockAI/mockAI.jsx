@@ -121,7 +121,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
@@ -245,10 +245,17 @@ function MockAI() {
           callback: function (value) {
             return value.toFixed(1);
           },
+          color: "white", // Set y-axis text color to white
         },
         title: {
           display: true,
           text: "Score",
+          color: "white", // Set y-axis title color to white
+        },
+      },
+      x: {
+        ticks: {
+          color: "white", // Set x-axis text color to white
         },
       },
     },
@@ -259,6 +266,7 @@ function MockAI() {
       title: {
         display: true,
         text: "Interview Performance Scores",
+        color: "white", // Set chart title color to white
       },
     },
   };
@@ -396,7 +404,7 @@ function MockAI() {
                   }}
                 >
                   <Typography variant="h6">Grades:</Typography>
-                  <Bar data={data} options={options} />
+                  <Bar data={data} options={options} sx={{ color: "white " }} />
                 </Box>
               )}
             </Box>
