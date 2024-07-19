@@ -41,6 +41,7 @@ function MockAI() {
   const [audio] = useState(new Audio());
   const recognitionRef = useRef(null);
   const [sessionIsStarted, setSessionIsStarted] = useState(false);
+  const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_KEY;
 
   useEffect(() => {
@@ -120,7 +121,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model: "gpt-4",
           messages: [
             {
               role: "system",
@@ -157,6 +158,7 @@ function MockAI() {
         });
 
         console.log("Extracted Grades:", grades);
+        setIsFeedbackExpanded(true); // Expand the feedback section
       } else {
         setResponse("No message found in the AI response.");
       }
@@ -280,7 +282,7 @@ function MockAI() {
                   }}
                 />
               </Stack>
-              <p>Interviewer D. Dog</p>
+              <p>Dog</p>
               <Button
                 className="start-session-button"
                 onClick={toggleSessionStatus}
@@ -331,7 +333,9 @@ function MockAI() {
               Submit
             </Button>
           </div>
-          <div className="ai-feedback">
+          <div
+            className={`ai-feedback ${isFeedbackExpanded ? "expanded" : ""}`}
+          >
             <Box sx={{ p: 2 }}>
               <Box
                 sx={{
@@ -385,7 +389,7 @@ function MockAI() {
               {grades && (
                 <Box
                   sx={{
-                    width: "1000px",
+                    width: "600px",
                     margin: "0 auto",
                     marginTop: "4rem",
                     color: "white",
