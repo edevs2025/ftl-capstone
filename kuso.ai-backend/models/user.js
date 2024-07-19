@@ -78,30 +78,44 @@ const getUserById = async (id) => {
     });
 };
 
-const addIndustry = async (userId, industryData) => {
+const addIndustry = async (userId, industryId) => {
+    // Check if the question exists
+    const industry = await prisma.industry.findUnique({
+        where: { industryId: parseInt(industryId) }
+    });
+
+    if (!industry) {
+        throw new Error('Industry does not exist');
+    }
+
     return prisma.user.update({
         where: { userId: parseInt(userId) },
         data: {
             industries: {
-                connectOrCreate: {
-                    where: { industryName: industryData.industryName },
-                    create: { industryName: industryData.industryName }
-                }
+                connect: {industryId: parseInt(industryId) }
             }
         },
         include: { industries: true }
     });
 };
 
-const addQuestion = async (userId, questionData) => {
+// Function to add an existing question to a user
+const addQuestion = async (userId, questionId) => {
+    // Check if the question exists
+    const question = await prisma.question.findUnique({
+        where: { questionId: parseInt(questionId) }
+    });
+
+    if (!question) {
+        throw new Error('Question does not exist');
+    }
+
+    // Add the question to the user
     return prisma.user.update({
         where: { userId: parseInt(userId) },
         data: {
             questions: {
-                connectOrCreate: {
-                    where: { questionId: questionData.questionId },
-                    create: { questionContent: questionData.questionContent }
-                }
+                connect: { questionId: parseInt(questionId) }
             }
         },
         include: { questions: true }

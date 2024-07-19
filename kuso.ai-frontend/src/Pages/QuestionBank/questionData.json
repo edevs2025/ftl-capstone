@@ -1,0 +1,27 @@
+{
+  "questions": [
+    {
+      "id": 1,
+      "question": "Tell me a time where you worked as a team",
+      "topic": "Behavioral",
+      "industry": "Technical",
+      "keywords": ["teamwork", "collaboration"]
+    },
+    {
+      "id": 2,
+      "question": "Describe a challenging project you worked on",
+      "topic": "Behavioral",
+      "industry": "Technical",
+      "keywords": ["project", "challenge"]
+    },
+    {
+      "id": 3,
+      "question": "How do you handle tight deadlines?",
+      "topic": "Behavioral",
+      "industry": "Technical",
+      "keywords": ["deadline", "stress"]
+    }
+  ],
+  "topics": ["Behavioral", "Technical", "Case Study"],
+  "industries": ["Technical", "Finance", "Healthcare", "Education"]
+}

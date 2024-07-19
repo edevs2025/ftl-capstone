@@ -1,14 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useParams, Link } from "react-router-dom";
 import ReactMarkdown from "react-markdown";
-import {
-  Box,
-  Button,
-  Select,
-  MenuItem,
-  FormControl,
-  InputLabel,
-  Typography,
-} from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { Bar } from "react-chartjs-2";
 import {
   Chart as ChartJS,
@@ -19,7 +12,11 @@ import {
   Tooltip,
   Legend,
 } from "chart.js";
-import questionsData from "./questions.json";
+import questionsData from "../QuestionBank/questionData.json";
+import Navbar from "../../components/Navbar/Navbar";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import Avatar from "@mui/material/Avatar";
+import Stack from "@mui/material/Stack";
 
 ChartJS.register(
   CategoryScale,
@@ -30,17 +27,35 @@ ChartJS.register(
   Legend
 );
 
+import "./mockAI.css";
+
 function MockAI() {
+  const { id } = useParams();
+  const [selectedQuestion, setSelectedQuestion] = useState("");
   const [response, setResponse] = useState("");
   const [transcript, setTranscript] = useState(
     "At my previous job, we faced a significant challenge when our main product experienced a critical bug just before an important client presentation. The bug caused the software to crash, and we had less than 24 hours to fix it. I coordinated with the development team to identify the root cause and worked overnight to implement and test the solution. We managed to resolve the issue and successfully delivered the presentation on time. This experience taught me the importance of teamwork and staying calm under pressure."
   );
   const [recording, setRecording] = useState(false);
-  const [selectedQuestion, setSelectedQuestion] = useState("");
   const [grades, setGrades] = useState(null);
   const [audio] = useState(new Audio());
-
   const recognitionRef = useRef(null);
+  const [sessionIsStarted, setSessionIsStarted] = useState(false);
+  const apiKey = import.meta.env.VITE_OPENAI_KEY;
+
+  useEffect(() => {
+    const question = questionsData.questions.find(
+      (q) => q.id === parseInt(id, 10)
+    );
+
+    if (question) {
+      setSelectedQuestion(question.question);
+    }
+  }, [id]);
+
+  const toggleSessionStatus = () => {
+    setSessionIsStarted(!sessionIsStarted);
+  };
 
   useEffect(() => {
     if (!("webkitSpeechRecognition" in window)) {
@@ -84,7 +99,7 @@ function MockAI() {
 
   const startRecording = () => {
     setRecording(true);
-    setTranscript(""); 
+    setTranscript("");
     recognitionRef.current.start();
   };
 
@@ -94,7 +109,7 @@ function MockAI() {
   };
 
   const fetchAIResponse = async (prompt) => {
-    const API_KEY = "sk-proj-sNfRUWMn9Myrg0sJbUDuT3BlbkFJpvgsZ6X7YH6zrSBrr0tb";
+    const API_KEY = apiKey;
     const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
@@ -105,7 +120,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
@@ -188,16 +203,6 @@ function MockAI() {
     });
   };
 
-  const handleQuestionSelect = (event) => {
-    setSelectedQuestion(event.target.value);
-    setTranscript("");
-    setResponse("");
-    setGrades(null);
-    setTranscript(
-      "At my previous job, we faced a significant challenge when our main product experienced a critical bug just before an important client presentation. The bug caused the software to crash, and we had less than 24 hours to fix it. I coordinated with the development team to identify the root cause and worked overnight to implement and test the solution. We managed to resolve the issue and successfully delivered the presentation on time. This experience taught me the importance of teamwork and staying calm under pressure."
-    );
-  };
-
   const handleSubmit = () => {
     fetchAIResponse(transcript);
   };
@@ -258,70 +263,142 @@ function MockAI() {
 
   return (
     <>
-      <button>Go to Conversational</button>
-      <Box sx={{ p: 2 }}>
-        <Typography variant="h4" gutterBottom>
-          Mock AI Interview
-        </Typography>
-        <FormControl fullWidth sx={{ mb: 2, backgroundColor: "white" }}>
-          <InputLabel id="question-select-label">Select a question</InputLabel>
-          <Select
-            labelId="question-select-label"
-            id="question-select"
-            value={selectedQuestion}
-            onChange={handleQuestionSelect}
-          >
-            <MenuItem value="">--Select a question--</MenuItem>
-            {questionsData.questions.map((question, index) => (
-              <MenuItem key={index} value={question}>
-                {question}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl>
-        <Button
-          variant="contained"
-          onClick={startRecording}
-          disabled={recording}
-          sx={{ mr: 2 }}
-        >
-          Start Recording
-        </Button>
-        <Button
-          variant="contained"
-          onClick={stopRecording}
-          disabled={!recording}
-          sx={{ mr: 2, color: "white" }}
-        >
-          Stop Recording
-        </Button>
-        <Button
-          variant="contained"
-          onClick={handleSubmit}
-          disabled={recording || !transcript}
-          sx={{ mr: 2, color: "white" }}
-        >
-          Submit
-        </Button>
-        <Box sx={{ mt: 4 }}>
-          <Typography variant="h6">Selected Question:</Typography>
-          <Typography>{selectedQuestion}</Typography>
-        </Box>
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="h6">Transcript:</Typography>
-          <Typography>{transcript}</Typography>
-        </Box>
-        <Box sx={{ mt: 2 }}>
-          <Typography variant="h6">AI Response:</Typography>
-          <ReactMarkdown>{response}</ReactMarkdown>
-        </Box>
-        {grades && (
-          <Box sx={{ mt: 4 }}>
-            <Typography variant="h6">Grades:</Typography>
-            <Bar data={data} options={options} />
-          </Box>
-        )}
-      </Box>
+      <Navbar />
+      {!sessionIsStarted ? (
+        <>
+          <div className="pre-mockai-container">
+            <div className="pre-mockai-content">
+              <Stack direction="row" spacing={2}>
+                <Avatar
+                  alt="Remy Sharp"
+                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  sx={{
+                    width: "200px",
+                    height: "200px",
+                    fontSize: "10rem",
+                    margin: "0 auto",
+                  }}
+                />
+              </Stack>
+              <p>Interviewer D. Dog</p>
+              <Button
+                className="start-session-button"
+                onClick={toggleSessionStatus}
+                sx={{ color: "black ", backgroundColor: "white" }}
+              >
+                Start Session
+              </Button>
+            </div>
+          </div>
+        </>
+      ) : (
+        <div className="mockai-container">
+          <div className="ai-content">
+            <Stack direction="row" spacing={2}>
+              <Avatar
+                alt="Remy Sharp"
+                src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                sx={{
+                  width: "400px",
+                  height: "400px",
+                  fontSize: "10rem",
+                  margin: "0 auto",
+                }}
+              />
+            </Stack>
+            <Button
+              variant="contained"
+              onClick={startRecording}
+              disabled={recording}
+              sx={{ mr: 2 }}
+            >
+              Start Recording
+            </Button>
+            <Button
+              variant="contained"
+              onClick={stopRecording}
+              disabled={!recording}
+              sx={{ mr: 2, color: "white" }}
+            >
+              Stop Recording
+            </Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={recording || !transcript}
+              sx={{ mr: 2, color: "white" }}
+            >
+              Submit
+            </Button>
+          </div>
+          <div className="ai-feedback">
+            <Box sx={{ p: 2 }}>
+              <Box
+                sx={{
+                  mb: 2,
+                  backgroundColor: "inherit",
+                  p: 2,
+                  borderRadius: 1,
+                }}
+              >
+                <Link
+                  to="/question-bank"
+                  style={{ textDecoration: "none", color: "inherit" }}
+                >
+                  {" "}
+                  <Typography
+                    variant="subtitle1"
+                    sx={{
+                      display: "flex",
+                      flexDirection: "row",
+                      alignItems: "center",
+                      cursor: "pointer",
+                      "&:hover": {
+                        textDecoration: "underline",
+                      },
+                    }}
+                  >
+                    <ArrowBackIosIcon fontSize="small" />
+                    <Typography sx={{ fontSize: "medium" }}>
+                      All Questions
+                    </Typography>
+                  </Typography>
+                </Link>
+                <Typography variant="h6" sx={{ mt: 4 }}></Typography>
+                <Typography sx={{ fontSize: "2rem" }}>
+                  {selectedQuestion}
+                </Typography>
+              </Box>
+
+              <Box sx={{ mt: 6, width: "100%", margin: "0 auto" }}>
+                <Typography variant="h6" sx={{ textAlign: "center" }}>
+                  Transcript:
+                </Typography>
+                <Typography>{transcript}</Typography>
+              </Box>
+              <Box sx={{ mt: 2, width: "100%" }}>
+                <Typography variant="h6" sx={{ textAlign: "center" }}>
+                  AI Response:
+                </Typography>
+                <ReactMarkdown>{response}</ReactMarkdown>
+              </Box>
+              {grades && (
+                <Box
+                  sx={{
+                    width: "1000px",
+                    margin: "0 auto",
+                    marginTop: "4rem",
+                    color: "white",
+                  }}
+                >
+                  <Typography variant="h6">Grades:</Typography>
+                  <Bar data={data} options={options} />
+                </Box>
+              )}
+            </Box>
+          </div>
+        </div>
+      )}
     </>
   );
 }
