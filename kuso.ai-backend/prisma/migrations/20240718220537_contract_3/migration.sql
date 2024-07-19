@@ -36,18 +36,20 @@ CREATE TABLE "Question" (
     "questionContent" TEXT NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updatedAt" TIMESTAMP(3) NOT NULL,
+    "keyword" TEXT[],
 
     CONSTRAINT "Question_pkey" PRIMARY KEY ("questionId")
 );
 
 -- CreateTable
 CREATE TABLE "SessionQuestion" (
+    "sessionQuestionId" SERIAL NOT NULL,
     "sessionId" INTEGER NOT NULL,
     "questionId" INTEGER NOT NULL,
     "askedAt" TIMESTAMP(3) NOT NULL,
     "isGenerated" BOOLEAN NOT NULL DEFAULT false,
 
-    CONSTRAINT "SessionQuestion_pkey" PRIMARY KEY ("sessionId","questionId")
+    CONSTRAINT "SessionQuestion_pkey" PRIMARY KEY ("sessionQuestionId")
 );
 
 -- CreateTable
@@ -87,6 +89,9 @@ CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
 CREATE UNIQUE INDEX "User_email_key" ON "User"("email");
 
 -- CreateIndex
+CREATE UNIQUE INDEX "SessionQuestion_sessionId_questionId_key" ON "SessionQuestion"("sessionId", "questionId");
+
+-- CreateIndex
 CREATE UNIQUE INDEX "_userIndustries_AB_unique" ON "_userIndustries"("A", "B");
 
 -- CreateIndex
@@ -105,22 +110,22 @@ CREATE UNIQUE INDEX "_userQuestions_AB_unique" ON "_userQuestions"("A", "B");
 CREATE INDEX "_userQuestions_B_index" ON "_userQuestions"("B");
 
 -- AddForeignKey
-ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Session" ADD CONSTRAINT "Session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "User"("userId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SessionQuestion" ADD CONSTRAINT "SessionQuestion_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "Session"("sessionId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SessionQuestion" ADD CONSTRAINT "SessionQuestion_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "Session"("sessionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "SessionQuestion" ADD CONSTRAINT "SessionQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("questionId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "SessionQuestion" ADD CONSTRAINT "SessionQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("questionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_sessionId_questionId_fkey" FOREIGN KEY ("sessionId", "questionId") REFERENCES "SessionQuestion"("sessionId", "questionId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_sessionId_questionId_fkey" FOREIGN KEY ("sessionId", "questionId") REFERENCES "SessionQuestion"("sessionId", "questionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "Session"("sessionId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "Session"("sessionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("questionId") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("questionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_userIndustries" ADD CONSTRAINT "_userIndustries_A_fkey" FOREIGN KEY ("A") REFERENCES "Industry"("industryId") ON DELETE CASCADE ON UPDATE CASCADE;

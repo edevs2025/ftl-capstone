@@ -72,10 +72,10 @@ const deleteUser = async (req, res) => {
 };
 
 const addIndustry = async (req, res) => {
-  const { industryName } = req.body;
+  const { industryId } = req.body;
   const { id: userId } = req.params;
   try {
-    const updatedUser = await userModel.addIndustry(userId, { industryName });
+    const updatedUser = await userModel.addIndustry(userId,  industryId );
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error("Error adding industry to user:", error);
@@ -84,10 +84,10 @@ const addIndustry = async (req, res) => {
 };
 
 const addQuestion = async (req, res) => {
-  const { questionId, questionContent } = req.body;
+  const { questionId } = req.body;
   const { id: userId } = req.params;
   try {
-    const updatedUser = await userModel.addQuestion(userId, { questionId, questionContent });
+    const updatedUser = await userModel.addQuestion(userId,  questionId );
     res.status(200).json(updatedUser);
   } catch (error) {
     console.error("Error adding question to user:", error);

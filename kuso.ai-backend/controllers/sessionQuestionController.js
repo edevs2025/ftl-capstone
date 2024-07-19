@@ -72,14 +72,14 @@ const updateSessionQuestion = async (req, res) => {
 
 // Get a specific SessionQuestion
 const getSessionQuestionById = async (req, res) => {
-  const { sessionId, questionId } = req.params;
+  const { id: sessionQuestionId } = req.params;
 
-  if (!sessionId || !questionId) {
-    return res.status(400).json({ error: "sessionId and questionId are required" });
+  if (!sessionQuestionId) {
+    return res.status(400).json({ error: "sessionQuestionId is required" });
   }
 
   try {
-    const sessionQuestion = await sessionQuestionModel.getSessionQuestionById(sessionId, questionId);
+    const sessionQuestion = await sessionQuestionModel.getSessionQuestionById(sessionQuestionId);
     if (sessionQuestion) {
       res.json(sessionQuestion);
     } else {
@@ -93,14 +93,14 @@ const getSessionQuestionById = async (req, res) => {
 
 // Delete a SessionQuestion
 const deleteSessionQuestion = async (req, res) => {
-  const { sessionId, questionId } = req.params;
+  const { id: sessionQuestionId  } = req.params;
 
-  if (!sessionId || !questionId) {
-    return res.status(400).json({ error: "sessionId and questionId are required" });
+  if (!sessionQuestionId) {
+    return res.status(400).json({ error: "sessionQuestionId is required" });
   }
 
   try {
-    const deletedSessionQuestion = await sessionQuestionModel.deleteSessionQuestion(sessionId, questionId);
+    const deletedSessionQuestion = await sessionQuestionModel.deleteSessionQuestion(sessionQuestionId);
     if (deletedSessionQuestion) {
       res.json({ message: "SessionQuestion successfully deleted" });
     } else {
