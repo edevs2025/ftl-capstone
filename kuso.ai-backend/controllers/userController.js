@@ -56,6 +56,21 @@ const getUserById = async (req, res) => {
   }
 };
 
+const getUserSessions = async (req, res) => {
+  const { id } = req.params;
+  try {
+    const user = await userModel.getUserById(id);
+    if (user) {
+      res.json(user);
+    } else {
+      res.status(404).json({ error: `User with ID ${id} not found` });
+    }
+  } catch (error) {
+    console.error("Error fetching user:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
 const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
@@ -134,6 +149,7 @@ const removeQuestion = async (req, res) => {
 module.exports = {
   createUser,
   getAllUsers,
+  getUserSessions,
   getUserById,
   deleteUser,
   updateUser,
