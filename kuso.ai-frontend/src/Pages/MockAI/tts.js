@@ -10,14 +10,15 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-const API_KEY = process.env.OPENAI_API_KEY;
+const API_KEY = process.env.VITE_OPENAI_API_KEY;
+console.log(API_KEY);
 const openai = new OpenAI({
-  apiKey: "sk-proj-sNfRUWMn9Myrg0sJbUDuT3BlbkFJpvgsZ6X7YH6zrSBrr0tb",
+  apiKey: API_KEY,
 });
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace this with your frontend's origin
+    origin: "http://localhost:5173", 
   })
 );
 

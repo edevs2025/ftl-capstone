@@ -42,7 +42,9 @@ function MockAI() {
   const recognitionRef = useRef(null);
   const [sessionIsStarted, setSessionIsStarted] = useState(false);
   const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
-  const apiKey = import.meta.env.VITE_OPENAI_KEY;
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+  console.log(apiKey);
 
   useEffect(() => {
     const question = questionsData.questions.find(
