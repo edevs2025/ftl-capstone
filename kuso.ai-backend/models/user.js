@@ -8,7 +8,7 @@ const createUser = async (data) => {
             username: data.username,
             name: data.name,
             email: data.email,
-            password: data.password,
+            password: data.hashedPassword,
             age: data.age,
             employed: data.employed,
             industries: data.industries ? { connect: data.industries.map(id => ({ industryId: id })) } : undefined,
@@ -89,6 +89,12 @@ const getUserById = async (id) => {
             sessions: true,
         }
     });
+};
+
+const findUserByUsername = async (username) => {
+    return await prisma.user.findUnique({
+        where : {username},
+    })
 };
 
 const addIndustry = async (userId, industryId) => {
@@ -212,4 +218,5 @@ module.exports = {
     removeIndustry,
     removeQuestion,
     getUserSessions,
+    findUserByUsername,
 };

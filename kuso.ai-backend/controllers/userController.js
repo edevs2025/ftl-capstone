@@ -1,9 +1,24 @@
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const userModel = require("../models/user");
+
+
+const login = async (req, res) => {
+  const {username, password} = req.body;
+  const user = await userModel.findUserByUsername(username);
+  if(user && (await bcrypt.compare(password, user.password))){
+      const token = jwt.sign({userId: user.userId, username: user.username}, "process.env.SECRET_KEY");
+      res.status(200).json({token});
+  }else{
+      res.status(401).json({error: "Invalid Login Information"})
+  }
+}
 
 const createUser = async (req, res) => {
   const { username, name, email, password, age, employed, industries, questions, sessions } = req.body;
   try {
-    const user = await userModel.createUser({ username, name, email, password, age, employed, industries, questions, sessions });
+    const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await userModel.createUser({ username, name, email, hashedPassword, age, employed, industries, questions, sessions });
     res.status(201).json(user);
   } catch (error) {
     console.error("Error creating user:", error);
@@ -158,4 +173,5 @@ module.exports = {
   addSession,
   removeIndustry,
   removeQuestion,
+  login,
 };
