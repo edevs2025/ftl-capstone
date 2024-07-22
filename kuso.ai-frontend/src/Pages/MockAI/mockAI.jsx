@@ -38,7 +38,6 @@ function MockAI() {
   );
   const [recording, setRecording] = useState(false);
   const [grades, setGrades] = useState(null);
-  const [audio] = useState(new Audio());
   const recognitionRef = useRef(null);
   const [sessionIsStarted, setSessionIsStarted] = useState(false);
   const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
@@ -110,7 +109,7 @@ function MockAI() {
   };
 
   const fetchTTS = async (text) => {
-    const API_KEY = apiKey; // Make sure this is accessible
+    const API_KEY = apiKey;
 
     try {
       const response = await fetch("https://api.openai.com/v1/audio/speech", {
@@ -131,15 +130,41 @@ function MockAI() {
       }
 
       const audioBlob = await response.blob();
-      const audioUrl = URL.createObjectURL(audioBlob);
-      const audio = new Audio(audioUrl);
-
-      return new Promise((resolve) => {
-        audio.onended = resolve;
-        audio.play();
-      });
+      return URL.createObjectURL(audioBlob);
     } catch (error) {
       console.error("Error fetching TTS:", error);
+    }
+  };
+
+  const speakFeedback = async (feedback, speedFactor = 1.15) => {
+    const chunkSize = 1000;
+    const chunks = [];
+    for (let i = 0; i < feedback.length; i += chunkSize) {
+      chunks.push(feedback.slice(i, i + chunkSize));
+    }
+
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+
+    for (const chunk of chunks) {
+      try {
+        const audioUrl = await fetchTTS(chunk);
+        const response = await fetch(audioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.playbackRate.value = speedFactor;
+        source.connect(audioContext.destination);
+
+        await new Promise((resolve) => {
+          source.onended = resolve;
+          source.start();
+        });
+      } catch (error) {
+        console.error("Error playing audio chunk:", error);
+      }
     }
   };
 
@@ -190,8 +215,8 @@ function MockAI() {
         console.log("Extracted Grades:", grades);
         setIsFeedbackExpanded(true);
 
-        const chunksPromise = simulateRealTimeResponse(feedback);
-        chunksPromise.then((chunks) => speakChunks(chunks));
+        speakFeedback(feedback, 1.15);
+        simulateRealTimeResponse(feedback);
       } else {
         setResponse("No message found in the AI response.");
       }
