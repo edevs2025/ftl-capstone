@@ -71,7 +71,7 @@ model SessionQuestion {
 
 model Feedback {
   feedbackId      Int             @id @default(autoincrement())
-  score           Float?
+  score           Float
   gptResponse     String
   userAnswer      String?
   sessionId       Int
