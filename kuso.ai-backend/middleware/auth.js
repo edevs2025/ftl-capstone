@@ -1,19 +1,20 @@
-const jwt = require('jsonwebtoken');
+// const jwt = require('jsonwebtoken');
 
-const authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(' ')[1];
+const { clerkClient } = require('@clerk/clerk-sdk-node');
 
-  if (!token) {
-    return res.status(401).json({ error: 'No token provided' });
+const clerkAuth = async (req, res, next) => {
+  const sessionToken = req.headers.authorization?.split(' ')[1];
+  if (!sessionToken) {
+    return res.status(401).json({ error: "No session token provided" });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.user = decoded;
+    const session = await clerkClient.sessions.verifySession(sessionToken);
+    req.userId = session.userId;
     next();
   } catch (error) {
-    return res.status(401).json({ error: 'Invalid token' });
+    return res.status(401).json({ error: "Invalid session token" });
   }
 };
 
-module.exports = authMiddleware;
+module.exports = clerkAuth;

@@ -79,15 +79,11 @@ const handleClerkWebhook = async (req, res) => {
 
 const login = async (req, res) => {
   try {
-    // Get the session token from the request header
     const sessionToken = req.headers.authorization?.split(' ')[1];
-    console.log(sessionToken)
-
     if (!sessionToken) {
       return res.status(401).json({ error: "No session token provided" });
     }
 
-    // Verify the session token with Clerk
     let session;
     try {
       session = await clerkClient.sessions.verifySession(sessionToken);
@@ -95,18 +91,13 @@ const login = async (req, res) => {
       return res.status(401).json({ error: "Invalid session token" });
     }
 
-    // Get the Clerk user ID from the session
     const clerkUserId = session.userId;
-
-    // Find the user in your database using the Clerk user ID
     const user = await userModel.findUserByClerkId(clerkUserId);
 
     if (!user) {
       return res.status(404).json({ error: "User not found in the database" });
     }
 
-    // At this point, the user is authenticated and found in your database
-    // You can create your own JWT token if you want, or just send back user data
     const token = jwt.sign(
       { userId: user.userId, clerkUserId: user.clerkUserId },
       process.env.JWT_SECRET,
