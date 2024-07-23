@@ -119,7 +119,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "tts-1",
+          model: "tts-1-hd",
           input: text,
           voice: "shimmer",
         }),
@@ -246,12 +246,6 @@ function MockAI() {
 
       simulateTyping();
     });
-  };
-
-  const speakChunks = async (chunks) => {
-    for (const chunk of chunks) {
-      await fetchTTS(chunk);
-    }
   };
 
   const handleSubmit = () => {
