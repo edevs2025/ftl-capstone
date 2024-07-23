@@ -8,9 +8,7 @@ const createUser = async (data) => {
             username: data.username,
             name: data.name,
             email: data.email,
-            password: data.hashedPassword,
-            age: data.age,
-            employed: data.employed,
+            userId: data.id,
             industries: data.industries ? { connect: data.industries.map(id => ({ industryId: id })) } : undefined,
             questions: data.questions ? { connect: data.questions.map(id => ({ questionId: id })) } : undefined,
             sessions: data.sessions ? { connect: data.sessions.map(id => ({ sessionId: id })) } : undefined,
@@ -22,6 +20,32 @@ const createUser = async (data) => {
         }
     });
 };
+
+
+const upsertUser = async (userData) => {
+    return prisma.user.upsert({
+      where: { clerkUserId: userData.clerkUserId },
+      update: {
+        username: userData.username || undefined,
+        firstName: userData.firstName || undefined,
+        lastName: userData.lastName || undefined,
+        email: userData.email,
+      },
+      create: {
+        clerkUserId: userData.clerkUserId,
+        username: userData.username || `user_${userData.clerkUserId}`,
+        firstName: userData.firstName || '',
+        lastName: userData.lastName || '',
+        email: userData.email,
+      },
+    });
+  };
+  
+  const deleteUserByClerkId = async (clerkUserId) => {
+    return prisma.user.delete({
+      where: { clerkUserId: clerkUserId },
+    });
+  };
 
 // Function to get all users
 const getAllUsers = async (filters) => {
@@ -219,4 +243,6 @@ module.exports = {
     removeQuestion,
     getUserSessions,
     findUserByUsername,
+    upsertUser,
+    deleteUserByClerkId,
 };

@@ -1,12 +1,18 @@
 import React from "react";
 import "./Signup.css";
 import Navbar from "../../components/Navbar/Navbar";
+import { SignUp, useUser } from "@clerk/clerk-react";
 
 function Signup() {
+  
   return (
     <>
       <Navbar />
-      <div className="page-container">
+      
+      <SignUp forceRedirectUrl = '/question-bank'   />
+  
+
+      {/* <div className="page-container">
         <div className="form-container">
           <form className="form">
             <div className="form-group">
@@ -32,7 +38,7 @@ function Signup() {
             </button>
           </form>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }
