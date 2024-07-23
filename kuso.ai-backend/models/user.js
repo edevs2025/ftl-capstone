@@ -199,10 +199,29 @@ const addSession = async (userId, sessionData) => {
 
 // Function to delete user
 const deleteUser = async (id) => {
-    return prisma.user.delete({
-        where: { userId: parseInt(id) }
-    });
+    try {
+        // First, find the user to get the clerkUserId
+        const user = await prisma.user.findUnique({
+            where: { userId: parseInt(id) }
+        });
+
+        if (!user) {
+            throw new Error('User not found');
+        }
+
+        // Delete the user from your database
+        const deletedUser = await prisma.user.delete({
+            where: { userId: parseInt(id) }
+        });
+
+        // Return the deleted user data
+        return deletedUser;
+    } catch (error) {
+        console.error("Error deleting user:", error);
+        throw error;
+    }
 };
+
 
 const removeIndustry = async (userId, industryId) => {
     return prisma.user.update({
