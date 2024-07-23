@@ -1,9 +1,12 @@
-import React from "react";
+import {React, useEffect} from "react";
 import "./Signup.css";
 import Navbar from "../../components/Navbar/Navbar";
-import { SignUp, useUser } from "@clerk/clerk-react";
+import { SignUp, } from "@clerk/clerk-react";
+
 
 function Signup() {
+  
+   
   
   return (
     <>
