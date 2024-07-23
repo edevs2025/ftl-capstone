@@ -1,25 +1,173 @@
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require("../models/user");
+const { Webhook } = require("svix");
+const { clerkClient } = require('@clerk/clerk-sdk-node');
+
+
+const handleClerkWebhook = async (req, res) => {
+  const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+  if (!WEBHOOK_SECRET) {
+    return res.status(500).json({ error: "Missing WEBHOOK_SECRET in environment variables" });
+  }
+
+  const headers = req.headers;
+  const payload = JSON.stringify(req.body);
+  const svix_id = headers["svix-id"];
+  const svix_timestamp = headers["svix-timestamp"];
+  const svix_signature = headers["svix-signature"];
+
+  if (!svix_id || !svix_timestamp || !svix_signature) {
+    return res.status(400).json({ error: "Missing required Svix headers" });
+  }
+
+  const webhook = new Webhook(WEBHOOK_SECRET);
+
+  let event;
+  try {
+    event = webhook.verify(payload, {
+      "svix-id": svix_id,
+      "svix-timestamp": svix_timestamp,
+      "svix-signature": svix_signature,
+    });
+  } catch (error) {
+    console.error("Error verifying webhook:", error.message);
+    return res.status(400).json({ error: "Invalid webhook signature" });
+  }
+
+  const { id, username, email_addresses, first_name, last_name } = event.data;
+  const eventType = event.type;
+
+  console.log(`Webhook type: ${eventType}`);
+  console.log("Webhook data:", event.data);
+
+
+  try {
+    let user;
+    switch (eventType) {
+      case 'user.created':
+      case 'user.updated':
+        user = await userModel.upsertUser({
+          clerkUserId: id,
+          username: username || email_addresses[0].email_address.split('@')[0],
+          firstName: first_name || '',
+          lastName: last_name || '',
+          email: email_addresses[0].email_address,
+        });
+        break;
+      case 'user.deleted':
+        user = await userModel.deleteUserByClerkId(id);
+        break;
+      default:
+        return res.status(400).json({ error: "Unsupported event type" });
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Webhook processed successfully",
+      user: user,
+    });
+  } catch (error) {
+    console.error("Error processing webhook:", error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+
+
 
 
 const login = async (req, res) => {
-  const {username, password} = req.body;
-  const user = await userModel.findUserByUsername(username);
-  if(user && (await bcrypt.compare(password, user.password))){
-      const token = jwt.sign({userId: user.userId, username: user.username}, "process.env.SECRET_KEY");
-      res.status(200).json({token});
-  }else{
-      res.status(401).json({error: "Invalid Login Information"})
+  try {
+    // Get the session token from the request header
+    const sessionToken = req.headers.authorization?.split(' ')[1];
+    console.log(sessionToken)
+
+    if (!sessionToken) {
+      return res.status(401).json({ error: "No session token provided" });
+    }
+
+    // Verify the session token with Clerk
+    let session;
+    try {
+      session = await clerkClient.sessions.verifySession(sessionToken);
+    } catch (error) {
+      return res.status(401).json({ error: "Invalid session token" });
+    }
+
+    // Get the Clerk user ID from the session
+    const clerkUserId = session.userId;
+
+    // Find the user in your database using the Clerk user ID
+    const user = await userModel.findUserByClerkId(clerkUserId);
+
+    if (!user) {
+      return res.status(404).json({ error: "User not found in the database" });
+    }
+
+    // At this point, the user is authenticated and found in your database
+    // You can create your own JWT token if you want, or just send back user data
+    const token = jwt.sign(
+      { userId: user.userId, clerkUserId: user.clerkUserId },
+      process.env.JWT_SECRET,
+      { expiresIn: '1h' }
+    );
+
+    res.status(200).json({ token, user });
+  } catch (error) {
+    console.error("Error in login:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
-}
+};
+
+
+
 
 const createUser = async (req, res) => {
-  const { username, name, email, password, age, employed, industries, questions, sessions } = req.body;
+  const USER_CREATED_WEBHOOK_SECRET = process.env.WEBHOOK_SECRET;
+	if (!USER_CREATED_WEBHOOK_SECRET) {
+		throw new Error("You need a WEBHOOK_SECRET in your .env");
+	}
+
+	const headers = req.headers;
+	const payload = JSON.stringify(req.body);
+	const svix_id = headers["svix-id"];
+	const svix_timestamp = headers["svix-timestamp"];
+	const svix_signature = headers["svix-signature"];
+	if (!svix_id || !svix_timestamp || !svix_signature) {
+		return res.json({ error: "No svix headers" });
+	}
+	const webhook = new Webhook(USER_CREATED_WEBHOOK_SECRET);
+
+	let event;
+
+	try {
+		event = webhook.verify(payload, {
+			"svix-id": svix_id,
+			"svix-timestamp": svix_timestamp,
+			"svix-signature": svix_signature,
+		});
+	} catch (error) {
+		console.log("Error verifying webhook:", error.message);
+		return res.json({
+			success: false,
+			message: error.message,
+		});
+	}
+
+	const { username, id, name, email } = event.data;
+	const eventType = event.type;
+	console.log(`Webhook type: ${eventType}`);
+	console.log("Webhook body:", event.data);
+  
   try {
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await userModel.createUser({ username, name, email, hashedPassword, age, employed, industries, questions, sessions });
-    res.status(201).json(user);
+    // const hashedPassword = await bcrypt.hash(password, 10);
+    const user = await userModel.createUser({  username, id, name, email });
+    res.status(201).json({
+      success: true,
+			message: "Webhook received",
+      user: user,
+    });
   } catch (error) {
     console.error("Error creating user:", error);
     res.status(500).json({ error: error.message });
@@ -70,6 +218,16 @@ const getUserById = async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 };
+
+const findUserByUsername = async (req, res) => {
+	try {
+		const user = await userModel.findUserByUsername(req.params);
+		res.json(user);
+	} catch (error) {
+		res.json({ error: error.message });
+	}
+};
+
 
 const getUserSessions = async (req, res) => {
   const { id } = req.params;
@@ -174,4 +332,6 @@ module.exports = {
   removeIndustry,
   removeQuestion,
   login,
+  findUserByUsername,
+  handleClerkWebhook,
 };

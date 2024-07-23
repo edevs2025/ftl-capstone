@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import "./Navbar.css";
 import { Link } from "react-router-dom";
+import { SignedOut, SignedIn, UserButton } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const [prevScrollPos, setPrevScrollPos] = useState(0);
@@ -53,9 +54,14 @@ const Navbar = () => {
         <Link to="/question-bank">questions</Link>
         <Link to="/profile">profile</Link>
       </div>
+      <SignedIn>
+        <UserButton />
+      </SignedIn>
+      <SignedOut>
       <Link to="/signup" className="navbar-signup">
         signup
       </Link>
+      </SignedOut>
     </nav>
   );
 };
