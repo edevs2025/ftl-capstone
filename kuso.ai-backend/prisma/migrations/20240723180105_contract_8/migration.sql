@@ -1,10 +1,11 @@
 -- CreateTable
 CREATE TABLE "User" (
     "userId" SERIAL NOT NULL,
+    "clerkUserId" TEXT NOT NULL,
     "username" TEXT NOT NULL,
-    "name" TEXT NOT NULL,
+    "firstName" TEXT NOT NULL,
+    "lastName" TEXT NOT NULL,
     "email" TEXT NOT NULL,
-    "password" TEXT NOT NULL,
     "age" INTEGER,
     "employed" BOOLEAN,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -57,9 +58,9 @@ CREATE TABLE "Feedback" (
     "feedbackId" SERIAL NOT NULL,
     "score" DOUBLE PRECISION NOT NULL,
     "gptResponse" TEXT NOT NULL,
-    "userAnswer" TEXT NOT NULL,
+    "userAnswer" TEXT,
     "sessionId" INTEGER NOT NULL,
-    "questionId" INTEGER NOT NULL,
+    "sessionQuestionId" INTEGER,
 
     CONSTRAINT "Feedback_pkey" PRIMARY KEY ("feedbackId")
 );
@@ -81,6 +82,9 @@ CREATE TABLE "_userQuestions" (
     "A" INTEGER NOT NULL,
     "B" INTEGER NOT NULL
 );
+
+-- CreateIndex
+CREATE UNIQUE INDEX "User_clerkUserId_key" ON "User"("clerkUserId");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "User_username_key" ON "User"("username");
@@ -119,13 +123,10 @@ ALTER TABLE "SessionQuestion" ADD CONSTRAINT "SessionQuestion_sessionId_fkey" FO
 ALTER TABLE "SessionQuestion" ADD CONSTRAINT "SessionQuestion_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("questionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
-ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_sessionId_questionId_fkey" FOREIGN KEY ("sessionId", "questionId") REFERENCES "SessionQuestion"("sessionId", "questionId") ON DELETE CASCADE ON UPDATE CASCADE;
+ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_sessionQuestionId_fkey" FOREIGN KEY ("sessionQuestionId") REFERENCES "SessionQuestion"("sessionQuestionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_sessionId_fkey" FOREIGN KEY ("sessionId") REFERENCES "Session"("sessionId") ON DELETE CASCADE ON UPDATE CASCADE;
-
--- AddForeignKey
-ALTER TABLE "Feedback" ADD CONSTRAINT "Feedback_questionId_fkey" FOREIGN KEY ("questionId") REFERENCES "Question"("questionId") ON DELETE CASCADE ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "_userIndustries" ADD CONSTRAINT "_userIndustries_A_fkey" FOREIGN KEY ("A") REFERENCES "Industry"("industryId") ON DELETE CASCADE ON UPDATE CASCADE;

@@ -50,7 +50,8 @@ function QuestionBank() {
 
   return (
     <div className="question-bank">
-      <Navbar />
+      <Navbar 
+      />
       <h3 id="header">Master your interviews with confidence</h3>
       <div className="question-bank-container">
         <div className="left-column">
@@ -153,7 +154,7 @@ function QuestionBank() {
                   </div>
                   <div className="question-details">
                     <p>{row.topic}</p>
-                    <p>{row.industry}</p>
+                    {/* <p>{row.industry}</p> */}
                     <p>{row.keywords.join(" ")}</p>
                   </div>
                 </li>

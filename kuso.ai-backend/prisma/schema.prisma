@@ -15,10 +15,11 @@ datasource db {
 
 model User {
   userId    Int       @id @default(autoincrement())
-  username  String    @unique
-  name      String
+  clerkUserId String  @unique
+  username  String?   @unique
+  firstName String?
+  lastName  String?
   email     String    @unique
-  password  String
   age       Int?
   employed  Boolean?
   createdAt DateTime  @default(now())
@@ -27,7 +28,6 @@ model User {
   questions  Question[] @relation("userQuestions")
   sessions   Session[]
 }
-
 model Industry {
   industryId   Int       @id @default(autoincrement())
   industryName String

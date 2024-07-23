@@ -10,6 +10,7 @@ const sessionRoutes = require('./routes/sessionRoutes');
 const questionRoutes = require('./routes/questionRoutes');
 const sessionQuestionRoutes = require('./routes/sessionQuestionRoutes');
 const feedbackRoutes = require('./routes/feedbackRoutes');
+const userController = require('./controllers/userController');
 
 
 const app = express();
@@ -30,6 +31,8 @@ app.use('/session', sessionRoutes);
 app.use('/question', questionRoutes);
 app.use('/session-question', sessionQuestionRoutes);
 app.use('/feedback', feedbackRoutes);
+
+app.post('/api/clerk-webhook', userController.handleClerkWebhook);
 
 
 app.listen(PORT,()=>{
