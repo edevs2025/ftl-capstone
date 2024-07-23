@@ -5,7 +5,7 @@ import LandingPage from "./Pages/Landing/landing";
 import QuestionBank from "./Pages/QuestionBank/QuestionBank";
 import Signup from "./Pages/Signup/Signup";
 import Profile from "./Pages/Profile/Profile";
-import ConversationalAI from "./Pages/ConversationalAI/conversatonalAI";
+import ConversationalAI from "./Pages/ConversationalAI/conversational";
 
 function App() {
   return (

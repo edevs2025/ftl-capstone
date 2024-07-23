@@ -1,4 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
+import { fetchOpenAIResponse } from "../../utils";
+import "./conversational.css";
+import Navbar from "../../components/Navbar/Navbar";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -6,6 +9,7 @@ const ConversationalSession = () => {
   const [sessionHistory, setSessionHistory] = useState([]);
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
+  const [messages, setMessages] = useState([]);
 
   const recognitionRef = useRef(null);
 
@@ -44,34 +48,66 @@ const ConversationalSession = () => {
     recognitionRef.current.start();
   };
 
+  const handleUserResponse = async (response) => {
+    setSessionHistory((prev) => [...prev, { speaker: "User", text: response }]);
+    setTranscript("");
+
+    const userMessage = `User's response: "${response}"`;
+    const aiResponse = await getAIResponse(userMessage);
+
+    setSessionHistory((prev) => [
+      ...prev,
+      { speaker: "Interviewer", text: aiResponse },
+    ]);
+    speakText(aiResponse);
+
+    const nextQuestion = await getNextQuestion();
+    setCurrentQuestion(nextQuestion);
+  };
+
+  const getAIResponse = async (userMessage) => {
+    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+
+    try {
+      const response = await fetchOpenAIResponse(apiKey, messages, userMessage);
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: userMessage },
+        { role: "assistant", content: response },
+      ]);
+      return response;
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+      return "I'm sorry, I'm having trouble responding right now. Could you please repeat that?";
+    }
+  };
+
+  const getNextQuestion = async () => {
+    const nextQuestionPrompt =
+      "Generate the next behavioral interview question.";
+    try {
+      const response = await fetchOpenAIResponse(
+        apiKey,
+        messages,
+        nextQuestionPrompt
+      );
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: nextQuestionPrompt },
+        { role: "assistant", content: response },
+      ]);
+      return response;
+    } catch (error) {
+      console.error("Error fetching next question:", error);
+      return "I'm sorry, I'm having trouble generating the next question. Let's continue with your previous response.";
+    }
+  };
+
   const stopListening = () => {
     setIsListening(false);
     recognitionRef.current.stop();
     handleUserResponse(transcript);
   };
-
-  const handleUserResponse = async (response) => {
-    // Add user's response to session history
-    setSessionHistory((prev) => [...prev, { speaker: "User", text: response }]);
-    setTranscript("");
-
-    // Get AI response (you'll need to implement this function)
-    const aiResponse = await getAIResponse(response, currentQuestion);
-
-    // Add AI's response to session history
-    setSessionHistory((prev) => [
-      ...prev,
-      { speaker: "Interviewer", text: aiResponse },
-    ]);
-
-    // Speak AI's response
-    speakText(aiResponse);
-
-    // Get next question (you'll need to implement this function)
-    const nextQuestion = await getNextQuestion();
-    setCurrentQuestion(nextQuestion);
-  };
-
   const speakText = (text) => {
     setIsInterviewerSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
@@ -80,14 +116,27 @@ const ConversationalSession = () => {
   };
 
   const startSession = async () => {
-    // Get initial question (you'll need to implement this function)
-    const initialQuestion = await getInitialQuestion();
-    setCurrentQuestion(initialQuestion);
-    speakText(initialQuestion);
+    const initialPrompt =
+      "You are an AI interviewer conducting a behavioral interview. Start the interview with an introduction and the first question.";
+    try {
+      const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
+      setMessages([
+        { role: "system", content: initialPrompt },
+        { role: "assistant", content: response },
+      ]);
+      setCurrentQuestion(response);
+      speakText(response);
+    } catch (error) {
+      console.error("Error starting session:", error);
+      setCurrentQuestion(
+        "I'm sorry, I'm having trouble starting the session. Please try again later."
+      );
+    }
   };
 
   return (
     <div>
+      <Navbar />
       <h1>Behavioral Interview Simulation</h1>
       <button onClick={startSession} disabled={sessionHistory.length > 0}>
         Start Session
