@@ -74,7 +74,7 @@ html {
   right: 0;
   bottom: 0;
   left: 50%;
-  background: linear-gradient(145deg, transparent 35%, #e81cff, #40c9ff);
+  background: linear-gradient(145deg, transparent 35%, #646cff, #000000);
   transition: left 0.3s ease;
   z-index: 0;
   opacity: 0.1;
@@ -166,7 +166,7 @@ html {
   right: 0;
   bottom: 0;
   left: 50%;
-  background: linear-gradient(145deg, transparent 35%, #e81cff, #40c9ff);
+  background: linear-gradient(145deg, transparent 35%, #646cff, #232323);
   transition: left 0.3s ease;
   z-index: 0;
 }
@@ -205,7 +205,6 @@ html {
 .topics-container {
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
   justify-content: flex-start;
   background-color: #212121;
   color: white;
@@ -221,6 +220,33 @@ html {
   width: 100%;
 }
 
+.topics-container h3 {
+  text-align: center;
+  font-size: 2rem;
+}
+
+.topics-container ul {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+.topics-container li {
+  list-style-type: none;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  border: 1px solid #646cff;
+  background-color: #646cff;
+  border-radius: 15px;
+  padding: 0.5rem;
+}
+.topics-container li:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.5);
+}
+
 .topics-container::before {
   content: "";
   position: absolute;
@@ -228,7 +254,8 @@ html {
   right: 0;
   bottom: 0;
   left: 0%;
-  background: linear-gradient(145deg, transparent 35%, #e81cff, #40c9ff);
+  background: linear-gradient(145deg, transparent 35%, #646cff, #000000);
+  text-align: center;
   transition: left 0.3s ease;
   z-index: 0;
   opacity: 0.1;

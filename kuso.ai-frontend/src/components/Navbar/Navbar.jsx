@@ -51,6 +51,7 @@ const Navbar = () => {
       </Link>
       <div className="navbar-middle-content">
         <Link to="/question-bank">questions</Link>
+        <Link to="/conversational-ai">conversation</Link>
         <Link to="/profile">profile</Link>
       </div>
       <Link to="/signup" className="navbar-signup">

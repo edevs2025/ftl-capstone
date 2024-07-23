@@ -4,6 +4,8 @@ import MockAI from "./Pages/MockAI/mockAI";
 import LandingPage from "./Pages/Landing/landing";
 import QuestionBank from "./Pages/QuestionBank/QuestionBank";
 import Signup from "./Pages/Signup/Signup";
+import Profile from "./Pages/Profile/Profile";
+import ConversationalAI from "./Pages/ConversationalAI/conversatonalAI";
 
 function App() {
   return (
@@ -14,6 +16,8 @@ function App() {
         <Route path="/mockai/:id" element={<MockAI />} />
         <Route path="/question-bank" element={<QuestionBank />} />
         <Route path="/signup" element={<Signup />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/conversational-ai" element={<ConversationalAI />} />
       </Routes>
     </Router>
   );
