@@ -60,6 +60,7 @@ body {
   margin-bottom: 1rem;
   color: white;
 }
+
 .start-session-button {
   background-color: white !important;
   color: #646cff !important;
@@ -96,4 +97,9 @@ body {
   max-height: 100vh;
   background-color: #373737;
   min-height: 100vh;
+  transition: width 0.5s ease;
+}
+
+.ai-feedback.expanded {
+  width: 50%;
 }
