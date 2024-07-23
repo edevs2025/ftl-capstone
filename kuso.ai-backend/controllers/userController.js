@@ -247,17 +247,31 @@ const getUserSessions = async (req, res) => {
 const deleteUser = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await userModel.deleteUser(id);
-    if (user) {
-      res.json({ message: `User with ID ${id} successfully deleted` });
-    } else {
-      res.status(404).json({ error: `User with ID ${id} not found` });
-    }
+      const deletedUser = await userModel.deleteUser(id);
+      
+      if (deletedUser) {
+          // If you're using Clerk, you might want to delete the user from Clerk as well
+          try {
+              await clerkClient.users.deleteUser(deletedUser.clerkUserId);
+          } catch (clerkError) {
+              console.error("Error deleting user from Clerk:", clerkError);
+              // Decide how to handle this error. You might want to inform the client
+              // that the user was deleted from your DB but not from Clerk.
+          }
+
+          res.json({ 
+              message: `User with ID ${id} successfully deleted`,
+              deletedUser 
+          });
+      } else {
+          res.status(404).json({ error: `User with ID ${id} not found` });
+      }
   } catch (error) {
-    console.error("Error deleting user:", error);
-    res.status(500).json({ error: error.message });
+      console.error("Error deleting user:", error);
+      res.status(500).json({ error: error.message });
   }
 };
+
 
 const addIndustry = async (req, res) => {
   const { industryId } = req.body;
