@@ -2,10 +2,12 @@ const express = require('express');
 const router = express.Router();
 const userController = require('../controllers/userController');
 
-router.post('/', userController.createUser);
+router.post('/register', userController.createUser);
+router.post('/login', userController.login);
 router.post('/:id/industry', userController.addIndustry);
 router.post('/:id/question', userController.addQuestion);
 router.post('/:id/session', userController.addSession);
+router.get('/:id/session', userController.getUserSessions);
 router.get('/', userController.getAllUsers);
 router.get('/:id', userController.getUserById);
 router.delete('/:id', userController.deleteUser);

@@ -8,7 +8,7 @@ const createUser = async (data) => {
             username: data.username,
             name: data.name,
             email: data.email,
-            password: data.password,
+            password: data.hashedPassword,
             age: data.age,
             employed: data.employed,
             industries: data.industries ? { connect: data.industries.map(id => ({ industryId: id })) } : undefined,
@@ -67,6 +67,19 @@ const updateUser = async (id, userData) => {
 };
 
 // Function to get user by id
+const getUserSessions = async (id) => {
+    const userInfo = prisma.user.findUnique({
+        where: { userId: parseInt(id) },
+        include: {
+            industries: true,
+            questions: true,
+            sessions: true,
+        }
+    });
+    return userInfo.sessions;
+};
+
+// Function to get user by id
 const getUserById = async (id) => {
     return prisma.user.findUnique({
         where: { userId: parseInt(id) },
@@ -78,30 +91,50 @@ const getUserById = async (id) => {
     });
 };
 
-const addIndustry = async (userId, industryData) => {
+const findUserByUsername = async (username) => {
+    return await prisma.user.findUnique({
+        where : {username},
+    })
+};
+
+const addIndustry = async (userId, industryId) => {
+    // Check if the question exists
+    const industry = await prisma.industry.findUnique({
+        where: { industryId: parseInt(industryId) }
+    });
+
+    if (!industry) {
+        throw new Error('Industry does not exist');
+    }
+
     return prisma.user.update({
         where: { userId: parseInt(userId) },
         data: {
             industries: {
-                connectOrCreate: {
-                    where: { industryName: industryData.industryName },
-                    create: { industryName: industryData.industryName }
-                }
+                connect: {industryId: parseInt(industryId) }
             }
         },
         include: { industries: true }
     });
 };
 
-const addQuestion = async (userId, questionData) => {
+// Function to add an existing question to a user
+const addQuestion = async (userId, questionId) => {
+    // Check if the question exists
+    const question = await prisma.question.findUnique({
+        where: { questionId: parseInt(questionId) }
+    });
+
+    if (!question) {
+        throw new Error('Question does not exist');
+    }
+
+    // Add the question to the user
     return prisma.user.update({
         where: { userId: parseInt(userId) },
         data: {
             questions: {
-                connectOrCreate: {
-                    where: { questionId: questionData.questionId },
-                    create: { questionContent: questionData.questionContent }
-                }
+                connect: { questionId: parseInt(questionId) }
             }
         },
         include: { questions: true }
@@ -184,4 +217,6 @@ module.exports = {
     addSession,
     removeIndustry,
     removeQuestion,
+    getUserSessions,
+    findUserByUsername,
 };

@@ -78,14 +78,11 @@ const updateSessionQuestion = async (sessionId, questionId, data) => {
     });
 };
 
-// Function to get sessionQuestion by sessionId and questionId
-const getSessionQuestionById = async (sessionId, questionId) => {
+// Function to get sessionQuestion by sessionQuestionId
+const getSessionQuestionById = async (sessionQuestionId) => {
     return prisma.sessionQuestion.findUnique({
         where: {
-            sessionId_questionId: {
-                sessionId: parseInt(sessionId),
-                questionId: parseInt(questionId)
-            }
+            sessionQuestionId: parseInt(sessionQuestionId),
         },
         include: {
             session: true,
@@ -96,13 +93,11 @@ const getSessionQuestionById = async (sessionId, questionId) => {
 };
 
 // Function to delete sessionQuestion
-const deleteSessionQuestion = async (sessionId, questionId) => {
+const deleteSessionQuestion = async (sessionQuestionId) => {
     return prisma.sessionQuestion.delete({
         where: {
-            sessionId_questionId: {
-                sessionId: parseInt(sessionId),
-                questionId: parseInt(questionId)
-            }
+             
+            sessionQuestionId: parseInt(sessionQuestionId),
         }
     });
 };
