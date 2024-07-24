@@ -273,7 +273,7 @@ const deleteUser = async (req, res) => {
 	console.log("Webhook body:", event.data);
 
 	try {
-		const user = await userModel.deleteUser(id);
+		const user = await userModel.deleteUserByClerkId(id);
 		console.log("User deleted");
 		return res.json({
 			success: true,
