@@ -10,6 +10,7 @@ const ConversationalSession = () => {
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [messages, setMessages] = useState([]);
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   const recognitionRef = useRef(null);
 

@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@clerk/clerk-react": "^5.2.8",
+    "@clerk/clerk-react": "^5.2.9",
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
     "@mui/icons-material": "^5.16.1",
@@ -21,6 +21,7 @@
     "axios": "^1.7.2",
     "chart.js": "^4.4.3",
     "chartjs": "^0.3.24",
+    "clerk": "^0.6.1",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
