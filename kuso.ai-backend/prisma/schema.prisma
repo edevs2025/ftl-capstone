@@ -9,60 +9,62 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 model User {
-  userId    Int       @id @default(autoincrement())
-  clerkUserId String  @unique
-  username  String?   @unique
-  firstName String?
-  lastName  String?
-  email     String    @unique
-  age       Int?
-  employed  Boolean?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
-  industries Industry[] @relation("userIndustries")
-  questions  Question[] @relation("userQuestions")
-  sessions   Session[]
+  userId      Int        @id @default(autoincrement())
+  clerkUserId String     @unique
+  username    String?    @unique
+  firstName   String?
+  lastName    String?
+  email       String     @unique
+  age         Int?
+  employed    Boolean?
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  industries  Industry[] @relation("userIndustries")
+  questions   Question[] @relation("userQuestions")
+  sessions    Session[]
 }
+
 model Industry {
-  industryId   Int       @id @default(autoincrement())
+  industryId   Int        @id @default(autoincrement())
   industryName String
-  users        User[]    @relation("userIndustries")
+  users        User[]     @relation("userIndustries")
   questions    Question[] @relation("questionIndustries")
 }
 
 model Session {
-  sessionId Int       @id @default(autoincrement())
-  user      User      @relation(fields: [userId], references: [userId], onDelete: Cascade)
+  sessionId Int               @id @default(autoincrement())
+  user      User              @relation(fields: [userId], references: [userId], onDelete: Cascade)
   userId    Int
-  createdAt DateTime  @default(now())
+  createdAt DateTime          @default(now())
   questions SessionQuestion[]
   feedback  Feedback[]
 }
 
 model Question {
-  questionId      Int       @id @default(autoincrement())
+  questionId      Int               @id @default(autoincrement())
   questionContent String
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
-  users           User[]    @relation("userQuestions")
-  industries      Industry[] @relation("questionIndustries")
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+  users           User[]            @relation("userQuestions")
+  industries      Industry[]        @relation("questionIndustries")
   sessions        SessionQuestion[]
   keyword         String[]
 }
 
 model SessionQuestion {
-  sessionQuestionId Int       @id @default(autoincrement())
-  session     Session  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
-  sessionId   Int
-  question    Question @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
-  questionId  Int
-  askedAt     DateTime 
-  isGenerated Boolean  @default(false)
+  sessionQuestionId Int      @id @default(autoincrement())
+  session           Session  @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  sessionId         Int
+  question          Question @relation(fields: [questionId], references: [questionId], onDelete: Cascade)
+  questionId        Int
+  askedAt           DateTime
+  isGenerated       Boolean  @default(false)
 
   feedback Feedback[]
 
@@ -70,12 +72,12 @@ model SessionQuestion {
 }
 
 model Feedback {
-  feedbackId      Int             @id @default(autoincrement())
-  score           Float
-  gptResponse     String
-  userAnswer      String?
-  sessionId       Int
+  feedbackId        Int              @id @default(autoincrement())
+  score             Float
+  gptResponse       String
+  userAnswer        String?
+  sessionId         Int
   sessionQuestionId Int?
-  sessionQuestion SessionQuestion? @relation(fields: [sessionQuestionId], references: [sessionQuestionId], onDelete: Cascade)
-  session         Session       @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
+  sessionQuestion   SessionQuestion? @relation(fields: [sessionQuestionId], references: [sessionQuestionId], onDelete: Cascade)
+  session           Session          @relation(fields: [sessionId], references: [sessionId], onDelete: Cascade)
 }
