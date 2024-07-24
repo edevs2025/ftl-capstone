@@ -87,11 +87,13 @@ const login = async (req, res) => {
     let session;
     try {
       session = await clerkClient.sessions.verifySession(sessionToken);
+      console.log(session)
     } catch (error) {
       return res.status(401).json({ error: "Invalid session token" });
     }
 
     const clerkUserId = session.userId;
+    console.log(clerkClient)
     const user = await userModel.findUserByClerkId(clerkUserId);
 
     if (!user) {
