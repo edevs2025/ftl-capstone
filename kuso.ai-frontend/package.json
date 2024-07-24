@@ -28,6 +28,7 @@
     "form-data": "^4.0.0",
     "framer-motion": "^11.3.2",
     "fs": "^0.0.1-security",
+    "jwt-decode": "^4.0.0",
     "openai": "^4.52.7",
     "particles.js": "^2.0.0",
     "path": "^0.12.7",

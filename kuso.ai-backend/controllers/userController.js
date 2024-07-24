@@ -2,7 +2,9 @@ const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const userModel = require("../models/user");
 const { Webhook } = require("svix");
+const {jwtDecode}  = require('jwt-decode');
 const { clerkClient } = require('@clerk/clerk-sdk-node');
+const { verifyToken } = require('@clerk/clerk-sdk-node');
 
 
 const handleClerkWebhook = async (req, res) => {
@@ -77,24 +79,31 @@ const handleClerkWebhook = async (req, res) => {
 
 
 
+
+
 const login = async (req, res) => {
+  
   try {
     const sessionToken = req.headers.authorization?.split(' ')[1];
     if (!sessionToken) {
       return res.status(401).json({ error: "No session token provided" });
     }
+    const decodedToken = jwtDecode(sessionToken);
+// console.log("session token!!", sessionToken)
+//     let session;
+//     try {
+//       session = await clerkClient.sessions.verifySession(sessionToken);
+//       console.log("Verified session:", session);
+//     } catch (error) {
+//       console.error("Error verifying session:", error);
+//       return res.status(401).json({ error: "Invalid session token" });
+//     }
 
-    let session;
-    try {
-      session = await clerkClient.sessions.verifySession(sessionToken);
-      console.log(session)
-    } catch (error) {
-      return res.status(401).json({ error: "Invalid session token" });
-    }
+    const clerkUserId = decodedToken.sub;
+    // console.log("Clerk User ID:", clerkUserId);
 
-    const clerkUserId = session.userId;
-    console.log(clerkClient)
     const user = await userModel.findUserByClerkId(clerkUserId);
+    // console.log("User from database:", user);
 
     if (!user) {
       return res.status(404).json({ error: "User not found in the database" });
@@ -112,8 +121,6 @@ const login = async (req, res) => {
     res.status(500).json({ error: "Internal server error" });
   }
 };
-
-
 
 
 const createUser = async (req, res) => {
