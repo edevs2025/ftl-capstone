@@ -236,31 +236,53 @@ const getUserSessions = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  const { id } = req.params;
-  try {
-      const deletedUser = await userModel.deleteUser(id);
-      
-      if (deletedUser) {
-          // If you're using Clerk, you might want to delete the user from Clerk as well
-          try {
-              await clerkClient.users.deleteUser(deletedUser.clerkUserId);
-          } catch (clerkError) {
-              console.error("Error deleting user from Clerk:", clerkError);
-              // Decide how to handle this error. You might want to inform the client
-              // that the user was deleted from your DB but not from Clerk.
-          }
+  const USER_DELETED_WEBHOOK_SECRET = process.env.USER_DELETED_WEBHOOK_SECRET;
+	if (!USER_DELETED_WEBHOOK_SECRET) {
+		throw new Error("You need a WEBHOOK_SECRET in your .env");
+	}
 
-          res.json({ 
-              message: `User with ID ${id} successfully deleted`,
-              deletedUser 
-          });
-      } else {
-          res.status(404).json({ error: `User with ID ${id} not found` });
-      }
-  } catch (error) {
-      console.error("Error deleting user:", error);
-      res.status(500).json({ error: error.message });
-  }
+	const headers = req.headers;
+	const payload = JSON.stringify(req.body);
+	const svix_id = headers["svix-id"];
+	const svix_timestamp = headers["svix-timestamp"];
+	const svix_signature = headers["svix-signature"];
+	if (!svix_id || !svix_timestamp || !svix_signature) {
+		return res.json({ error: "No svix headers" });
+	}
+	const webhook = new Webhook(USER_DELETED_WEBHOOK_SECRET);
+
+	let event;
+
+	try {
+		event = webhook.verify(payload, {
+			"svix-id": svix_id,
+			"svix-timestamp": svix_timestamp,
+			"svix-signature": svix_signature,
+		});
+	} catch (error) {
+		console.log("Error verifying webhook:", error.message);
+		return res.json({
+			success: false,
+			message: error.message,
+		});
+	}
+
+	const { id } = event.data;
+	const eventType = event.type;
+	console.log(`Webhook type: ${eventType}`);
+	console.log("Webhook body:", event.data);
+
+	try {
+		const user = await userModel.deleteUser(id);
+		console.log("User deleted");
+		return res.json({
+			success: true,
+			message: "Webhook received",
+			user: user,
+		});
+	} catch (error) {
+		return res.json({ error: error.message });
+	}
 };
 
 
