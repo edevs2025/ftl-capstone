@@ -5,6 +5,7 @@ const authMiddleware = require('../middleware/auth');
 
 router.post('/register', userController.createUser);
 router.post('/login', userController.login);
+router.post('/delete', userController.deleteUser);
 
 router.use(authMiddleware);
 router.post('/:id/industry', userController.addIndustry);
@@ -13,7 +14,6 @@ router.post('/:id/session', userController.addSession);
 router.get('/:id/session', userController.getUserSessions);
 router.get('/', userController.getAllUsers);
 router.get('/:id', userController.getUserById);
-router.post('/delete', userController.deleteUser);
 router.delete('/:id/industry', userController.removeIndustry);
 router.delete('/:id/question', userController.removeQuestion);
 router.put('/:id', userController.updateUser);

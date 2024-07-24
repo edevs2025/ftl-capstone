@@ -236,7 +236,7 @@ const getUserSessions = async (req, res) => {
 };
 
 const deleteUser = async (req, res) => {
-  const USER_DELETED_WEBHOOK_SECRET = process.env.USER_DELETED_WEBHOOK_SECRET;
+  const USER_DELETED_WEBHOOK_SECRET = process.env.WEBHOOK_SECRET_DELETE;
 	if (!USER_DELETED_WEBHOOK_SECRET) {
 		throw new Error("You need a WEBHOOK_SECRET in your .env");
 	}
