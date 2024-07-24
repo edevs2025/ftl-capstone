@@ -38,10 +38,10 @@ function MockAI() {
   );
   const [recording, setRecording] = useState(false);
   const [grades, setGrades] = useState(null);
-  const [audio] = useState(new Audio());
   const recognitionRef = useRef(null);
   const [sessionIsStarted, setSessionIsStarted] = useState(false);
-  const apiKey = import.meta.env.VITE_OPENAI_KEY;
+  const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
+  const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -108,6 +108,67 @@ function MockAI() {
     recognitionRef.current.stop();
   };
 
+  const fetchTTS = async (text) => {
+    const API_KEY = apiKey;
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "tts-1-hd",
+          input: text,
+          voice: "shimmer",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("TTS API request failed");
+      }
+
+      const audioBlob = await response.blob();
+      return URL.createObjectURL(audioBlob);
+    } catch (error) {
+      console.error("Error fetching TTS:", error);
+    }
+  };
+
+  const speakFeedback = async (feedback, speedFactor = 1.15) => {
+    const chunkSize = 1000;
+    const chunks = [];
+    for (let i = 0; i < feedback.length; i += chunkSize) {
+      chunks.push(feedback.slice(i, i + chunkSize));
+    }
+
+    const audioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+
+    for (const chunk of chunks) {
+      try {
+        const audioUrl = await fetchTTS(chunk);
+        const response = await fetch(audioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
+
+        const source = audioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.playbackRate.value = speedFactor;
+        source.connect(audioContext.destination);
+
+        await new Promise((resolve) => {
+          source.onended = resolve;
+          source.start();
+        });
+      } catch (error) {
+        console.error("Error playing audio chunk:", error);
+        // return
+      }
+    }
+  };
+
   const fetchAIResponse = async (prompt) => {
     const API_KEY = apiKey;
     const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
@@ -146,10 +207,6 @@ function MockAI() {
         const feedback = parsedResponse.feedback;
         const grades = parsedResponse.grades;
 
-        await fetchTTS(feedback);
-
-        simulateRealTimeResponse(feedback);
-
         setGrades({
           problemSolving: grades["Problem-Solving"] || 0,
           relevance: grades["Relevance"] || 0,
@@ -157,6 +214,10 @@ function MockAI() {
         });
 
         console.log("Extracted Grades:", grades);
+        setIsFeedbackExpanded(true);
+
+        speakFeedback(feedback, 1.15);
+        simulateRealTimeResponse(feedback);
       } else {
         setResponse("No message found in the AI response.");
       }
@@ -166,45 +227,31 @@ function MockAI() {
     }
   };
 
-  const fetchTTS = async (text) => {
-    try {
-      const response = await fetch("http://localhost:3001/generate-tts", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text }),
-      });
-
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      audio.src = url;
-      audio.play();
-    } catch (error) {
-      console.error("Error fetching TTS:", error);
-    }
-  };
-
   const simulateRealTimeResponse = (feedback) => {
-    const words = feedback.split(" ");
-    let currentResponse = "";
-    words.forEach((word, index) => {
-      setTimeout(() => {
-        currentResponse += `${word} `;
-        setResponse(currentResponse);
-        if (index === words.length - 1) {
-          audio.play();
+    return new Promise((resolve) => {
+      const words = feedback.split(" ");
+      let currentIndex = 0;
+      const chunks = [];
+
+      const simulateTyping = () => {
+        if (currentIndex < words.length) {
+          const chunk = words.slice(currentIndex, currentIndex + 5).join(" ");
+          setResponse((prev) => prev + " " + chunk);
+          chunks.push(chunk);
+          currentIndex += 5;
+          setTimeout(simulateTyping, 200);
+        } else {
+          resolve(chunks);
         }
-      }, index * 100);
+      };
+
+      simulateTyping();
     });
   };
 
   const handleSubmit = () => {
     fetchAIResponse(transcript);
+    // add handle err if fetchairepsonse doenst reutrn anything
   };
 
   const barColors = [
@@ -243,10 +290,17 @@ function MockAI() {
           callback: function (value) {
             return value.toFixed(1);
           },
+          color: "white", // Set y-axis text color to white
         },
         title: {
           display: true,
           text: "Score",
+          color: "white", // Set y-axis title color to white
+        },
+      },
+      x: {
+        ticks: {
+          color: "white", // Set x-axis text color to white
         },
       },
     },
@@ -257,6 +311,7 @@ function MockAI() {
       title: {
         display: true,
         text: "Interview Performance Scores",
+        color: "white", // Set chart title color to white
       },
     },
   };
@@ -280,7 +335,7 @@ function MockAI() {
                   }}
                 />
               </Stack>
-              <p>Interviewer D. Dog</p>
+              <p>Dog</p>
               <Button
                 className="start-session-button"
                 onClick={toggleSessionStatus}
@@ -331,7 +386,9 @@ function MockAI() {
               Submit
             </Button>
           </div>
-          <div className="ai-feedback">
+          <div
+            className={`ai-feedback ${isFeedbackExpanded ? "expanded" : ""}`}
+          >
             <Box sx={{ p: 2 }}>
               <Box
                 sx={{
@@ -385,14 +442,14 @@ function MockAI() {
               {grades && (
                 <Box
                   sx={{
-                    width: "1000px",
+                    width: "600px",
                     margin: "0 auto",
                     marginTop: "4rem",
                     color: "white",
                   }}
                 >
                   <Typography variant="h6">Grades:</Typography>
-                  <Bar data={data} options={options} />
+                  <Bar data={data} options={options} sx={{ color: "white " }} />
                 </Box>
               )}
             </Box>

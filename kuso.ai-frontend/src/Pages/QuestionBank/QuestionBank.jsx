@@ -154,7 +154,7 @@ function QuestionBank() {
                   </div>
                   <div className="question-details">
                     <p>{row.topic}</p>
-                    <p>{row.industry}</p>
+                    {/* <p>{row.industry}</p> */}
                     <p>{row.keywords.join(" ")}</p>
                   </div>
                 </li>
