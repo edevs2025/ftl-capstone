@@ -134,3 +134,18 @@
   border: 1px solid #414141;
   margin-bottom: 16px;
 }
+
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(
+    100vh - 60px
+  ); 
+  padding: 20px;
+}
+
+.cl-component {
+  width: 100%;
+  max-width: 400px; 
+}

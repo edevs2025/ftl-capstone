@@ -164,6 +164,7 @@ function MockAI() {
         });
       } catch (error) {
         console.error("Error playing audio chunk:", error);
+        // return
       }
     }
   };
@@ -250,6 +251,7 @@ function MockAI() {
 
   const handleSubmit = () => {
     fetchAIResponse(transcript);
+    // add handle err if fetchairepsonse doenst reutrn anything
   };
 
   const barColors = [
