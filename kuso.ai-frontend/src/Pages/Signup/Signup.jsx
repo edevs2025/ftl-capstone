@@ -4,15 +4,20 @@ import Navbar from "../../components/Navbar/Navbar";
 import { SignUp, useUser } from "@clerk/clerk-react";
 
 function Signup() {
-  
   return (
     <>
       <Navbar />
-      
-      <SignUp forceRedirectUrl = '/question-bank'   />
-  
+      <div className="signup-container">
+        <SignUp forceRedirectUrl="/question-bank" />
+      </div>
+    </>
+  );
+}
 
-      {/* <div className="page-container">
+export default Signup;
+
+{
+  /* <div className="page-container">
         <div className="form-container">
           <form className="form">
             <div className="form-group">
@@ -38,9 +43,5 @@ function Signup() {
             </button>
           </form>
         </div>
-      </div> */}
-    </>
-  );
+      </div> */
 }
-
-export default Signup;
