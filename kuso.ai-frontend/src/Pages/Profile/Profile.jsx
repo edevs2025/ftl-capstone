@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import "./Profile.css";
 import Navbar from "../../components/Navbar/Navbar";
 import { useAuth } from "@clerk/clerk-react";
@@ -10,10 +10,10 @@ const AfterSignIn = () => {
     const fetchToken = async () => {
       const token = await getToken();
 
-      console.log(token);
+      // console.log(token);
       // Send this token to your backend
       const response = await fetch(
-        "https://ftl-capstone.onrender.com/user/login",
+        "http://localhost:3000/user/login",
         {
           method: "POST",
           headers: {
@@ -23,8 +23,11 @@ const AfterSignIn = () => {
         }
       );
 
+      
+
       if (response.ok) {
         const data = await response.json();
+        // console.log(data)
         // Store the custom JWT token from your backend
         localStorage.setItem("authToken", data.token);
         // You can also store user data or redirect to a protected route
@@ -36,6 +39,7 @@ const AfterSignIn = () => {
 };
 
 function Profile() {
+  AfterSignIn();
   return (
     <div>
       <Navbar />

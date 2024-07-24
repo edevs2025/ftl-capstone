@@ -1,7 +1,7 @@
 import {React, useEffect} from "react";
 import "./Signup.css";
 import Navbar from "../../components/Navbar/Navbar";
-import { SignUp, } from "@clerk/clerk-react";
+import { SignUp, SignIn} from "@clerk/clerk-react";
 
 
 function Signup() {
@@ -11,6 +11,7 @@ function Signup() {
       <Navbar />
       <div className="signup-container">
         <SignUp forceRedirectUrl="/question-bank" />
+        <SignIn forceRedirectUrl="/profile" />
       </div>
     </>
   );

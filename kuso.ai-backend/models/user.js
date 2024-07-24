@@ -247,7 +247,11 @@ const removeQuestion = async (userId, questionId) => {
     });
 };
 
-
+const findUserByClerkId = async (clerkUserId) => {
+    return prisma.user.findUnique({
+      where: { clerkUserId: clerkUserId },
+    });
+  };
 
 module.exports = {
     createUser,
@@ -264,4 +268,5 @@ module.exports = {
     findUserByUsername,
     upsertUser,
     deleteUserByClerkId,
+    findUserByClerkId
 };
