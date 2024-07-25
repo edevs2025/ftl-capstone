@@ -83,12 +83,10 @@ function Profile() {
   console.log(userData);
 
   return (
-    <div className="profile-page">
+    <div>
       <Navbar />
-        <div className="profile-header">
-          <h1 className="profile-title">Profile Page</h1>
-        </div>
-        <h1 className="dashboard-title">Dashboard</h1>
+    <div className="profile-page">
+        
       <div className="profile-container">
         <div className="left-container">    
           {userData && (
@@ -107,7 +105,7 @@ function Profile() {
               <p className="stat-value">1,500</p>
             </div>
             <div className="stat-box">
-              <h2 className="stat-title">Page Views</h2>
+              <h2 className="stat-title">Questions Practiced</h2>
               <p className="stat-value">3,200</p>
             </div>
             <div className="stat-box">
@@ -118,21 +116,21 @@ function Profile() {
 
           <div className="charts-container">
             <div className="chart-box">
-              <h2 className="chart-title">Traffic Sources</h2>
+              <h2 className="chart-title">Question Breakdown By Topic</h2>
               <div className="chart-placeholder">
-                Pie Chart Placeholder
+                Line Graph Placeholder
               </div>
             </div>
             <div className="chart-box">
-              <h2 className="chart-title">User Activity</h2>
+              <h2 className="chart-title">Average Scores</h2>
               <div className="chart-placeholder">
-                Line Graph Placeholder
+                Bar Graph Placeholder
               </div>
             </div>
           </div>
 
           <div className="heatmap-container">
-            <h2 className="heatmap-title">Visit Heatmap</h2>
+            <h2 className="heatmap-title">Activity Breakdown</h2>
             <HeatMapGrid
               data={data}
               xLabels={xLabels}
@@ -159,6 +157,7 @@ function Profile() {
             </div>
         </div>
       </div>
+    </div>
     </div>
   );
 }

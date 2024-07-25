@@ -2,8 +2,12 @@
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
 }
 .profile-page {
+
     color: white;
     min-height: 100vh;
+    display: flex;
+    align-items: center;
+    margin: auto;
   }
   
   .profile-container {
@@ -12,10 +16,11 @@
     padding: 0px;
     display: flex;
     flex-direction: row;
+    
   }
 
   .right-container {
-    width: 70%;
+    width: 100vh;
     margin-left: 20px;
   } 
   .left-container {
@@ -23,24 +28,9 @@
     background-color: #f0f0f0;
     border-radius: 8px;
     padding: 20px;
-    width: 30%;
+    width: 40%;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
-  
-  .profile-header {
-    color: white;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 30px;
-  }
-  
-  .profile-title {
-    font-size: 24px;
-    font-weight: bold;
-    color: white;
-  }
-  
   .profile-info {
     color: #333;
     border-radius: 8px;
@@ -122,6 +112,7 @@
   .heatmap-container {
     background-color: #ffffff;
     border-radius: 8px;
+    color: #333;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
