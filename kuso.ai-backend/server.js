@@ -28,7 +28,7 @@ app.get('/', (req, res) =>
 app.use('/user', userRoute);
 app.use('/industry', industryRoute);
 app.use('/session', sessionRoutes);
-app.use('/question', questionRoutes);
+app.use('/questions', questionRoutes);
 app.use('/session-question', sessionQuestionRoutes);
 app.use('/feedback', feedbackRoutes);
 
