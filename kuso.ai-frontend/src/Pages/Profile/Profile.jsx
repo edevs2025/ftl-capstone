@@ -10,6 +10,7 @@ function Profile() {
   const [userToken, setUserToken] = useState(null);
   const [decodedUserToken, setDecodedUserToken] = useState(null);
   const [username, setUsername] = useState(null);
+  const [userData, setUserData] = useState(null);
   const { getToken } = useAuth();
 
   useEffect(() => {
@@ -59,7 +60,7 @@ function Profile() {
             `http://localhost:3000/user/${decodedUserToken.userId}`
           );
           if (response.status === 200) {
-            setUsername(response.data.username);
+            setUserData(response.data);
           } else {
             console.error("Failed to fetch username");
           }
@@ -79,7 +80,8 @@ function Profile() {
       {decodedUserToken && (
         <div>
           <p>User ID: {decodedUserToken.userId}</p>
-          <p>Username: {username}</p>
+          <p>data: {userData}</p>
+          
         </div>
       )}
     </div>
