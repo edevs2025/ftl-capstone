@@ -27,6 +27,10 @@ export const AuthProvider = ({ children }) => {
           localStorage.setItem("authToken", data.token);
           setAuthToken(data.token);
         }
+      } else {
+        // User is not signed in, remove the token
+        localStorage.removeItem("authToken");
+        setAuthToken(null);
       }
     };
 
