@@ -3,15 +3,22 @@ import "./Profile.css";
 import Navbar from "../../components/Navbar/Navbar";
 import { useAuth } from "@clerk/clerk-react";
 import { jwtDecode } from "jwt-decode";
-
+import { HeatMapGrid } from 'react-grid-heatmap';
 import axios from "axios";
 
 function Profile() {
   const [userToken, setUserToken] = useState(null);
   const [decodedUserToken, setDecodedUserToken] = useState(null);
-  const [username, setUsername] = useState(null);
   const [userData, setUserData] = useState(null);
   const { getToken } = useAuth();
+
+  // Dummy data for the heatmap
+  const xLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const yLabels = ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'];
+  const data = new Array(yLabels.length).fill(0).map(() => 
+    new Array(xLabels.length).fill(0).map(() => Math.floor(Math.random() * 100))
+  );
+
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -73,17 +80,85 @@ function Profile() {
     fetchUsername();
   }, [decodedUserToken]);
 
+  console.log(userData);
+
   return (
-    <div>
+    <div className="profile-page">
       <Navbar />
-      <h1>Profile Page</h1>
-      {decodedUserToken && (
-        <div>
-          <p>User ID: {decodedUserToken.userId}</p>
-          <p>data: {userData}</p>
-          
+        <div className="profile-header">
+          <h1 className="profile-title">Profile Page</h1>
         </div>
-      )}
+        <h1 className="dashboard-title">Dashboard</h1>
+      <div className="profile-container">
+        <div className="left-container">    
+          {userData && (
+            <div className="profile-info">
+              <p>First Name: {userData.firstName}</p>
+              <p>Last Name: {userData.lastName}</p>
+              <p>Username: {userData.username}</p>
+              <p>Email: {userData.email}</p>
+            </div>
+          )}
+        </div>
+        <div className="right-container"> 
+          <div className="stats-container">
+            <div className="stat-box">
+              <h2 className="stat-title">Total Visits</h2>
+              <p className="stat-value">1,500</p>
+            </div>
+            <div className="stat-box">
+              <h2 className="stat-title">Page Views</h2>
+              <p className="stat-value">3,200</p>
+            </div>
+            <div className="stat-box">
+              <h2 className="stat-title">Bounce Rate</h2>
+              <p className="stat-value">40%</p>
+            </div>
+          </div>
+
+          <div className="charts-container">
+            <div className="chart-box">
+              <h2 className="chart-title">Traffic Sources</h2>
+              <div className="chart-placeholder">
+                Pie Chart Placeholder
+              </div>
+            </div>
+            <div className="chart-box">
+              <h2 className="chart-title">User Activity</h2>
+              <div className="chart-placeholder">
+                Line Graph Placeholder
+              </div>
+            </div>
+          </div>
+
+          <div className="heatmap-container">
+            <h2 className="heatmap-title">Visit Heatmap</h2>
+            <HeatMapGrid
+              data={data}
+              xLabels={xLabels}
+              yLabels={yLabels}
+              cellRender={(x, y, value) => (
+                <div title={`${xLabels[x]} ${yLabels[y]}: ${value}`}>{value}</div>
+              )}
+              cellStyle={(x, y, ratio) => ({
+                background: `rgb(12, 160, 44, ${ratio})`,
+                fontSize: '11px',
+                color: `rgb(0, 0, 0, ${ratio > 0.5 ? 1 : 0})`
+              })}
+              cellHeight="30px"
+              cellWidth="40px"
+              xLabelsStyle={() => ({
+                fontSize: '12px',
+                textTransform: 'uppercase'
+              })}
+              yLabelsStyle={() => ({
+                fontSize: '12px',
+                textTransform: 'uppercase'
+              })}
+            />
+            </div>
+        </div>
+      </div>
     </div>
   );
 }
