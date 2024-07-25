@@ -1,11 +1,13 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { useAuth } from "@clerk/clerk-react";
+import jwtDecode from 'jwt-decode';
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const { getToken, isSignedIn } = useAuth();
   const [authToken, setAuthToken] = useState(null);
+  const [userId, setUserId] = useState(null);
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -26,11 +28,18 @@ export const AuthProvider = ({ children }) => {
           const data = await response.json();
           localStorage.setItem("authToken", data.token);
           setAuthToken(data.token);
+          
+          try {
+            const decodedToken = jwtDecode(data.token);
+            setUserId(decodedToken.userId); // Assuming the token has a userId field
+          } catch (error) {
+            console.error('Error decoding token:', error);
+          }
         }
       } else {
-        // User is not signed in, remove the token
         localStorage.removeItem("authToken");
         setAuthToken(null);
+        setUserId(null);
       }
     };
 
@@ -38,7 +47,7 @@ export const AuthProvider = ({ children }) => {
   }, [getToken, isSignedIn]);
 
   return (
-    <AuthContext.Provider value={{ authToken, setAuthToken }}>
+    <AuthContext.Provider value={{ authToken, userId }}>
       {children}
     </AuthContext.Provider>
   );
