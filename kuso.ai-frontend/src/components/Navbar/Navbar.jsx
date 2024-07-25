@@ -59,9 +59,16 @@ const Navbar = () => {
         <UserButton />
       </SignedIn>
       <SignedOut>
+        <span>
       <Link to="/signup" className="navbar-signup">
-        signup
+        signup<span> </span>
       </Link>
+      /
+      <Link to="/signin" className="navbar-signup">
+      <span> </span>signin
+      </Link>
+
+        </span>
       </SignedOut>
     </nav>
   );
