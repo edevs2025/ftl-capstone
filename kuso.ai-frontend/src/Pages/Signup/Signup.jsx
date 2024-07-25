@@ -11,7 +11,6 @@ function Signup() {
       <Navbar />
       <div className="signup-container">
         <SignUp forceRedirectUrl="/question-bank" />
-        <SignIn forceRedirectUrl="/profile" />
       </div>
     </>
   );
