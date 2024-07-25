@@ -35,8 +35,6 @@ function QuestionBank() {
     setSelectedIndustry(newValue);
   };
 
-
-
   const handleQuestionClick = (id) => {
     navigate(`/mockai/${id}`);
   };
