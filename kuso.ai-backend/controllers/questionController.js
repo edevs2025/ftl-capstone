@@ -2,14 +2,14 @@ const questionModel = require("../models/question");
 
 // Create a new Question
 const createQuestion = async (req, res) => {
-  const { questionContent, users, industries } = req.body;
+  const { questionContent, users, industries, keyword } = req.body;
   
   if (!questionContent) {
     return res.status(400).json({ error: "questionContent is required" });
   }
 
   try {
-    const question = await questionModel.createQuestion({ questionContent, users, industries });
+    const question = await questionModel.createQuestion({ questionContent, users, industries, keyword });
     res.status(201).json(question);
   } catch (error) {
     console.error("Error creating question:", error);
@@ -112,13 +112,14 @@ const addUser = async (req, res) => {
 const addIndustry = async (req, res) => {
   const { id: questionId } = req.params;
   const { industryId } = req.body;
-
+  
   if (!industryId) {
     return res.status(400).json({ error: "industryId is required" });
   }
 
   try {
     const updatedQuestion = await questionModel.addIndustry(questionId, { industryId });
+    
     res.json(updatedQuestion);
   } catch (error) {
     console.error("Error adding industry to question:", error);
