@@ -16,13 +16,16 @@ function Profile() {
     const fetchToken = async () => {
       try {
         const token = await getToken();
-        const response = await fetch("http://localhost:3000/user/login", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
+        const response = await fetch(
+          "https://ftl-capstone.onrender.com/user/login",
+          {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
 
         if (response.ok) {
           const data = await response.json();
@@ -56,7 +59,7 @@ function Profile() {
       if (decodedUserToken && decodedUserToken.userId) {
         try {
           const response = await axios.get(
-            `http://localhost:3000/user/${decodedUserToken.userId}`
+            `https://ftl-capstone.onrender.com/user/${decodedUserToken.userId}`
           );
           if (response.status === 200) {
             setUsername(response.data.username);

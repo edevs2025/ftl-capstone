@@ -45,7 +45,9 @@ function QuestionBank() {
   useEffect(() => {
     const fetchQuestions = async () => {
       try {
-        const response = await axios.get(`http://localhost:3000/questions`);
+        const response = await axios.get(
+          `https://ftl-capstone.onrender.com/questions`
+        );
         setQuestions(response.data);
         setTotalPages(Math.ceil(response.data.length / questionsPerPage));
       } catch (error) {
@@ -55,9 +57,11 @@ function QuestionBank() {
 
     const fetchTopicsAndIndustries = async () => {
       try {
-        const topicsResponse = await axios.get(`http://localhost:3000/topics`);
+        const topicsResponse = await axios.get(
+          `https://ftl-capstone.onrender.com/topics`
+        );
         const industriesResponse = await axios.get(
-          `http://localhost:3000/industries`
+          `https://ftl-capstone.onrender.com/industries`
         );
         setTopics(topicsResponse.data);
         setIndustries(industriesResponse.data);

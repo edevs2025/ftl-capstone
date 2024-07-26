@@ -63,13 +63,13 @@ function MockAI() {
     setSessionIsStarted(newSessionStatus);
     try {
       const sessionResponse = await axios.post(
-        `http://localhost:3000/session`,
+        `https://ftl-capstone.onrender.com/session`,
         { userId }
       );
       const session = sessionResponse.data;
 
       const sessionQResponse = await axios.post(
-        `http://localhost:3000/questions/${id}/session`,
+        `https://ftl-capstone.onrender.com/questions/${id}/session`,
         {
           sessionId: session.sessionId,
           isGenerated: false,
@@ -310,13 +310,16 @@ function MockAI() {
         const avgGrade = calculateAverage(grades);
         const roundedAverageGrade = parseFloat(avgGrade.toFixed(2));
 
-        let dBFeedback = await axios.post(`http://localhost:3000/feedback`, {
-          score: roundedAverageGrade,
-          gptResponse: feedback,
-          userAnswer: prompt,
-          sessionId: sessionQ.sessionId,
-          sessionQuestionId: sessionQ.sessionQuestionId,
-        });
+        let dBFeedback = await axios.post(
+          `https://ftl-capstone.onrender.com/feedback`,
+          {
+            score: roundedAverageGrade,
+            gptResponse: feedback,
+            userAnswer: prompt,
+            sessionId: sessionQ.sessionId,
+            sessionQuestionId: sessionQ.sessionQuestionId,
+          }
+        );
 
         setTimeout(() => {
           setIsFeedbackExpanded(true);
