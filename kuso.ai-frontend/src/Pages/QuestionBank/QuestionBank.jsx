@@ -33,7 +33,7 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
 }));
 
 function QuestionBank() {
-  const questionTopics = [
+  const keywords = [
     "diagnosis",
     "compliance",
     "ethics",
@@ -154,9 +154,16 @@ function QuestionBank() {
     "professional development",
     "regulatory compliance",
   ];
+const topics = [
+  "behavioral",
+  "case study",
+  "technical",
+]
+
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTopic, setSelectedTopic] = useState(null);
+  const [selectedKeyword, setSelectedKeyword] = useState(null);
   const [selectedIndustry, setSelectedIndustry] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [page, setPage] = useState(1);
@@ -184,6 +191,11 @@ function QuestionBank() {
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
+    setPage(1);
+  };
+
+  const handleKeywordChange = (event, newValue) => {
+    setSelectedKeyword(newValue);
     setPage(1);
   };
 
@@ -217,9 +229,10 @@ function QuestionBank() {
   const filteredRows = questions.filter(
     (row) =>
       row.questionContent.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (!selectedTopic || row.keyword.includes(selectedTopic)) &&
+      (!selectedKeyword || row.keyword.includes(selectedKeyword)) &&
       (!selectedIndustry ||
-        row.industries.some((industry) => industry.name === selectedIndustry))
+        row.industries.some((industry) => industry.name === selectedIndustry)) &&
+      (!selectedTopic || row.keyword.includes(selectedTopic))
   );
 
   const paginatedRows = filteredRows.slice(
@@ -298,13 +311,72 @@ function QuestionBank() {
               />
               <div className="filter-labels">
                 <Autocomplete
-                  options={questionTopics}
+                  options={ keywords }
+                  value={selectedKeyword}
+                  onChange={handleKeywordChange}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Filter by keywords"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#212121",
+                          color: "white",
+                          "& fieldset": {
+                            borderColor: "rgba(255, 255, 255, 0.3)",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "rgba(255, 255, 255, 0.5)",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#40c9ff",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "rgba(255, 255, 255, 0.7)",
+                        },
+                        "& input": {
+                          color: "white",
+                        },
+                      }}
+                    />
+                  )}
+                  style={{
+                    marginTop: "1rem",
+                    width: "33%",
+                  }}
+                  sx={{
+                    "& .MuiAutocomplete-paper": {
+                      backgroundColor: "#212121",
+                      color: "white",
+                    },
+                    "& .MuiAutocomplete-option": {
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      },
+                      '&[aria-selected="true"]': {
+                        backgroundColor: "rgba(64, 201, 255, 0.3)",
+                      },
+                    },
+                    "& .MuiAutocomplete-listbox": {
+                      backgroundColor: "#212121",
+                      color: "white",
+                    },
+                    "& .MuiAutocomplete-tag": {
+                      backgroundColor: "rgba(64, 201, 255, 0.3)",
+                      color: "white",
+                    },
+                  }}
+                />
+
+                <Autocomplete
+                  options={ topics }
                   value={selectedTopic}
                   onChange={handleTopicChange}
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Filter by keywords"
+                      label="Filter by topics"
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           backgroundColor: "#212121",
