@@ -149,3 +149,31 @@
   width: 100%;
   max-width: 400px; 
 }
+
+/* Signin.css */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.signup-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: calc(100vh - 60px); /* Adjust if you have a fixed navbar height */
+  padding: 20px;
+  opacity: 0;
+  animation: fadeIn 1s forwards; /* Animation will run for 1 second */
+}
+
+.cl-component {
+  width: 100%;
+  max-width: 400px; 
+}
