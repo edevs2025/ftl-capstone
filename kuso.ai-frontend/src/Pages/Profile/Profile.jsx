@@ -2,11 +2,12 @@ import React, { useEffect, useState } from "react";
 import "./Profile.css";
 import Navbar from "../../components/Navbar/Navbar";
 import { useAuth } from "@clerk/clerk-react";
-import {jwtDecode} from "jwt-decode";
+import {jwtDecode} from "jwt-decode"; // Remove curly braces
 import { HeatMapGrid } from 'react-grid-heatmap';
 import axios from "axios";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { Bar } from 'react-chartjs-2';
+import { formatDistanceToNowStrict } from 'date-fns';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -151,6 +152,10 @@ function Profile() {
     fetchUsername();
   }, [decodedUserToken]);
 
+  function formatTimeAgo(date) {
+    return `${formatDistanceToNowStrict(date)} ago`;
+  }
+
   return (
     <div>
       <Navbar />
@@ -159,10 +164,16 @@ function Profile() {
           <div className="left-container">
             {userData && (
               <div className="profile-info">
-                <p>First Name: {userData.firstName}</p>
-                <p>Last Name: {userData.lastName}</p>
-                <p>Username: {userData.username}</p>
-                <p>Email: {userData.email}</p>
+                <strong>
+                  <span style={{display: "flex", gap:".25rem"}}>
+                      <p>{userData.firstName}</p>
+                      <p>{userData.lastName}</p>
+                  </span>
+                </strong>
+                <p>{userData.username}</p>
+                <p>Questions solved: <strong>10</strong></p>
+                <p>Joined <strong>{formatTimeAgo(new Date(userData.createdAt))}</strong></p>
+                <p>Last seen <strong>{formatTimeAgo(new Date(userData.updatedAt))}</strong></p>
               </div>
             )}
           </div>
