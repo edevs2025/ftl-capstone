@@ -11,6 +11,7 @@ import Pagination from "@mui/material/Pagination";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
 import ParticleEffect from "../Landing/ParticleEffect"; // Adjust the import path as needed
+import { useAuthContext } from "../../AuthContext";
 
 const StyledPagination = styled(Pagination)(({ theme }) => ({
   "& .MuiPaginationItem-root": {
@@ -41,6 +42,7 @@ function QuestionBank() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const questionsPerPage = 10;
+  const { isSignedIn } = useAuthContext();
 
   const navigate = useNavigate();
 
@@ -92,7 +94,12 @@ function QuestionBank() {
   };
 
   const handleQuestionClick = (id) => {
+    if(!isSignedIn){
+      navigate('/signup')
+    }
+    else{
     navigate(`/mockai/${id}`);
+    }
   };
 
   const handlePageChange = (event, value) => {
