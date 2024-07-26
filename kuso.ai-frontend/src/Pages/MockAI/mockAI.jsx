@@ -17,6 +17,7 @@ import Navbar from "../../components/Navbar/Navbar";
 import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
+import { useAuthContext } from "../../AuthContext";
 
 ChartJS.register(
   CategoryScale,
@@ -28,6 +29,7 @@ ChartJS.register(
 );
 
 import "./mockAI.css";
+import axios from "axios";
 
 function MockAI() {
   const { id } = useParams();
@@ -38,10 +40,13 @@ function MockAI() {
   );
   const [recording, setRecording] = useState(false);
   const [grades, setGrades] = useState(null);
-  const recognitionRef = useRef(null);
   const [sessionIsStarted, setSessionIsStarted] = useState(false);
   const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
+  const [initialAIResponse, setInitialAIResponse] = useState("");
+  const [sessionQ, setSessionQ] = useState(null);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const recognitionRef = useRef(null);
+  const { authToken, userId } = useAuthContext();
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -53,8 +58,90 @@ function MockAI() {
     }
   }, [id]);
 
-  const toggleSessionStatus = () => {
-    setSessionIsStarted(!sessionIsStarted);
+  const toggleSessionStatus = async () => {
+    const newSessionStatus = !sessionIsStarted;
+    setSessionIsStarted(newSessionStatus);
+    try {
+      const sessionResponse = await axios.post(
+        `http://localhost:3000/session`,
+        { userId }
+      );
+      const session = sessionResponse.data;
+
+      const sessionQResponse = await axios.post(
+        `http://localhost:3000/questions/${id}/session`,
+        {
+          sessionId: session.sessionId,
+          isGenerated: false,
+        }
+      );
+
+      const sessionQData = sessionQResponse.data;
+      setSessionQ(sessionQData);
+
+      console.log(sessionQData); // Log the correct sessionQ data after setting it
+    } catch (error) {
+      console.error("Error creating session or session question:", error);
+    }
+
+    // if (newSessionStatus) {
+    //   const API_KEY = apiKey;
+    //   const fullPrompt = `You are an interviewer. Please introduce the interviewee, whose name is John Doe, and ask him this question: "${selectedQuestion}". Format the response in the following JSON structure: {"introduction": "<your introduction>", "question": "<your question>", "prompt": "Feel free to share your response, and we can continue from there!"}`;
+
+    //   try {
+    //     const result = await fetch(
+    //       "https://api.openai.com/v1/chat/completions",
+    //       {
+    //         method: "POST",
+    //         headers: {
+    //           Authorization: `Bearer ${API_KEY}`,
+    //           "Content-Type": "application/json",
+    //         },
+    //         body: JSON.stringify({
+    //           model: "gpt-4",
+    //           messages: [
+    //             {
+    //               role: "system",
+    //               content: `You are an interviewer conducting a behavioral interview.`,
+    //             },
+    //             { role: "user", content: fullPrompt },
+    //           ],
+    //           max_tokens: 500,
+    //         }),
+    //       }
+    //     );
+
+    //     if (!result.ok) {
+    //       throw new Error("Network response was not ok");
+    //     }
+
+    //     const data = await result.json();
+    //     if (data.choices && data.choices[0] && data.choices[0].message) {
+    //       const responseContent = data.choices[0].message.content;
+    //       console.log("Full AI Response:", responseContent);
+
+    //       // Parse the JSON response
+    //       const parsedResponse = JSON.parse(responseContent);
+    //       const introduction = parsedResponse.introduction;
+    //       const question = parsedResponse.question;
+    //       const prompt = parsedResponse.prompt;
+
+    //       // Combine the parsed parts into the initial AI response
+    //       const initialResponse = `${introduction}\n\n${question}\n\n${prompt}`;
+    //       setInitialAIResponse(initialResponse);
+
+    //       // Integrate TTS for the initial response
+    //       const audioUrl = await fetchTTS(initialResponse);
+    //       const audio = new Audio(audioUrl);
+    //       audio.play();
+    //     } else {
+    //       setResponse("No message found in the AI response.");
+    //     }
+    //   } catch (error) {
+    //     console.error("Error fetching response:", error);
+    //     setResponse("An error occurred while fetching the response.");
+    //   }
+    // }
   };
 
   useEffect(() => {
@@ -169,6 +256,13 @@ function MockAI() {
     }
   };
 
+  const calculateAverage = (grades) => {
+    const values = Object.values(grades);
+    const sum = values.reduce((acc, curr) => acc + curr, 0);
+    const average = sum / values.length;
+    return average;
+  };
+
   const fetchAIResponse = async (prompt) => {
     const API_KEY = apiKey;
     const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
@@ -213,8 +307,20 @@ function MockAI() {
           clarity: grades["Clarity"] || 0,
         });
 
-        console.log("Extracted Grades:", grades);
-        setIsFeedbackExpanded(true);
+        const avgGrade = calculateAverage(grades);
+        const roundedAverageGrade = parseFloat(avgGrade.toFixed(2));
+
+        let dBFeedback = await axios.post(`http://localhost:3000/feedback`, {
+          score: roundedAverageGrade,
+          gptResponse: feedback,
+          userAnswer: prompt,
+          sessionId: sessionQ.sessionId,
+          sessionQuestionId: sessionQ.sessionQuestionId,
+        });
+
+        setTimeout(() => {
+          setIsFeedbackExpanded(true);
+        }, 1000);
 
         speakFeedback(feedback, 1.15);
         simulateRealTimeResponse(feedback);

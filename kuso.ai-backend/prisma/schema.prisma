@@ -43,7 +43,7 @@ model Session {
   userId    Int
   createdAt DateTime          @default(now())
   questions SessionQuestion[]
-  feedback  Feedback[]
+  Feedback[]
 }
 
 model Question {
