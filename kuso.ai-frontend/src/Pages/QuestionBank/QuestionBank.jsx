@@ -250,7 +250,7 @@ function QuestionBank() {
         className="question-bank-content"
         style={{ position: "relative", zIndex: 1 }}
       >
-        <h3 id="header">Master your interviews with confidence</h3>
+        <h3 id="header">Master Your Interviews With Confidence</h3>
         <div className="question-bank-container">
           <div className="left-column">
             <div className="filter-container">
