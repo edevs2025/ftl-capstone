@@ -94,11 +94,10 @@ function QuestionBank() {
   };
 
   const handleQuestionClick = (id) => {
-    if(!isSignedIn){
-      navigate('/signup')
-    }
-    else{
-    navigate(`/mockai/${id}`);
+    if (!isSignedIn) {
+      navigate('/signup');
+    } else {
+      navigate(`/mockai/${id}`);
     }
   };
 
