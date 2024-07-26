@@ -45,6 +45,7 @@ function MockAI() {
   const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
   const [initialAIResponse, setInitialAIResponse] = useState("");
   const [sessionQ, setSessionQ] = useState(null);
+  const [isLoading, setIsLoading] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const recognitionRef = useRef(null);
   const { authToken, userId } = useAuthContext();
@@ -84,65 +85,6 @@ function MockAI() {
     } catch (error) {
       console.error("Error creating session or session question:", error);
     }
-
-    // if (newSessionStatus) {
-    //   const API_KEY = apiKey;
-    //   const fullPrompt = `You are an interviewer. Please introduce the interviewee, whose name is John Doe, and ask him this question: "${selectedQuestion}". Format the response in the following JSON structure: {"introduction": "<your introduction>", "question": "<your question>", "prompt": "Feel free to share your response, and we can continue from there!"}`;
-
-    //   try {
-    //     const result = await fetch(
-    //       "https://api.openai.com/v1/chat/completions",
-    //       {
-    //         method: "POST",
-    //         headers: {
-    //           Authorization: `Bearer ${API_KEY}`,
-    //           "Content-Type": "application/json",
-    //         },
-    //         body: JSON.stringify({
-    //           model: "gpt-4",
-    //           messages: [
-    //             {
-    //               role: "system",
-    //               content: `You are an interviewer conducting a behavioral interview.`,
-    //             },
-    //             { role: "user", content: fullPrompt },
-    //           ],
-    //           max_tokens: 500,
-    //         }),
-    //       }
-    //     );
-
-    //     if (!result.ok) {
-    //       throw new Error("Network response was not ok");
-    //     }
-
-    //     const data = await result.json();
-    //     if (data.choices && data.choices[0] && data.choices[0].message) {
-    //       const responseContent = data.choices[0].message.content;
-    //       console.log("Full AI Response:", responseContent);
-
-    //       // Parse the JSON response
-    //       const parsedResponse = JSON.parse(responseContent);
-    //       const introduction = parsedResponse.introduction;
-    //       const question = parsedResponse.question;
-    //       const prompt = parsedResponse.prompt;
-
-    //       // Combine the parsed parts into the initial AI response
-    //       const initialResponse = `${introduction}\n\n${question}\n\n${prompt}`;
-    //       setInitialAIResponse(initialResponse);
-
-    //       // Integrate TTS for the initial response
-    //       const audioUrl = await fetchTTS(initialResponse);
-    //       const audio = new Audio(audioUrl);
-    //       audio.play();
-    //     } else {
-    //       setResponse("No message found in the AI response.");
-    //     }
-    //   } catch (error) {
-    //     console.error("Error fetching response:", error);
-    //     setResponse("An error occurred while fetching the response.");
-    //   }
-    // }
   };
 
   useEffect(() => {
@@ -276,7 +218,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model: "gpt-4",
           messages: [
             {
               role: "system",
@@ -334,6 +276,8 @@ function MockAI() {
     } catch (error) {
       console.error("Error parsing response:", error);
       setResponse("An error occurred while fetching the response.");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -360,8 +304,8 @@ function MockAI() {
   };
 
   const handleSubmit = () => {
+    setIsLoading(true);
     fetchAIResponse(transcript);
-    // add handle err if fetchairepsonse doenst reutrn anything
   };
 
   const barColors = [
@@ -439,7 +383,7 @@ function MockAI() {
           zIndex: -1, // Ensure ModifiedParticleEffect is in the background
         }}
       >
-        <ModifiedParticleEffect />
+        {/* <ModifiedParticleEffect /> */}
       </Box>
       {!sessionIsStarted ? (
         <>
@@ -505,7 +449,7 @@ function MockAI() {
               disabled={recording || !transcript}
               sx={{ mr: 2, color: "white" }}
             >
-              Submit
+              {isLoading ? "Thinking..." : "Submit"}
             </Button>
           </div>
           <div
