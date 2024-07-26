@@ -7,12 +7,14 @@ import Signup from "./Pages/Signup/Signup";
 import Signin from "./Pages/Signin/Signin"
 import Profile from "./Pages/Profile/Profile";
 import ConversationalAI from "./Pages/ConversationalAI/conversational";
+import BackgroundLayer from './Pages/BackgroundLayer/backgroundLayer';
 import { AuthProvider } from './AuthContext';
 
 
 function App() {
   return (
     <AuthProvider>
+      <BackgroundLayer />
       <Router>
         <Routes>
           <Route path="/" element={<LandingPage />} />

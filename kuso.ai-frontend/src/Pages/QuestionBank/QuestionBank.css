@@ -15,7 +15,7 @@ html {
   padding: 0;
   height: 100%;
   overflow: auto;
-  background-color: #242424;
+  /* background-color: #242424; */
   font-family: "Lucida Sans", "Lucida Sans Regular", "Lucida Grande",
     "Lucida Sans Unicode", Geneva, Verdana, sans-serif;
 }
