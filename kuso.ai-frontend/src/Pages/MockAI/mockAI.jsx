@@ -18,7 +18,7 @@ import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
 import { useAuthContext } from "../../AuthContext";
-import ModifiedParticleEffect from "../Landing/ModifiedParticleEffect";
+import AiEffect from "../Landing/AiEffect";
 
 ChartJS.register(
   CategoryScale,
@@ -380,10 +380,10 @@ function MockAI() {
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: -1, // Ensure ModifiedParticleEffect is in the background
+          zIndex: -1, // Ensure AiEffect is in the background
         }}
       >
-        {/* <ModifiedParticleEffect /> */}
+        <AiEffect />
       </Box>
       {!sessionIsStarted ? (
         <>
