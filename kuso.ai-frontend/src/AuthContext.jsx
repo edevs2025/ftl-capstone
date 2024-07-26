@@ -1,6 +1,6 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { useAuth } from "@clerk/clerk-react";
-import jwtDecode from 'jwt-decode';
+import { jwtDecode } from "jwt-decode";
 
 const AuthContext = createContext();
 
@@ -28,12 +28,12 @@ export const AuthProvider = ({ children }) => {
           const data = await response.json();
           localStorage.setItem("authToken", data.token);
           setAuthToken(data.token);
-          
+
           try {
             const decodedToken = jwtDecode(data.token);
             setUserId(decodedToken.userId); // Assuming the token has a userId field
           } catch (error) {
-            console.error('Error decoding token:', error);
+            console.error("Error decoding token:", error);
           }
         }
       } else {
