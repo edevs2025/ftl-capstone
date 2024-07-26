@@ -248,11 +248,10 @@ html {
   list-style-type: none;
   cursor: pointer;
   transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
-  border: 1px solid #ffffff;
-  background-color: rgb(172, 170, 255);
+  border: 1px solid #646cff;
+  background-color: #646cff;
   border-radius: 15px;
   padding: 0.5rem;
-  color: rgb(0, 0, 0);
 }
 .topics-container li:hover {
   transform: translateY(-5px);

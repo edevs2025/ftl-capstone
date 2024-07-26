@@ -46,6 +46,7 @@ function MockAI() {
   const [initialAIResponse, setInitialAIResponse] = useState("");
   const [sessionQ, setSessionQ] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [sessionQuestion, setSessionQuestion] = useState(null);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const recognitionRef = useRef(null);
   const { authToken, userId } = useAuthContext();
@@ -81,7 +82,9 @@ function MockAI() {
       const sessionQData = sessionQResponse.data;
       setSessionQ(sessionQData);
 
-      console.log(sessionQData); // Log the correct sessionQ data after setting it
+      console.log(sessionQData);
+      console.log(sessionQData.question.questionContent);
+      setSessionQuestion(sessionQData.question.questionContent);
     } catch (error) {
       console.error("Error creating session or session question:", error);
     }
@@ -208,7 +211,7 @@ function MockAI() {
 
   const fetchAIResponse = async (prompt) => {
     const API_KEY = apiKey;
-    const fullPrompt = `You are an interviewer. The following is the question: "${selectedQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
+    const fullPrompt = `You are an interviewer. The following is the question: "${sessionQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
       const result = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -218,7 +221,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4",
+          model: "gpt-4o",
           messages: [
             {
               role: "system",
@@ -264,10 +267,7 @@ function MockAI() {
           }
         );
 
-        setTimeout(() => {
-          setIsFeedbackExpanded(true);
-        }, 1000);
-
+        setIsFeedbackExpanded(true);
         speakFeedback(feedback, 1.15);
         simulateRealTimeResponse(feedback);
       } else {
@@ -415,7 +415,17 @@ function MockAI() {
       ) : (
         <div className="mockai-container">
           <div className="ai-content">
-            <Stack direction="row" spacing={2}>
+            <Stack
+              direction="column"
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+              spacing={2}
+            >
+              <h1 style={{ marginBottom: "5rem" }}>{sessionQuestion}</h1>
+
               <Avatar
                 alt="Remy Sharp"
                 src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
@@ -489,7 +499,7 @@ function MockAI() {
                 </Link>
                 <Typography variant="h6" sx={{ mt: 4 }}></Typography>
                 <Typography sx={{ fontSize: "2rem" }}>
-                  {selectedQuestion}
+                  {sessionQuestion}
                 </Typography>
               </Box>
 
