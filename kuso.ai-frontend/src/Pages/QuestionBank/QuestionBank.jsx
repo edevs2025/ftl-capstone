@@ -33,12 +33,132 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
 }));
 
 function QuestionBank() {
+  const questionTopics = [
+    "diagnosis",
+    "compliance",
+    "ethics",
+    "deadlines",
+    "strategy",
+    "patient care",
+    "regulations",
+    "failure",
+    "trends",
+    "academic performance",
+    "planning",
+    "deadline",
+    "software",
+    "time management",
+    "project management",
+    "adaptability",
+    "conflict resolution",
+    "lean manufacturing",
+    "debugging",
+    "prioritization",
+    "guest experience",
+    "implementation",
+    "troubleshooting",
+    "analytics",
+    "customer service",
+    "client management",
+    "communication",
+    "research",
+    "legal skills",
+    "customer experience",
+    "security",
+    "impact",
+    "financial analysis",
+    "tools",
+    "case management",
+    "resource management",
+    "success",
+    "laboratory management",
+    "data analysis",
+    "education",
+    "budget management",
+    "production management",
+    "public relations",
+    "challenge",
+    "efficiency",
+    "intervention",
+    "risk management",
+    "data analytics",
+    "digital marketing",
+    "policy development",
+    "assessment tools",
+    "software tools",
+    "sales",
+    "marketing",
+    "business processes",
+    "launch",
+    "dedication",
+    "operational efficiency",
+    "quality control",
+    "technical skills",
+    "deadline management",
+    "continuous learning",
+    "business impact",
+    "process improvement",
+    "campaign management",
+    "automation",
+    "decision-making",
+    "digital tools",
+    "public sector",
+    "safety",
+    "goal achievement",
+    "learning",
+    "inventory management",
+    "legal tools",
+    "management systems",
+    "analytical skills",
+    "environmental impact",
+    "creativity",
+    "management",
+    "innovation",
+    "LIMS",
+    "public service",
+    "results",
+    "performance",
+    "crisis management",
+    "problem-solving",
+    "simplification",
+    "data-driven strategy",
+    "engineering",
+    "product launch",
+    "stress management",
+    "sustainability",
+    "diversity",
+    "legal knowledge",
+    "leadership",
+    "teaching",
+    "platforms",
+    "policy",
+    "attention to detail",
+    "advocacy",
+    "product development",
+    "multitasking",
+    "teamwork",
+    "pressure",
+    "complexity",
+    "hospitality",
+    "curriculum development",
+    "optimization",
+    "multidisciplinary",
+    "technology",
+    "guest satisfaction",
+    "goal-setting",
+    "collaboration",
+    "quick thinking",
+    "student management",
+    "guest relations",
+    "empathy",
+    "professional development",
+    "regulatory compliance",
+  ];
+
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedIndustry, setSelectedIndustry] = useState(null);
   const [questions, setQuestions] = useState([]);
-  const [topics, setTopics] = useState([]);
-  const [industries, setIndustries] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const questionsPerPage = 10;
@@ -59,23 +179,7 @@ function QuestionBank() {
       }
     };
 
-    const fetchTopicsAndIndustries = async () => {
-      try {
-        const topicsResponse = await axios.get(
-          `https://ftl-capstone.onrender.com/topics`
-        );
-        const industriesResponse = await axios.get(
-          `https://ftl-capstone.onrender.com/industries`
-        );
-        setTopics(topicsResponse.data);
-        setIndustries(industriesResponse.data);
-      } catch (error) {
-        console.error("Error fetching topics or industries:", error);
-      }
-    };
-
     fetchQuestions();
-    fetchTopicsAndIndustries();
   }, []);
 
   const handleSearchChange = (event) => {
@@ -106,10 +210,15 @@ function QuestionBank() {
     setPage(value);
   };
 
+  const handleIndustryClick = (industry) => {
+    setSelectedIndustry(industry);
+    setPage(1);
+  };
+
   const filteredRows = questions.filter(
     (row) =>
       row.questionContent.toLowerCase().includes(searchQuery.toLowerCase()) &&
-      (!selectedTopic || row.topic === selectedTopic) &&
+      (!selectedTopic || row.keyword.includes(selectedTopic)) &&
       (!selectedIndustry ||
         row.industries.some((industry) => industry.name === selectedIndustry))
   );
@@ -138,7 +247,10 @@ function QuestionBank() {
       >
         <ParticleEffect />
       </Box>
-      <div className="question-bank-content" style={{ position: "relative", zIndex: 1 }}>
+      <div
+        className="question-bank-content"
+        style={{ position: "relative", zIndex: 1 }}
+      >
         <h3 id="header">Master your interviews with confidence</h3>
         <div className="question-bank-container">
           <div className="left-column">
@@ -187,7 +299,7 @@ function QuestionBank() {
               />
               <div className="filter-labels">
                 <Autocomplete
-                  options={topics}
+                  options={questionTopics}
                   value={selectedTopic}
                   onChange={handleTopicChange}
                   renderInput={(params) => (
@@ -280,13 +392,16 @@ function QuestionBank() {
               }}
             />
           </div>
-         <div className="right-column">
+          <div className="right-column">
             <div className="topics-container">
-              <h3>Topics</h3>
+              <h3>Industry</h3>
               <ul>
-                {topics.map((topic, index) => (
+                {/* {questionTopics.map((topic, index) => (
                   <li key={index}>{topic}</li>
-                ))}
+                ))} */}
+                <li>Behavioral</li>
+                <li>Case Study</li>
+                <li>Technical</li>
               </ul>
             </div>
           </div>

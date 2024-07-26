@@ -232,6 +232,7 @@ html {
 .topics-container h3 {
   text-align: center;
   font-size: 2rem;
+  margin-bottom: 2rem;
 }
 
 .topics-container ul {
