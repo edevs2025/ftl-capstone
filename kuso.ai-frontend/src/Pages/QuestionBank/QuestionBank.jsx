@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
+import { Box, Typography, Button } from "@mui/material";
 import "./QuestionBank.css";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -9,6 +10,7 @@ import SearchIcon from "@mui/icons-material/Search";
 import Pagination from "@mui/material/Pagination";
 import { styled } from "@mui/material/styles";
 import axios from "axios";
+import ParticleEffect from "../Landing/ParticleEffect"; // Adjust the import path as needed
 
 const StyledPagination = styled(Pagination)(({ theme }) => ({
   "& .MuiPaginationItem-root": {
@@ -117,155 +119,169 @@ function QuestionBank() {
   return (
     <div className="question-bank">
       <Navbar />
-      <h3 id="header">Master your interviews with confidence</h3>
-      <div className="question-bank-container">
-        <div className="left-column">
-          <div className="filter-container">
-            <TextField
-              fullWidth
-              variant="outlined"
-              placeholder="Search questions"
-              value={searchQuery}
-              onChange={handleSearchChange}
-              sx={{
-                "& .MuiOutlinedInput-root": {
-                  backgroundColor: "#212121",
-                  color: "white",
-                  "& fieldset": {
-                    borderColor: "rgba(255, 255, 255, 0.3)",
-                  },
-                  "&:hover fieldset": {
-                    borderColor: "rgba(255, 255, 255, 0.5)",
-                  },
-                  "&.Mui-focused fieldset": {
-                    borderColor: "#40c9ff",
-                  },
-                },
-                "& .MuiInputLabel-root": {
-                  color: "rgba(255, 255, 255, 0.7)",
-                },
-                "& .MuiInputAdornment-root": {
-                  color: "rgba(255, 255, 255, 0.7)",
-                },
-                "& input": {
-                  color: "white",
-                },
-                "& input::placeholder": {
-                  color: "rgba(255, 255, 255, 0.5)",
-                  opacity: 1,
-                },
-              }}
-              InputProps={{
-                startAdornment: (
-                  <InputAdornment position="start">
-                    <SearchIcon />
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <div className="filter-labels">
-              <Autocomplete
-                options={topics}
-                value={selectedTopic}
-                onChange={handleTopicChange}
-                renderInput={(params) => (
-                  <TextField
-                    {...params}
-                    label="Filter by Topic"
-                    sx={{
-                      "& .MuiOutlinedInput-root": {
-                        backgroundColor: "#212121",
-                        color: "white",
-                        "& fieldset": {
-                          borderColor: "rgba(255, 255, 255, 0.3)",
-                        },
-                        "&:hover fieldset": {
-                          borderColor: "rgba(255, 255, 255, 0.5)",
-                        },
-                        "&.Mui-focused fieldset": {
-                          borderColor: "#40c9ff",
-                        },
-                      },
-                      "& .MuiInputLabel-root": {
-                        color: "rgba(255, 255, 255, 0.7)",
-                      },
-                      "& input": {
-                        color: "white",
-                      },
-                    }}
-                  />
-                )}
-                style={{
-                  marginTop: "1rem",
-                  width: "33%",
-                }}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1, // Ensure ParticleEffect is in the background
+        }}
+      >
+        <ParticleEffect />
+      </Box>
+      <div className="question-bank-content" style={{ position: "relative", zIndex: 1 }}>
+        <h3 id="header">Master your interviews with confidence</h3>
+        <div className="question-bank-container">
+          <div className="left-column">
+            <div className="filter-container">
+              <TextField
+                fullWidth
+                variant="outlined"
+                placeholder="Search questions"
+                value={searchQuery}
+                onChange={handleSearchChange}
                 sx={{
-                  "& .MuiAutocomplete-paper": {
+                  "& .MuiOutlinedInput-root": {
                     backgroundColor: "#212121",
                     color: "white",
-                  },
-                  "& .MuiAutocomplete-option": {
-                    "&:hover": {
-                      backgroundColor: "rgba(255, 255, 255, 0.1)",
+                    "& fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.3)",
                     },
-                    '&[aria-selected="true"]': {
-                      backgroundColor: "rgba(64, 201, 255, 0.3)",
+                    "&:hover fieldset": {
+                      borderColor: "rgba(255, 255, 255, 0.5)",
+                    },
+                    "&.Mui-focused fieldset": {
+                      borderColor: "#40c9ff",
                     },
                   },
-                  "& .MuiAutocomplete-listbox": {
-                    backgroundColor: "#212121",
+                  "& .MuiInputLabel-root": {
+                    color: "rgba(255, 255, 255, 0.7)",
+                  },
+                  "& .MuiInputAdornment-root": {
+                    color: "rgba(255, 255, 255, 0.7)",
+                  },
+                  "& input": {
                     color: "white",
                   },
-                  "& .MuiAutocomplete-tag": {
-                    backgroundColor: "rgba(64, 201, 255, 0.3)",
-                    color: "white",
+                  "& input::placeholder": {
+                    color: "rgba(255, 255, 255, 0.5)",
+                    opacity: 1,
                   },
+                }}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <SearchIcon />
+                    </InputAdornment>
+                  ),
                 }}
               />
+              <div className="filter-labels">
+                <Autocomplete
+                  options={topics}
+                  value={selectedTopic}
+                  onChange={handleTopicChange}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Filter by Topic"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#212121",
+                          color: "white",
+                          "& fieldset": {
+                            borderColor: "rgba(255, 255, 255, 0.3)",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "rgba(255, 255, 255, 0.5)",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#40c9ff",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "rgba(255, 255, 255, 0.7)",
+                        },
+                        "& input": {
+                          color: "white",
+                        },
+                      }}
+                    />
+                  )}
+                  style={{
+                    marginTop: "1rem",
+                    width: "33%",
+                  }}
+                  sx={{
+                    "& .MuiAutocomplete-paper": {
+                      backgroundColor: "#212121",
+                      color: "white",
+                    },
+                    "& .MuiAutocomplete-option": {
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      },
+                      '&[aria-selected="true"]': {
+                        backgroundColor: "rgba(64, 201, 255, 0.3)",
+                      },
+                    },
+                    "& .MuiAutocomplete-listbox": {
+                      backgroundColor: "#212121",
+                      color: "white",
+                    },
+                    "& .MuiAutocomplete-tag": {
+                      backgroundColor: "rgba(64, 201, 255, 0.3)",
+                      color: "white",
+                    },
+                  }}
+                />
+              </div>
             </div>
+            <div className="question-list-container">
+              <ul>
+                {paginatedRows.map((row) => (
+                  <li
+                    key={row.questionId}
+                    className="question-container"
+                    onClick={() => handleQuestionClick(row.questionId)}
+                    style={{ fontSize: "1.2rem", cursor: "pointer" }}
+                  >
+                    <div>
+                      {row.questionId}. {row.questionContent}
+                    </div>
+                    <div className="question-topics">
+                      {row.keyword.map((word, index) => (
+                        <span key={index} className="keyword">
+                          {word}
+                        </span>
+                      ))}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <StyledPagination
+              count={totalPages}
+              page={page}
+              onChange={handlePageChange}
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                marginTop: "1rem",
+              }}
+            />
           </div>
-          <div className="question-list-container">
-            <ul>
-              {paginatedRows.map((row) => (
-                <li
-                  key={row.questionId}
-                  className="question-container"
-                  onClick={() => handleQuestionClick(row.questionId)}
-                  style={{ fontSize: "1.2rem", cursor: "pointer" }}
-                >
-                  <div>
-                    {row.questionId}. {row.questionContent}
-                  </div>
-                  <div className="question-topics">
-                    {row.keyword.map((word, index) => (
-                      <span key={index} className="keyword">
-                        {word}
-                      </span>
-                    ))}
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-          <StyledPagination
-            count={totalPages}
-            page={page}
-            onChange={handlePageChange}
-            sx={{
-              display: "flex",
-              justifyContent: "center",
-              marginTop: "1rem",
-            }}
-          />
-        </div>
-        <div className="right-column">
-          <div className="topics-container">
-            <h3>Topics</h3>
-            <ul>
-              {topics.map((topic, index) => (
-                <li key={index}>{topic}</li>
-              ))}
-            </ul>
+         <div className="right-column">
+            <div className="topics-container">
+              <h3>Topics</h3>
+              <ul>
+                {topics.map((topic, index) => (
+                  <li key={index}>{topic}</li>
+                ))}
+              </ul>
+            </div>
           </div>
         </div>
       </div>
