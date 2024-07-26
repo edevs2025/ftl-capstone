@@ -199,7 +199,7 @@ function QuestionBank() {
 
   const handleQuestionClick = (id) => {
     if (!isSignedIn) {
-      navigate('/signup');
+      navigate("/signup");
     } else {
       navigate(`/mockai/${id}`);
     }
@@ -304,7 +304,7 @@ function QuestionBank() {
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Filter by Topic"
+                      label="Filter by keywords"
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           backgroundColor: "#212121",
@@ -398,9 +398,21 @@ function QuestionBank() {
                 {/* {questionTopics.map((topic, index) => (
                   <li key={index}>{topic}</li>
                 ))} */}
-                <li>Behavioral</li>
-                <li>Case Study</li>
-                <li>Technical</li>
+                <li>Information Technology</li>
+                <li>Healthcare and Medical</li>
+                <li>Finance and Insurance</li>
+                <li>Education</li>
+                <li>Manufacturing</li>
+                <li>Retail and Consumer Goods</li>
+                <li>Marketing and Advertising</li>
+                <li>Engineering and Construction</li>
+                <li>Government and Public Administration</li>
+                <li>Business Services</li>
+                <li>Hospitality and Travel</li>
+                <li>Pharmaceuticals and Biotechnology</li>
+                <li>Legal Services</li>
+                <li>Environmental Services</li>
+                <li>Arts, Media, and Entertainment</li>
               </ul>
             </div>
           </div>
