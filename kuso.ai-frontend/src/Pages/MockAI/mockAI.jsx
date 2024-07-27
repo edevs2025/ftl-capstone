@@ -50,6 +50,8 @@ function MockAI() {
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const recognitionRef = useRef(null);
   const { authToken, userId } = useAuthContext();
+  const [audioContext, setAudioContext] = useState(null);
+const [audioSources, setAudioSources] = useState([]);
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -130,6 +132,19 @@ function MockAI() {
     };
   }, []);
 
+  useEffect(() => {
+    return () => {
+      if (audioContext) {
+        audioSources.forEach(source => {
+          if (source.stop) {
+            source.stop();
+          }
+        });
+        audioContext.close();
+      }
+    };
+  }, [audioContext, audioSources]);
+
   const startRecording = () => {
     setRecording(true);
     setTranscript("");
@@ -175,31 +190,34 @@ function MockAI() {
     for (let i = 0; i < feedback.length; i += chunkSize) {
       chunks.push(feedback.slice(i, i + chunkSize));
     }
-
-    const audioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
-
+  
+    const newAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+    setAudioContext(newAudioContext);
+    const newAudioSources = [];
+  
     for (const chunk of chunks) {
       try {
         const audioUrl = await fetchTTS(chunk);
         const response = await fetch(audioUrl);
         const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await audioContext.decodeAudioData(arrayBuffer);
-
-        const source = audioContext.createBufferSource();
+        const audioBuffer = await newAudioContext.decodeAudioData(arrayBuffer);
+  
+        const source = newAudioContext.createBufferSource();
         source.buffer = audioBuffer;
         source.playbackRate.value = speedFactor;
-        source.connect(audioContext.destination);
-
+        source.connect(newAudioContext.destination);
+        newAudioSources.push(source);
+  
         await new Promise((resolve) => {
           source.onended = resolve;
           source.start();
         });
       } catch (error) {
         console.error("Error playing audio chunk:", error);
-        // return
       }
     }
+  
+    setAudioSources(newAudioSources);
   };
 
   const calculateAverage = (grades) => {
