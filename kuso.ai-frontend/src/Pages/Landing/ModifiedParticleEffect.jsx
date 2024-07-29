@@ -137,15 +137,15 @@ const ModifiedParticleEffect = () => {
 
     const clock = new Clock();
     const animate = () => {
-        const elapsedTime = clock.getElapsedTime();
-        material.uniforms.uTime.value = elapsedTime;
-        material.uniforms.uScale.value = Math.sin(elapsedTime * 0.3) * 0.5 + 2.5;
-  
-        particles.rotation.y = elapsedTime * 0.05;
-  
-        renderer.render(scene, camera);
-        animationFrameRef.current = window.requestAnimationFrame(animate);
-      };
+      const elapsedTime = clock.getElapsedTime();
+      material.uniforms.uTime.value = elapsedTime * 0.3; // Slowed down overall animation
+      material.uniforms.uScale.value = Math.sin(elapsedTime * 0.2) * 0.3 + 1.7; // Adjusted scale animation
+
+      particles.rotation.y = elapsedTime * 0.02; // Slowed down rotation
+
+      renderer.render(scene, camera);
+      animationFrameRef.current = window.requestAnimationFrame(animate);
+    };
     animate();
     
 
