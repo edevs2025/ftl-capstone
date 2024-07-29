@@ -36,6 +36,7 @@ function Profile() {
   const [userSessions, setUserSessions] = useState([]);
   const [userQuestions, setUserQuestions] = useState([]);
   const [userFeedback, setUserFeedback] = useState([]);
+  const [userScore, setUserScore] = useState(0);
   const [technicalCount, setTechnicalCount] = useState(0);
   const [caseStudyCount, setCaseStudyCount] = useState(0);
   const [behavioralCount, setBehavioralCount] = useState(0);
@@ -99,6 +100,9 @@ function Profile() {
           );
           if (response.status === 200) {
             setUserData(response.data);
+            setUserSessions(response.data.sessions);
+            setUserFeedback(userData.feedback);
+            // console.log(userSessions);
           } else {
             console.error("Failed to fetch username");
           }
@@ -114,6 +118,7 @@ function Profile() {
   useEffect(() => {
     const gatherData = async () => {
       if (userSessions.length > 0) {
+        console.log("feedback: ",userFeedback);
         for (const session of userSessions) {
           const sessionQuestions = await Promise.all(
             session.questions.map(async (question) => {
@@ -125,7 +130,7 @@ function Profile() {
           );
 
           setUserQuestions((prevQuestions) => [...prevQuestions, ...sessionQuestions]);
-          setUserFeedback((prevFeedback) => [...prevFeedback, ...session.feedback]);
+          // setUserFeedback((prevFeedback) => [...prevFeedback, ...session.feedback]);
         }
       }
     };
@@ -133,31 +138,32 @@ function Profile() {
     const calculatePieChartData = async () => {
       await gatherData();
       if (userData && userData.sessions) {
-        setUserSessions(userData.sessions);
+        // setUserSessions(userData.sessions);
+        console.log("sessions: ",userSessions);
         userData.sessions.forEach((session) => {
-          console.log("User Data:", userData);
           session.questions.forEach((question) => {
-            if (question.type === "Technical") setTechnicalCount((prev) => prev + 1);
-            if (question.type === "Behavioral") setBehavioralCount((prev) => prev + 1);
-            if (question.type === "Case Study") setCaseStudyCount((prev) => prev + 1);
+            console.log("question: ",question);
+            if (question.question.keyword[0] === "technical") setTechnicalCount((prev) => prev + 1);
+            if (question.question.keyword[0] === "behavioral") setBehavioralCount((prev) => prev + 1);
+            if (question.question.keyword[0] === "case study") setCaseStudyCount((prev) => prev + 1);
           });
         });
       }
     };
-
+    
     calculatePieChartData();
   }, [userData]);
-
+  
   function formatTimeAgo(date) {
     return `${formatDistanceToNowStrict(date)} ago`;
   }
-
+  
   const pieChartData = [
     { id: 0, value: technicalCount, label: 'Technical' },
     { id: 1, value: behavioralCount, label: 'Behavioral' },
     { id: 2, value: caseStudyCount, label: 'Case Study' },
   ];
-
+  
   const lineChartData = {
     labels: ['Averaged Score'],
     datasets: [
@@ -172,7 +178,7 @@ function Profile() {
       },
     ],
   };
-
+  
   const lineChartOptions = {
     scales: {
       y: {
@@ -197,7 +203,7 @@ function Profile() {
       },
     },
   };
-
+  
   return (
     <div>
       <Navbar />
