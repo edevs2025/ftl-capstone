@@ -36,7 +36,7 @@ function Profile() {
   const [userSessions, setUserSessions] = useState([]);
   const [userQuestions, setUserQuestions] = useState([]);
   const [userFeedback, setUserFeedback] = useState([]);
-  const [userScore, setUserScore] = useState(0);
+  const [userScores, setUserScores] = useState([]);
   const [technicalCount, setTechnicalCount] = useState(0);
   const [caseStudyCount, setCaseStudyCount] = useState(0);
   const [behavioralCount, setBehavioralCount] = useState(0);
@@ -101,7 +101,7 @@ function Profile() {
           if (response.status === 200) {
             setUserData(response.data);
             setUserSessions(response.data.sessions);
-            setUserFeedback(userData.feedback);
+            console.log(response.data);
             // console.log(userSessions);
           } else {
             console.error("Failed to fetch username");
@@ -139,21 +139,23 @@ function Profile() {
       await gatherData();
       if (userData && userData.sessions) {
         // setUserSessions(userData.sessions);
-        console.log("sessions: ",userSessions);
         userData.sessions.forEach((session) => {
+          if(session.feedback.length > 0) {  
+            const feedbackk = session.feedback[0];
+            setUserScores((prevScore) => [...prevScore, feedbackk.score]);
+          }
           session.questions.forEach((question) => {
-            console.log("question: ",question);
-            if (question.question.keyword[0] === "technical") setTechnicalCount((prev) => prev + 1);
-            if (question.question.keyword[0] === "behavioral") setBehavioralCount((prev) => prev + 1);
-            if (question.question.keyword[0] === "case study") setCaseStudyCount((prev) => prev + 1);
-          });
+              if (question.question.keyword[0] === "technical") setTechnicalCount((prev) => prev + 1);
+              if (question.question.keyword[0] === "behavioral") setBehavioralCount((prev) => prev + 1);
+              if (question.question.keyword[0] === "case study") setCaseStudyCount((prev) => prev + 1);
+            });
         });
       }
     };
     
     calculatePieChartData();
   }, [userData]);
-  
+
   function formatTimeAgo(date) {
     return `${formatDistanceToNowStrict(date)} ago`;
   }
@@ -165,11 +167,11 @@ function Profile() {
   ];
   
   const lineChartData = {
-    labels: ['Averaged Score'],
+    labels: userScores.map((_, index) => `Session ${index + 1} Score`), // Adjusted labels array
     datasets: [
       {
         label: 'Grades',
-        data: [4], // Example data, replace with actual grades if available
+        data: userScores, 
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
@@ -178,7 +180,6 @@ function Profile() {
       },
     ],
   };
-  
   const lineChartOptions = {
     scales: {
       y: {
@@ -229,11 +230,11 @@ function Profile() {
             <div className="stats-container">
               <div className="stat-box">
                 <h2 className="stat-title">Total Visits</h2>
-                <p className="stat-value">1,500</p>
+                <p className="stat-value">{userSessions.length}</p>
               </div>
               <div className="stat-box">
                 <h2 className="stat-title">Questions Practiced</h2>
-                <p className="stat-value">3,200</p>
+                <p className="stat-value">{behavioralCount + technicalCount + caseStudyCount}</p>
               </div>
               <div className="stat-box">
                 <h2 className="stat-title">Bounce Rate</h2>
@@ -254,6 +255,7 @@ function Profile() {
                       },
                     ]}
                     height={200}
+                    margin={{ bottom: 10, right: 120 }}
                   />
                 </div>
               </div>
