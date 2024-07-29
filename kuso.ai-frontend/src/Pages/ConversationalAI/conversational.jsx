@@ -16,7 +16,7 @@ const ConversationalSession = () => {
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const { authToken, userId } = useAuthContext(); // Custom hook for auth context
-
+  const lastProcessedTranscriptRef = useRef("");
   const recognitionRef = useRef(null);
   const silenceTimeoutRef = useRef(null);
   const [audioContext, setAudioContext] = useState(null);
@@ -43,11 +43,17 @@ const ConversationalSession = () => {
         }
 
         setTranscript((prevTranscript) => {
-          const newTranscript = finalTranscript || interimTranscript;
-          if (prevTranscript.endsWith(newTranscript)) {
-            return prevTranscript;
+          if (finalTranscript) {
+            return finalTranscript;
+          } else if (interimTranscript) {
+            const lastFinalIndex = prevTranscript.lastIndexOf(" ");
+            const prevFinal =
+              lastFinalIndex !== -1
+                ? prevTranscript.slice(0, lastFinalIndex)
+                : "";
+            return prevFinal + " " + interimTranscript;
           }
-          return prevTranscript + newTranscript;
+          return prevTranscript;
         });
         resetSilenceTimeout();
       };
@@ -77,10 +83,13 @@ const ConversationalSession = () => {
     }
     silenceTimeoutRef.current = setTimeout(() => {
       setTranscript((currentTranscript) => {
-        handleUserResponse(currentTranscript);
+        if (currentTranscript !== lastProcessedTranscriptRef.current) {
+          lastProcessedTranscriptRef.current = currentTranscript;
+          handleUserResponse(currentTranscript);
+        }
         return currentTranscript;
       });
-    }, 3000); // 3 seconds of silence
+    }, 2200); // 3 seconds of silence
   };
 
   const startListening = () => {
