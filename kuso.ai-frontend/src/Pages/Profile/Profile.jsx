@@ -7,7 +7,7 @@ import { HeatMapGrid } from 'react-grid-heatmap';
 import axios from "axios";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { Line } from 'react-chartjs-2';
-import { formatDistanceToNowStrict } from 'date-fns';
+import { formatDistanceToNowStrict, set } from 'date-fns';
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -35,6 +35,8 @@ function Profile() {
   const [userData, setUserData] = useState(null);
   const [userSessions, setUserSessions] = useState([]);
   const [userQuestions, setUserQuestions] = useState([]);
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const [totalVisits, setTotalVisits] = useState(1);
   const [userFeedback, setUserFeedback] = useState([]);
   const [userScores, setUserScores] = useState([]);
   const [technicalCount, setTechnicalCount] = useState(0);
@@ -101,6 +103,11 @@ function Profile() {
           if (response.status === 200) {
             setUserData(response.data);
             setUserSessions(response.data.sessions);
+            setTotalVisits(response.data.sessions.length);
+            if(response.data.updatedAt !== updatedAt) {
+              setUpdatedAt(response.data.updatedAt);
+              setTotalVisits((prev) => prev + 1);
+            }
             console.log(response.data);
             // console.log(userSessions);
           } else {
@@ -134,7 +141,6 @@ function Profile() {
         }
       }
     };
-
     const calculatePieChartData = async () => {
       await gatherData();
       if (userData && userData.sessions) {
@@ -230,7 +236,7 @@ function Profile() {
             <div className="stats-container">
               <div className="stat-box">
                 <h2 className="stat-title">Total Visits</h2>
-                <p className="stat-value">{userSessions.length}</p>
+                <p className="stat-value">{totalVisits}</p>
               </div>
               <div className="stat-box">
                 <h2 className="stat-title">Questions Practiced</h2>
