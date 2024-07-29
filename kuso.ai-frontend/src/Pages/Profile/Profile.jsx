@@ -44,12 +44,7 @@ function Profile() {
   const [behavioralCount, setBehavioralCount] = useState(0);
   const { getToken } = useAuth();
 
-  // Dummy data for the heatmap
-  const xLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const yLabels = ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'];
-  const heatmapData = new Array(yLabels.length).fill(0).map(() =>
-    new Array(xLabels.length).fill(0).map(() => Math.floor(Math.random() * 100))
-  );
+  
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -82,6 +77,7 @@ function Profile() {
   }, [getToken]);
 
   useEffect(() => {
+    
     if (userToken) {
       try {
         const decoded = jwtDecode(userToken);
@@ -94,7 +90,9 @@ function Profile() {
   }, [userToken]);
 
   useEffect(() => {
+    
     const fetchUsername = async () => {
+      setTotalVisits(0);
       if (decodedUserToken && decodedUserToken.userId) {
         try {
           const response = await axios.get(
@@ -104,10 +102,11 @@ function Profile() {
             setUserData(response.data);
             setUserSessions(response.data.sessions);
             setTotalVisits(response.data.sessions.length);
-            if(response.data.updatedAt !== updatedAt) {
-              setUpdatedAt(response.data.updatedAt);
-              setTotalVisits((prev) => prev + 1);
-            }
+            // if(response.data.updatedAt !== updatedAt) {
+            //   setUpdatedAt(response.data.updatedAt);
+            //   setTotalVisits((prev) => prev + 1);
+              
+            // }
             console.log(response.data);
             // console.log(userSessions);
           } else {
@@ -123,26 +122,12 @@ function Profile() {
   }, [decodedUserToken]);
 
   useEffect(() => {
-    const gatherData = async () => {
-      if (userSessions.length > 0) {
-        console.log("feedback: ",userFeedback);
-        for (const session of userSessions) {
-          const sessionQuestions = await Promise.all(
-            session.questions.map(async (question) => {
-              const response = await axios.get(
-                `https://ftl-capstone.onrender.com/questions/${question.questionId}`
-              );
-              return response.data;
-            })
-          );
-
-          setUserQuestions((prevQuestions) => [...prevQuestions, ...sessionQuestions]);
-          // setUserFeedback((prevFeedback) => [...prevFeedback, ...session.feedback]);
-        }
-      }
-    };
+    setTechnicalCount(0);
+    setBehavioralCount(0);
+    setCaseStudyCount(0);
+    setUserScores([]);
     const calculatePieChartData = async () => {
-      await gatherData();
+      //await gatherData();
       if (userData && userData.sessions) {
         // setUserSessions(userData.sessions);
         userData.sessions.forEach((session) => {
@@ -210,6 +195,13 @@ function Profile() {
       },
     },
   };
+
+  // Dummy data for the heatmap
+  const xLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const yLabels = ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'];
+  const heatmapData = new Array(yLabels.length).fill(0).map(() =>
+    new Array(xLabels.length).fill(0).map(() => Math.floor(Math.random() * 100))
+  );
   
   return (
     <div>
