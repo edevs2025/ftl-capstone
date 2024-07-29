@@ -51,7 +51,7 @@ function MockAI() {
   const recognitionRef = useRef(null);
   const { authToken, userId } = useAuthContext();
   const [audioContext, setAudioContext] = useState(null);
-const [audioSources, setAudioSources] = useState([]);
+  const [audioSources, setAudioSources] = useState([]);
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -83,9 +83,6 @@ const [audioSources, setAudioSources] = useState([]);
 
       const sessionQData = sessionQResponse.data;
       setSessionQ(sessionQData);
-
-      console.log(sessionQData);
-      console.log(sessionQData.question.questionContent);
       setSessionQuestion(sessionQData.question.questionContent);
     } catch (error) {
       console.error("Error creating session or session question:", error);
@@ -135,7 +132,7 @@ const [audioSources, setAudioSources] = useState([]);
   useEffect(() => {
     return () => {
       if (audioContext) {
-        audioSources.forEach(source => {
+        audioSources.forEach((source) => {
           if (source.stop) {
             source.stop();
           }
@@ -190,24 +187,25 @@ const [audioSources, setAudioSources] = useState([]);
     for (let i = 0; i < feedback.length; i += chunkSize) {
       chunks.push(feedback.slice(i, i + chunkSize));
     }
-  
-    const newAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    const newAudioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
     setAudioContext(newAudioContext);
     const newAudioSources = [];
-  
+
     for (const chunk of chunks) {
       try {
         const audioUrl = await fetchTTS(chunk);
         const response = await fetch(audioUrl);
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = await newAudioContext.decodeAudioData(arrayBuffer);
-  
+
         const source = newAudioContext.createBufferSource();
         source.buffer = audioBuffer;
         source.playbackRate.value = speedFactor;
         source.connect(newAudioContext.destination);
         newAudioSources.push(source);
-  
+
         await new Promise((resolve) => {
           source.onended = resolve;
           source.start();
@@ -216,7 +214,7 @@ const [audioSources, setAudioSources] = useState([]);
         console.error("Error playing audio chunk:", error);
       }
     }
-  
+
     setAudioSources(newAudioSources);
   };
 
@@ -259,7 +257,6 @@ const [audioSources, setAudioSources] = useState([]);
       const data = await result.json();
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const responseContent = data.choices[0].message.content;
-        console.log("Full AI Response:", responseContent);
 
         const parsedResponse = JSON.parse(responseContent);
         const feedback = parsedResponse.feedback;
