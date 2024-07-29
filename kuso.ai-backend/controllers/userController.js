@@ -232,7 +232,7 @@ const findUserByUsername = async (req, res) => {
 const getUserSessions = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await userModel.getUserById(id);
+    const user = await userModel.getUserSessions(id);
     if (user) {
       res.json(user);
     } else {
