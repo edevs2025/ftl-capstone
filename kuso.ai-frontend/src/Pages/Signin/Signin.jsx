@@ -1,14 +1,29 @@
-import {React, useEffect} from "react";
+import React, { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import "./Signin.css";
 import Navbar from "../../components/Navbar/Navbar";
-import { SignUp, SignIn} from "@clerk/clerk-react";
-import { Box, Typography, Button } from "@mui/material";
-import ParticleEffect from "../Landing/ParticleEffect"; // Adjust the import path as needed
+import { SignIn } from "@clerk/clerk-react";
+import { Box } from "@mui/material";
 import ModifiedParticleEffect from "../Landing/ModifiedParticleEffect";
+import { useAuthContext } from "../../AuthContext"; // Make sure to import this
 
+function Signin() {
+  const navigate = useNavigate();
+  const { isSignedIn } = useAuthContext();
 
-function Signup() {
-  
+  useEffect(() => {
+    if (isSignedIn) {
+      const pendingQuestionId = localStorage.getItem('pendingQuestionId');
+      console.log(pendingQuestionId)
+      if (pendingQuestionId) {
+        localStorage.removeItem('pendingQuestionId');
+        navigate(`/mockai/${pendingQuestionId}`);
+      } else {
+        navigate('/profile');
+      }
+    }
+  }, [isSignedIn, navigate]);
+
   return (
     <>
       <Navbar />
@@ -19,16 +34,16 @@ function Signup() {
           left: 0,
           right: 0,
           bottom: 0,
-          zIndex: -1, // Ensure ParticleEffect is in the background
+          zIndex: -1,
         }}
       >
         <ModifiedParticleEffect />
       </Box>
       <div className="signin-container">
-        <SignIn forceRedirectUrl="/question-bank" />
+        <SignIn forceRedirectUrl='/signin'/>
       </div>
     </>
   );
 }
 
-export default Signup;
+export default Signin;

@@ -211,6 +211,8 @@ const topics = [
 
   const handleQuestionClick = (id) => {
     if (!isSignedIn) {
+      // Store the question ID in localStorage before redirecting
+      localStorage.setItem('pendingQuestionId', id);
       navigate("/signup");
     } else {
       navigate(`/mockai/${id}`);

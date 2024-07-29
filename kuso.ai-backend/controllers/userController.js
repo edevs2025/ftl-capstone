@@ -64,6 +64,7 @@ const handleClerkWebhook = async (req, res) => {
         return res.status(400).json({ error: "Unsupported event type" });
     }
 
+    
     res.status(200).json({
       success: true,
       message: "Webhook processed successfully",
