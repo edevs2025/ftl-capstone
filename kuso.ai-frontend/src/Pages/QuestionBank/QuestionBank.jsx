@@ -222,17 +222,26 @@ const topics = [
   };
 
   const handleIndustryClick = (industry) => {
-    setSelectedIndustry(industry);
-    setPage(1);
+    if (selectedIndustry === industry) {
+      // If the clicked industry is already selected, clear the filter
+      setSelectedIndustry(null);
+    } else {
+      // Otherwise, set the new industry
+      setSelectedIndustry(industry);
+    }
+    setPage(1); // Reset to first page when changing or clearing industry
+  };
+
+  const clearIndustryFilter = () => {
+    setSelectedIndustry(null);
   };
 
   const filteredRows = questions.filter(
     (row) =>
       row.questionContent.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (!selectedKeyword || row.keyword.includes(selectedKeyword)) &&
-      (!selectedIndustry ||
-        row.industries.some((industry) => industry.name === selectedIndustry)) &&
-      (!selectedTopic || row.keyword.includes(selectedTopic))
+      (!selectedTopic || row.keyword.includes(selectedTopic)) &&
+      (!selectedIndustry || row.industries.some(ind => ind.industryName === selectedIndustry))
   );
 
   const paginatedRows = filteredRows.slice(
@@ -467,24 +476,36 @@ const topics = [
             <div className="topics-container">
               <h3>Industry</h3>
               <ul>
-                {/* {questionTopics.map((topic, index) => (
-                  <li key={index}>{topic}</li>
-                ))} */}
-                <li>Information Technology</li>
-                <li>Healthcare and Medical</li>
-                <li>Finance and Insurance</li>
-                <li>Education</li>
-                <li>Manufacturing</li>
-                <li>Retail and Consumer Goods</li>
-                <li>Marketing and Advertising</li>
-                <li>Engineering and Construction</li>
-                <li>Government and Public Administration</li>
-                <li>Business Services</li>
-                <li>Hospitality and Travel</li>
-                <li>Pharmaceuticals and Biotechnology</li>
-                <li>Legal Services</li>
-                <li>Environmental Services</li>
-                <li>Arts, Media, and Entertainment</li>
+                {[
+                  "General",
+                  "Information Technology",
+                  "Healthcare and Medical",
+                  "Finance and Insurance",
+                  "Education",
+                  "Manufacturing",
+                  "Retail and Consumer Goods",
+                  "Marketing and Advertising",
+                  "Engineering and Construction",
+                  "Government and Public Administration",
+                  "Business Services",
+                  "Hospitality and Travel",
+                  "Pharmaceuticals and Biotechnology",
+                  "Legal Services",
+                  "Environmental Services",
+                  "Arts, Media, and Entertainment"
+                ].map((industry, index) => (
+                  <li 
+                    key={index} 
+                    onClick={() => handleIndustryClick(industry)}
+                    style={{
+                      cursor: 'pointer',
+                      color: selectedIndustry === industry ? '#000000' : 'inherit',
+                      fontWeight: selectedIndustry === industry ? 'bold' : 'normal'
+                    }}
+                  >
+                    {industry}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
