@@ -33,7 +33,7 @@ const StyledPagination = styled(Pagination)(({ theme }) => ({
 }));
 
 function QuestionBank() {
-  const questionTopics = [
+  const keywords = [
     "diagnosis",
     "compliance",
     "ethics",
@@ -154,9 +154,16 @@ function QuestionBank() {
     "professional development",
     "regulatory compliance",
   ];
+const topics = [
+  "behavioral",
+  "case study",
+  "technical",
+]
+
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTopic, setSelectedTopic] = useState(null);
+  const [selectedKeyword, setSelectedKeyword] = useState(null);
   const [selectedIndustry, setSelectedIndustry] = useState(null);
   const [questions, setQuestions] = useState([]);
   const [page, setPage] = useState(1);
@@ -187,6 +194,11 @@ function QuestionBank() {
     setPage(1);
   };
 
+  const handleKeywordChange = (event, newValue) => {
+    setSelectedKeyword(newValue);
+    setPage(1);
+  };
+
   const handleTopicChange = (event, newValue) => {
     setSelectedTopic(newValue);
     setPage(1);
@@ -210,16 +222,26 @@ function QuestionBank() {
   };
 
   const handleIndustryClick = (industry) => {
-    setSelectedIndustry(industry);
-    setPage(1);
+    if (selectedIndustry === industry) {
+      // If the clicked industry is already selected, clear the filter
+      setSelectedIndustry(null);
+    } else {
+      // Otherwise, set the new industry
+      setSelectedIndustry(industry);
+    }
+    setPage(1); // Reset to first page when changing or clearing industry
+  };
+
+  const clearIndustryFilter = () => {
+    setSelectedIndustry(null);
   };
 
   const filteredRows = questions.filter(
     (row) =>
       row.questionContent.toLowerCase().includes(searchQuery.toLowerCase()) &&
+      (!selectedKeyword || row.keyword.includes(selectedKeyword)) &&
       (!selectedTopic || row.keyword.includes(selectedTopic)) &&
-      (!selectedIndustry ||
-        row.industries.some((industry) => industry.name === selectedIndustry))
+      (!selectedIndustry || row.industries.some(ind => ind.industryName === selectedIndustry))
   );
 
   const paginatedRows = filteredRows.slice(
@@ -250,7 +272,7 @@ function QuestionBank() {
         className="question-bank-content"
         style={{ position: "relative", zIndex: 1 }}
       >
-        <h3 id="header">Master your interviews with confidence</h3>
+        <h3 id="header">Master Your Interviews With Confidence</h3>
         <div className="question-bank-container">
           <div className="left-column">
             <div className="filter-container">
@@ -298,13 +320,72 @@ function QuestionBank() {
               />
               <div className="filter-labels">
                 <Autocomplete
-                  options={questionTopics}
+                  options={ keywords }
+                  value={selectedKeyword}
+                  onChange={handleKeywordChange}
+                  renderInput={(params) => (
+                    <TextField
+                      {...params}
+                      label="Filter by keywords"
+                      sx={{
+                        "& .MuiOutlinedInput-root": {
+                          backgroundColor: "#212121",
+                          color: "white",
+                          "& fieldset": {
+                            borderColor: "rgba(255, 255, 255, 0.3)",
+                          },
+                          "&:hover fieldset": {
+                            borderColor: "rgba(255, 255, 255, 0.5)",
+                          },
+                          "&.Mui-focused fieldset": {
+                            borderColor: "#40c9ff",
+                          },
+                        },
+                        "& .MuiInputLabel-root": {
+                          color: "rgba(255, 255, 255, 0.7)",
+                        },
+                        "& input": {
+                          color: "white",
+                        },
+                      }}
+                    />
+                  )}
+                  style={{
+                    marginTop: "1rem",
+                    width: "33%",
+                  }}
+                  sx={{
+                    "& .MuiAutocomplete-paper": {
+                      backgroundColor: "#212121",
+                      color: "white",
+                    },
+                    "& .MuiAutocomplete-option": {
+                      "&:hover": {
+                        backgroundColor: "rgba(255, 255, 255, 0.1)",
+                      },
+                      '&[aria-selected="true"]': {
+                        backgroundColor: "rgba(64, 201, 255, 0.3)",
+                      },
+                    },
+                    "& .MuiAutocomplete-listbox": {
+                      backgroundColor: "#212121",
+                      color: "white",
+                    },
+                    "& .MuiAutocomplete-tag": {
+                      backgroundColor: "rgba(64, 201, 255, 0.3)",
+                      color: "white",
+                    },
+                  }}
+                />
+
+                <Autocomplete
+                  options={ topics }
                   value={selectedTopic}
                   onChange={handleTopicChange}
                   renderInput={(params) => (
                     <TextField
                       {...params}
-                      label="Filter by keywords"
+                      label="Filter by topics"
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           backgroundColor: "#212121",
@@ -395,24 +476,36 @@ function QuestionBank() {
             <div className="topics-container">
               <h3>Industry</h3>
               <ul>
-                {/* {questionTopics.map((topic, index) => (
-                  <li key={index}>{topic}</li>
-                ))} */}
-                <li>Information Technology</li>
-                <li>Healthcare and Medical</li>
-                <li>Finance and Insurance</li>
-                <li>Education</li>
-                <li>Manufacturing</li>
-                <li>Retail and Consumer Goods</li>
-                <li>Marketing and Advertising</li>
-                <li>Engineering and Construction</li>
-                <li>Government and Public Administration</li>
-                <li>Business Services</li>
-                <li>Hospitality and Travel</li>
-                <li>Pharmaceuticals and Biotechnology</li>
-                <li>Legal Services</li>
-                <li>Environmental Services</li>
-                <li>Arts, Media, and Entertainment</li>
+                {[
+                  "General",
+                  "Information Technology",
+                  "Healthcare and Medical",
+                  "Finance and Insurance",
+                  "Education",
+                  "Manufacturing",
+                  "Retail and Consumer Goods",
+                  "Marketing and Advertising",
+                  "Engineering and Construction",
+                  "Government and Public Administration",
+                  "Business Services",
+                  "Hospitality and Travel",
+                  "Pharmaceuticals and Biotechnology",
+                  "Legal Services",
+                  "Environmental Services",
+                  "Arts, Media, and Entertainment"
+                ].map((industry, index) => (
+                  <li 
+                    key={index} 
+                    onClick={() => handleIndustryClick(industry)}
+                    style={{
+                      cursor: 'pointer',
+                      color: selectedIndustry === industry ? '#000000' : 'inherit',
+                      fontWeight: selectedIndustry === industry ? 'bold' : 'normal'
+                    }}
+                  >
+                    {industry}
+                  </li>
+                ))}
               </ul>
             </div>
           </div>
