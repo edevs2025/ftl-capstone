@@ -64,6 +64,7 @@ const handleClerkWebhook = async (req, res) => {
         return res.status(400).json({ error: "Unsupported event type" });
     }
 
+    
     res.status(200).json({
       success: true,
       message: "Webhook processed successfully",
@@ -232,7 +233,7 @@ const findUserByUsername = async (req, res) => {
 const getUserSessions = async (req, res) => {
   const { id } = req.params;
   try {
-    const user = await userModel.getUserById(id);
+    const user = await userModel.getUserSessions(id);
     if (user) {
       res.json(user);
     } else {
