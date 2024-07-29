@@ -84,6 +84,12 @@ function MockAI() {
       const sessionQData = sessionQResponse.data;
       setSessionQ(sessionQData);
       setSessionQuestion(sessionQData.question.questionContent);
+
+      const introductionText =
+        "Hello, I'm your interviewer for today, and the question is:";
+      const fullText = `${introductionText} ${sessionQData.question.questionContent}`;
+
+      await speakFeedback(fullText);
     } catch (error) {
       console.error("Error creating session or session question:", error);
     }
