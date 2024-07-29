@@ -56,7 +56,7 @@ function Profile() {
       try {
         const token = await getToken();
         const response = await fetch(
-          "http://localhost:3000/user/login",
+          "https://ftl-capstone.onrender.com/user/login",
           {
             method: "POST",
             headers: {
@@ -98,7 +98,7 @@ function Profile() {
       if (decodedUserToken && decodedUserToken.userId) {
         try {
           const response = await axios.get(
-            `http://localhost:3000/user/${decodedUserToken.userId}/session`
+            `https://ftl-capstone.onrender.com/user/${decodedUserToken.userId}/session`
           );
           if (response.status === 200) {
             setUserData(response.data);
@@ -130,7 +130,7 @@ function Profile() {
           const sessionQuestions = await Promise.all(
             session.questions.map(async (question) => {
               const response = await axios.get(
-                `http://localhost:3000/questions/${question.questionId}`
+                `https://ftl-capstone.onrender.com/questions/${question.questionId}`
               );
               return response.data;
             })
