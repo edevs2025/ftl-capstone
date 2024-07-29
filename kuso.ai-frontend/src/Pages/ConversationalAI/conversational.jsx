@@ -44,14 +44,13 @@ const ConversationalSession = () => {
 
         setTranscript((prevTranscript) => {
           if (finalTranscript) {
-            return finalTranscript;
+            if (finalTranscript !== prevTranscript) {
+              return finalTranscript;
+            }
           } else if (interimTranscript) {
-            const lastFinalIndex = prevTranscript.lastIndexOf(" ");
-            const prevFinal =
-              lastFinalIndex !== -1
-                ? prevTranscript.slice(0, lastFinalIndex)
-                : "";
-            return prevFinal + " " + interimTranscript;
+            if (interimTranscript !== prevTranscript) {
+              return interimTranscript;
+            }
           }
           return prevTranscript;
         });
