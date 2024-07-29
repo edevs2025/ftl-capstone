@@ -96,11 +96,20 @@ const getUserSessions = async (id) => {
         where: { userId: parseInt(id) },
         include: {
             industries: true,
-            questions: true,
-            sessions: true,
+            sessions: {
+                include: {
+                    questions: {
+                        include: {
+                            question: true,
+                            feedback: true,
+                        }
+                    },
+                    feedback: true,
+            }
         }
+    }
     });
-    return userInfo.sessions;
+    return userInfo;
 };
 
 // Function to get user by id
