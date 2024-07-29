@@ -50,6 +50,15 @@ const ConversationalSession = () => {
     };
   }, [isListening]);
 
+  const resetSilenceTimeout = () => {
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+    }
+    silenceTimeoutRef.current = setTimeout(() => {
+      handleUserResponse(transcript);
+    }, 3000); // 2.5 seconds of silence
+  };
+
   const startListening = () => {
     setIsListening(true);
     recognitionRef.current.start();
@@ -79,12 +88,27 @@ const ConversationalSession = () => {
     speakText(aiResponse);
   };
 
+  const getAIResponse = async (userMessage) => {
+    try {
+      const response = await fetchOpenAIResponse(apiKey, messages, userMessage);
+      setMessages((prev) => [
+        ...prev,
+        { role: "user", content: userMessage },
+        { role: "assistant", content: response },
+      ]);
+      return response;
+    } catch (error) {
+      console.error("Error fetching AI response:", error);
+      return "I'm sorry, I'm having trouble responding right now. Could you please repeat that?";
+    }
+  };
+
   const speakText = (text) => {
     setIsInterviewerSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.onend = () => {
       setIsInterviewerSpeaking(false);
-      startListening(); // Automatically start listening when AI finishes speaking
+      startListening(); 
     };
     window.speechSynthesis.speak(utterance);
   };
@@ -107,6 +131,15 @@ const ConversationalSession = () => {
         "I'm sorry, I'm having trouble starting the session. Please try again later."
       );
     }
+  };
+
+  const finishSession = () => {
+    stopListening();
+    setSessionStarted(false);
+    setSessionHistory([]);
+    setMessages([]);
+    setCurrentQuestion("");
+    setTranscript("");
   };
 
   return (
@@ -132,6 +165,7 @@ const ConversationalSession = () => {
               </div>
             ))}
           </div>
+          <button onClick={finishSession}>Finish Interview</button>
         </>
       )}
     </div>
