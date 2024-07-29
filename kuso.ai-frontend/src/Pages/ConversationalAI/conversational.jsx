@@ -10,9 +10,11 @@ const ConversationalSession = () => {
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [sessionStarted, setSessionStarted] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
 
   const recognitionRef = useRef(null);
+  const silenceTimeoutRef = useRef(null);
 
   useEffect(() => {
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
@@ -26,6 +28,7 @@ const ConversationalSession = () => {
         const current = event.resultIndex;
         const transcriptText = event.results[current][0].transcript;
         setTranscript(transcriptText);
+        resetSilenceTimeout();
       };
 
       recognitionRef.current.onend = () => {
@@ -41,15 +44,28 @@ const ConversationalSession = () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current);
+      }
     };
   }, [isListening]);
 
   const startListening = () => {
     setIsListening(true);
     recognitionRef.current.start();
+    resetSilenceTimeout();
+  };
+
+  const stopListening = () => {
+    setIsListening(false);
+    recognitionRef.current.stop();
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+    }
   };
 
   const handleUserResponse = async (response) => {
+    stopListening();
     setSessionHistory((prev) => [...prev, { speaker: "User", text: response }]);
     setTranscript("");
 
@@ -61,64 +77,22 @@ const ConversationalSession = () => {
       { speaker: "Interviewer", text: aiResponse },
     ]);
     speakText(aiResponse);
-
-    const nextQuestion = await getNextQuestion();
-    setCurrentQuestion(nextQuestion);
   };
 
-  const getAIResponse = async (userMessage) => {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
-    try {
-      const response = await fetchOpenAIResponse(apiKey, messages, userMessage);
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: userMessage },
-        { role: "assistant", content: response },
-      ]);
-      return response;
-    } catch (error) {
-      console.error("Error fetching AI response:", error);
-      return "I'm sorry, I'm having trouble responding right now. Could you please repeat that?";
-    }
-  };
-
-  const getNextQuestion = async () => {
-    const nextQuestionPrompt =
-      "Generate the next behavioral interview question.";
-    try {
-      const response = await fetchOpenAIResponse(
-        apiKey,
-        messages,
-        nextQuestionPrompt
-      );
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: nextQuestionPrompt },
-        { role: "assistant", content: response },
-      ]);
-      return response;
-    } catch (error) {
-      console.error("Error fetching next question:", error);
-      return "I'm sorry, I'm having trouble generating the next question. Let's continue with your previous response.";
-    }
-  };
-
-  const stopListening = () => {
-    setIsListening(false);
-    recognitionRef.current.stop();
-    handleUserResponse(transcript);
-  };
   const speakText = (text) => {
     setIsInterviewerSpeaking(true);
     const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onend = () => setIsInterviewerSpeaking(false);
+    utterance.onend = () => {
+      setIsInterviewerSpeaking(false);
+      startListening(); // Automatically start listening when AI finishes speaking
+    };
     window.speechSynthesis.speak(utterance);
   };
 
   const startSession = async () => {
+    setSessionStarted(true);
     const initialPrompt =
-      "You are an AI interviewer conducting a behavioral interview. Start the interview with an introduction and the first question.";
+      "You are an AI interviewer conducting a behavioral interview. Start the interview with a brief introduction and the first question.";
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
@@ -139,37 +113,27 @@ const ConversationalSession = () => {
     <div>
       <Navbar />
       <h1>Behavioral Interview Simulation</h1>
-      <button onClick={startSession} disabled={sessionHistory.length > 0}>
-        Start Session
-      </button>
-      <div>
-        <h2>Current Question:</h2>
-        <p>{currentQuestion}</p>
-      </div>
-      <div>
-        <h2>Your Response:</h2>
-        <p>{transcript}</p>
-        <button
-          onClick={startListening}
-          disabled={isListening || isInterviewerSpeaking}
-        >
-          Start Speaking
-        </button>
-        <button
-          onClick={stopListening}
-          disabled={!isListening || isInterviewerSpeaking}
-        >
-          Stop Speaking
-        </button>
-      </div>
-      <div>
-        <h2>Session History:</h2>
-        {sessionHistory.map((entry, index) => (
-          <div key={index}>
-            <strong>{entry.speaker}:</strong> {entry.text}
+      {!sessionStarted && <button onClick={startSession}>Start Session</button>}
+      {sessionStarted && (
+        <>
+          <div>
+            <h2>Current Question:</h2>
+            <p>{currentQuestion}</p>
           </div>
-        ))}
-      </div>
+          <div>
+            <h2>Your Response:</h2>
+            <p>{transcript}</p>
+          </div>
+          <div>
+            <h2>Session History:</h2>
+            {sessionHistory.map((entry, index) => (
+              <div key={index}>
+                <strong>{entry.speaker}:</strong> {entry.text}
+              </div>
+            ))}
+          </div>
+        </>
+      )}
     </div>
   );
 };
