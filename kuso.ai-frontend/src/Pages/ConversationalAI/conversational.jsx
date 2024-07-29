@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios"; // Don't forget to import axios
 import { fetchOpenAIResponse } from "../../utils";
 import "./conversational.css";
 import Navbar from "../../components/Navbar/Navbar";
+import { useAuthContext } from "../../AuthContext"; // Assuming you have a custom hook for authentication
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -11,10 +13,14 @@ const ConversationalSession = () => {
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [messages, setMessages] = useState([]);
   const [sessionStarted, setSessionStarted] = useState(false);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
+  const { authToken, userId } = useAuthContext(); // Custom hook for auth context
 
   const recognitionRef = useRef(null);
   const silenceTimeoutRef = useRef(null);
+  const [audioContext, setAudioContext] = useState(null);
+  const [audioSources, setAudioSources] = useState([]);
 
   useEffect(() => {
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
@@ -25,9 +31,24 @@ const ConversationalSession = () => {
       recognitionRef.current.interimResults = true;
 
       recognitionRef.current.onresult = (event) => {
-        const current = event.resultIndex;
-        const transcriptText = event.results[current][0].transcript;
-        setTranscript(transcriptText);
+        let interimTranscript = "";
+        let finalTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        setTranscript((prevTranscript) => {
+          const newTranscript = finalTranscript || interimTranscript;
+          if (prevTranscript.endsWith(newTranscript)) {
+            return prevTranscript;
+          }
+          return prevTranscript + newTranscript;
+        });
         resetSilenceTimeout();
       };
 
@@ -55,11 +76,15 @@ const ConversationalSession = () => {
       clearTimeout(silenceTimeoutRef.current);
     }
     silenceTimeoutRef.current = setTimeout(() => {
-      handleUserResponse(transcript);
-    }, 3000); // 2.5 seconds of silence
+      setTranscript((currentTranscript) => {
+        handleUserResponse(currentTranscript);
+        return currentTranscript;
+      });
+    }, 3000); // 3 seconds of silence
   };
 
   const startListening = () => {
+    setTranscript("");
     setIsListening(true);
     recognitionRef.current.start();
     resetSilenceTimeout();
@@ -75,17 +100,26 @@ const ConversationalSession = () => {
 
   const handleUserResponse = async (response) => {
     stopListening();
-    setSessionHistory((prev) => [...prev, { speaker: "User", text: response }]);
+    const trimmedResponse = response.trim();
+    if (trimmedResponse !== "") {
+      setSessionHistory((prev) => [
+        ...prev,
+        { speaker: "User", text: trimmedResponse },
+      ]);
+
+      const userMessage = `User's response: "${trimmedResponse}"`;
+      const aiResponse = await getAIResponse(userMessage);
+
+      setSessionHistory((prev) => [
+        ...prev,
+        { speaker: "Interviewer", text: aiResponse },
+      ]);
+      speakText(aiResponse);
+    } else {
+      console.log("Empty response received, not processing.");
+      startListening(); // Restart listening if the response was empty
+    }
     setTranscript("");
-
-    const userMessage = `User's response: "${response}"`;
-    const aiResponse = await getAIResponse(userMessage);
-
-    setSessionHistory((prev) => [
-      ...prev,
-      { speaker: "Interviewer", text: aiResponse },
-    ]);
-    speakText(aiResponse);
   };
 
   const getAIResponse = async (userMessage) => {
@@ -103,14 +137,72 @@ const ConversationalSession = () => {
     }
   };
 
-  const speakText = (text) => {
+  const fetchTTS = async (text) => {
+    const API_KEY = apiKey;
+
+    try {
+      const response = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "tts-1-hd",
+          input: text,
+          voice: "shimmer",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("TTS API request failed");
+      }
+
+      const audioBlob = await response.blob();
+      return URL.createObjectURL(audioBlob);
+    } catch (error) {
+      console.error("Error fetching TTS:", error);
+    }
+  };
+
+  const speakText = async (text) => {
     setIsInterviewerSpeaking(true);
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onend = () => {
-      setIsInterviewerSpeaking(false);
-      startListening(); 
-    };
-    window.speechSynthesis.speak(utterance);
+    const chunkSize = 1000;
+    const chunks = [];
+    for (let i = 0; i < text.length; i += chunkSize) {
+      chunks.push(text.slice(i, i + chunkSize));
+    }
+
+    const newAudioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+    setAudioContext(newAudioContext);
+    const newAudioSources = [];
+
+    for (const chunk of chunks) {
+      try {
+        const audioUrl = await fetchTTS(chunk);
+        const response = await fetch(audioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await newAudioContext.decodeAudioData(arrayBuffer);
+
+        const source = newAudioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.playbackRate.value = 1.15;
+        source.connect(newAudioContext.destination);
+        newAudioSources.push(source);
+
+        await new Promise((resolve) => {
+          source.onended = resolve;
+          source.start();
+        });
+      } catch (error) {
+        console.error("Error playing audio chunk:", error);
+      }
+    }
+
+    setAudioSources(newAudioSources);
+    setIsInterviewerSpeaking(false);
+    startListening();
   };
 
   const startSession = async () => {
