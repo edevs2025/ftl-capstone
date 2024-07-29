@@ -52,6 +52,7 @@ function MockAI() {
   const { authToken, userId } = useAuthContext();
   const [audioContext, setAudioContext] = useState(null);
   const [audioSources, setAudioSources] = useState([]);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -86,12 +87,15 @@ function MockAI() {
       setSessionQuestion(sessionQData.question.questionContent);
 
       const introductionText =
-        "Hello, I'm your interviewer for today, and the question is:";
+        "Hello, I'm your AI interviewer for today. Here's your question:";
       const fullText = `${introductionText} ${sessionQData.question.questionContent}`;
 
+      setIsAISpeaking(true);
       await speakFeedback(fullText);
+      setIsAISpeaking(false);
     } catch (error) {
       console.error("Error creating session or session question:", error);
+      setIsAISpeaking(false);
     }
   };
 
@@ -188,6 +192,7 @@ function MockAI() {
   };
 
   const speakFeedback = async (feedback, speedFactor = 1.15) => {
+    setIsAISpeaking(true);
     const chunkSize = 1000;
     const chunks = [];
     for (let i = 0; i < feedback.length; i += chunkSize) {
@@ -221,6 +226,7 @@ function MockAI() {
       }
     }
 
+    setIsAISpeaking(false);
     setAudioSources(newAudioSources);
   };
 
@@ -420,6 +426,7 @@ function MockAI() {
                     fontSize: "10rem",
                     margin: "0 auto",
                   }}
+                  className={isAISpeaking ? "avatar-speaking" : ""}
                 />
               </Stack>
               <p>Dog</p>
@@ -456,6 +463,7 @@ function MockAI() {
                   fontSize: "10rem",
                   margin: "0 auto",
                 }}
+                className={isAISpeaking ? "avatar-speaking" : ""}
               />
             </Stack>
             <Button
