@@ -146,9 +146,9 @@ const ConversationalSession = () => {
         { speaker: "Interviewer", text: aiResponse },
       ]);
       await speakText(aiResponse);
-      const nextQuestion = await getNextQuestion();
-      setCurrentQuestion(nextQuestion);
-      await speakText(nextQuestion);
+      // const nextQuestion = await getNextQuestion();
+      // setCurrentQuestion(nextQuestion);
+      // await speakText(nextQuestion);
     } else {
       console.log("Empty response received, not processing.");
       startListening();
@@ -261,7 +261,7 @@ const ConversationalSession = () => {
 
   const startSession = async () => {
     setSessionStarted(true);
-    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION`;
+    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After apporpriate responses, please prompt the user to the next question.`;
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
