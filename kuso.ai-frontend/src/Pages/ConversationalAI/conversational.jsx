@@ -1,9 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
-import axios from "axios"; // Don't forget to import axios
+import axios from "axios";
 import { fetchOpenAIResponse } from "../../utils";
 import "./conversational.css";
 import Navbar from "../../components/Navbar/Navbar";
-import { useAuthContext } from "../../AuthContext"; // Assuming you have a custom hook for authentication
+import { useAuthContext } from "../../AuthContext";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -15,7 +15,7 @@ const ConversationalSession = () => {
   const [sessionStarted, setSessionStarted] = useState(false);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const { authToken, userId } = useAuthContext(); // Custom hook for auth context
+  const { authToken, userId } = useAuthContext();
   const lastProcessedTranscriptRef = useRef("");
   const recognitionRef = useRef(null);
   const silenceTimeoutRef = useRef(null);
@@ -88,7 +88,7 @@ const ConversationalSession = () => {
         }
         return currentTranscript;
       });
-    }, 2200); // 3 seconds of silence
+    }, 2200);
   };
 
   const startListening = () => {
@@ -122,10 +122,10 @@ const ConversationalSession = () => {
         ...prev,
         { speaker: "Interviewer", text: aiResponse },
       ]);
-      speakText(aiResponse);
+      await speakText(aiResponse);
     } else {
       console.log("Empty response received, not processing.");
-      startListening(); // Restart listening if the response was empty
+      startListening();
     }
     setTranscript("");
   };
@@ -210,7 +210,7 @@ const ConversationalSession = () => {
 
     setAudioSources(newAudioSources);
     setIsInterviewerSpeaking(false);
-    startListening();
+    // Remove the startListening() call from here
   };
 
   const startSession = async () => {
