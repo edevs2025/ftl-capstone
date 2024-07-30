@@ -1,7 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
+import axios from "axios";
 import { fetchOpenAIResponse } from "../../utils";
 import "./conversational.css";
 import Navbar from "../../components/Navbar/Navbar";
+import { useAuthContext } from "../../AuthContext";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -10,9 +12,15 @@ const ConversationalSession = () => {
   const [currentQuestion, setCurrentQuestion] = useState("");
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [messages, setMessages] = useState([]);
+  const [sessionStarted, setSessionStarted] = useState(false);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
+  const { authToken, userId } = useAuthContext();
+  const lastProcessedTranscriptRef = useRef("");
   const recognitionRef = useRef(null);
+  const silenceTimeoutRef = useRef(null);
+  const [audioContext, setAudioContext] = useState(null);
+  const [audioSources, setAudioSources] = useState([]);
 
   useEffect(() => {
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
@@ -23,9 +31,30 @@ const ConversationalSession = () => {
       recognitionRef.current.interimResults = true;
 
       recognitionRef.current.onresult = (event) => {
-        const current = event.resultIndex;
-        const transcriptText = event.results[current][0].transcript;
-        setTranscript(transcriptText);
+        let interimTranscript = "";
+        let finalTranscript = "";
+
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          if (event.results[i].isFinal) {
+            finalTranscript += event.results[i][0].transcript;
+          } else {
+            interimTranscript += event.results[i][0].transcript;
+          }
+        }
+
+        setTranscript((prevTranscript) => {
+          if (finalTranscript) {
+            if (finalTranscript !== prevTranscript) {
+              return finalTranscript;
+            }
+          } else if (interimTranscript) {
+            if (interimTranscript !== prevTranscript) {
+              return interimTranscript;
+            }
+          }
+          return prevTranscript;
+        });
+        resetSilenceTimeout();
       };
 
       recognitionRef.current.onend = () => {
@@ -41,34 +70,67 @@ const ConversationalSession = () => {
       if (recognitionRef.current) {
         recognitionRef.current.stop();
       }
+      if (silenceTimeoutRef.current) {
+        clearTimeout(silenceTimeoutRef.current);
+      }
     };
   }, [isListening]);
 
+  const resetSilenceTimeout = () => {
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+    }
+    silenceTimeoutRef.current = setTimeout(() => {
+      setTranscript((currentTranscript) => {
+        if (currentTranscript !== lastProcessedTranscriptRef.current) {
+          lastProcessedTranscriptRef.current = currentTranscript;
+          handleUserResponse(currentTranscript);
+        }
+        return currentTranscript;
+      });
+    }, 2200);
+  };
+
   const startListening = () => {
+    setTranscript("");
     setIsListening(true);
     recognitionRef.current.start();
+    resetSilenceTimeout();
+  };
+
+  const stopListening = () => {
+    setIsListening(false);
+    recognitionRef.current.stop();
+    if (silenceTimeoutRef.current) {
+      clearTimeout(silenceTimeoutRef.current);
+    }
   };
 
   const handleUserResponse = async (response) => {
-    setSessionHistory((prev) => [...prev, { speaker: "User", text: response }]);
+    stopListening();
+    const trimmedResponse = response.trim();
+    if (trimmedResponse !== "") {
+      setSessionHistory((prev) => [
+        ...prev,
+        { speaker: "User", text: trimmedResponse },
+      ]);
+
+      const userMessage = `User's response: "${trimmedResponse}"`;
+      const aiResponse = await getAIResponse(userMessage);
+
+      setSessionHistory((prev) => [
+        ...prev,
+        { speaker: "Interviewer", text: aiResponse },
+      ]);
+      await speakText(aiResponse);
+    } else {
+      console.log("Empty response received, not processing.");
+      startListening();
+    }
     setTranscript("");
-
-    const userMessage = `User's response: "${response}"`;
-    const aiResponse = await getAIResponse(userMessage);
-
-    setSessionHistory((prev) => [
-      ...prev,
-      { speaker: "Interviewer", text: aiResponse },
-    ]);
-    speakText(aiResponse);
-
-    const nextQuestion = await getNextQuestion();
-    setCurrentQuestion(nextQuestion);
   };
 
   const getAIResponse = async (userMessage) => {
-    const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-
     try {
       const response = await fetchOpenAIResponse(apiKey, messages, userMessage);
       setMessages((prev) => [
@@ -83,42 +145,78 @@ const ConversationalSession = () => {
     }
   };
 
-  const getNextQuestion = async () => {
-    const nextQuestionPrompt =
-      "Generate the next behavioral interview question.";
+  const fetchTTS = async (text) => {
+    const API_KEY = apiKey;
+
     try {
-      const response = await fetchOpenAIResponse(
-        apiKey,
-        messages,
-        nextQuestionPrompt
-      );
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: nextQuestionPrompt },
-        { role: "assistant", content: response },
-      ]);
-      return response;
+      const response = await fetch("https://api.openai.com/v1/audio/speech", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${API_KEY}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          model: "tts-1-hd",
+          input: text,
+          voice: "shimmer",
+        }),
+      });
+
+      if (!response.ok) {
+        throw new Error("TTS API request failed");
+      }
+
+      const audioBlob = await response.blob();
+      return URL.createObjectURL(audioBlob);
     } catch (error) {
-      console.error("Error fetching next question:", error);
-      return "I'm sorry, I'm having trouble generating the next question. Let's continue with your previous response.";
+      console.error("Error fetching TTS:", error);
     }
   };
 
-  const stopListening = () => {
-    setIsListening(false);
-    recognitionRef.current.stop();
-    handleUserResponse(transcript);
-  };
-  const speakText = (text) => {
+  const speakText = async (text) => {
     setIsInterviewerSpeaking(true);
-    const utterance = new SpeechSynthesisUtterance(text);
-    utterance.onend = () => setIsInterviewerSpeaking(false);
-    window.speechSynthesis.speak(utterance);
+    const chunkSize = 1000;
+    const chunks = [];
+    for (let i = 0; i < text.length; i += chunkSize) {
+      chunks.push(text.slice(i, i + chunkSize));
+    }
+
+    const newAudioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
+    setAudioContext(newAudioContext);
+    const newAudioSources = [];
+
+    for (const chunk of chunks) {
+      try {
+        const audioUrl = await fetchTTS(chunk);
+        const response = await fetch(audioUrl);
+        const arrayBuffer = await response.arrayBuffer();
+        const audioBuffer = await newAudioContext.decodeAudioData(arrayBuffer);
+
+        const source = newAudioContext.createBufferSource();
+        source.buffer = audioBuffer;
+        source.playbackRate.value = 1.15;
+        source.connect(newAudioContext.destination);
+        newAudioSources.push(source);
+
+        await new Promise((resolve) => {
+          source.onended = resolve;
+          source.start();
+        });
+      } catch (error) {
+        console.error("Error playing audio chunk:", error);
+      }
+    }
+
+    setAudioSources(newAudioSources);
+    setIsInterviewerSpeaking(false);
+    // Remove the startListening() call from here
   };
 
   const startSession = async () => {
+    setSessionStarted(true);
     const initialPrompt =
-      "You are an AI interviewer conducting a behavioral interview. Start the interview with an introduction and the first question.";
+      "You are an AI interviewer conducting a behavioral interview. Start the interview with a brief introduction and the first question.";
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
@@ -135,41 +233,41 @@ const ConversationalSession = () => {
     }
   };
 
+  const finishSession = () => {
+    stopListening();
+    setSessionStarted(false);
+    setSessionHistory([]);
+    setMessages([]);
+    setCurrentQuestion("");
+    setTranscript("");
+  };
+
   return (
     <div>
       <Navbar />
       <h1>Behavioral Interview Simulation</h1>
-      <button onClick={startSession} disabled={sessionHistory.length > 0}>
-        Start Session
-      </button>
-      <div>
-        <h2>Current Question:</h2>
-        <p>{currentQuestion}</p>
-      </div>
-      <div>
-        <h2>Your Response:</h2>
-        <p>{transcript}</p>
-        <button
-          onClick={startListening}
-          disabled={isListening || isInterviewerSpeaking}
-        >
-          Start Speaking
-        </button>
-        <button
-          onClick={stopListening}
-          disabled={!isListening || isInterviewerSpeaking}
-        >
-          Stop Speaking
-        </button>
-      </div>
-      <div>
-        <h2>Session History:</h2>
-        {sessionHistory.map((entry, index) => (
-          <div key={index}>
-            <strong>{entry.speaker}:</strong> {entry.text}
+      {!sessionStarted && <button onClick={startSession}>Start Session</button>}
+      {sessionStarted && (
+        <>
+          <div>
+            <h2>Current Question:</h2>
+            <p>{currentQuestion}</p>
           </div>
-        ))}
-      </div>
+          <div>
+            <h2>Your Response:</h2>
+            <p>{transcript}</p>
+          </div>
+          <div>
+            <h2>Session History:</h2>
+            {sessionHistory.map((entry, index) => (
+              <div key={index}>
+                <strong>{entry.speaker}:</strong> {entry.text}
+              </div>
+            ))}
+          </div>
+          <button onClick={finishSession}>Finish Interview</button>
+        </>
+      )}
     </div>
   );
 };
