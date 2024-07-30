@@ -515,19 +515,11 @@ const topics = [
         ))}
       </div>
       <div 
-  className="bookmark-icon"
+  className={`bookmark-icon ${bookmarkedQuestions.includes(row.questionId) ? 'bookmarked' : ''}`}
   onClick={(e) => handleBookmark(row.questionId, e)}
-  style={{
-    position: "absolute",
-    top: "5px",
-    right: "5px",
-    cursor: "pointer",
-    opacity: 1,  // Changed from 0.5 to 1 for better visibility
-    transition: "opacity 0.3s"
-  }}
 >
   {bookmarkedQuestions.includes(row.questionId) ? (
-    <BookmarkIcon style={{ color: "white" }} />  // Changed color to make it stand out
+    <BookmarkIcon style={{ color: "white" }} />
   ) : (
     <BookmarkBorderIcon style={{ color: "white" }} />
   )}
