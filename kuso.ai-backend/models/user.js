@@ -96,6 +96,7 @@ const getUserSessions = async (id) => {
         where: { userId: parseInt(id) },
         include: {
             industries: true,
+            questions: true,
             sessions: {
                 include: {
                     questions: {
