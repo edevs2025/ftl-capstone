@@ -304,3 +304,13 @@ html {
   font-size: 0.875rem;
   border-radius: 15px;
 }
+
+.question-container:hover .bookmark-icon {
+  opacity: 2;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.bookmark-icon{
+  display: none;
+}
