@@ -227,7 +227,7 @@ function Profile() {
           <div className="right-container">
             <div className="stats-container">
               <div className="stat-box">
-                <h2 className="stat-title">Total Visits</h2>
+                <h2 className="stat-title">Total Pratice Sessions</h2>
                 <p className="stat-value">{totalVisits}</p>
               </div>
               <div className="stat-box">
