@@ -53,6 +53,7 @@ function MockAI() {
   const [audioContext, setAudioContext] = useState(null);
   const [audioSources, setAudioSources] = useState([]);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -333,6 +334,7 @@ function MockAI() {
   const handleSubmit = () => {
     setIsLoading(true);
     fetchAIResponse(transcript);
+    setIsSubmitted(true);
   };
 
   const barColors = [
@@ -469,7 +471,7 @@ function MockAI() {
             <Button
               variant="contained"
               onClick={startRecording}
-              disabled={recording}
+              disabled={recording || isSubmitted}
               sx={{ mr: 2 }}
             >
               Start Recording
@@ -485,7 +487,7 @@ function MockAI() {
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={recording || !transcript}
+              disabled={recording || !transcript || isSubmitted}
               sx={{ mr: 2, color: "white" }}
             >
               {isLoading ? "Thinking..." : "Submit"}
