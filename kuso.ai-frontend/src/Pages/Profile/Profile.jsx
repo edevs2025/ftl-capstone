@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import "./Profile.css";
 import Navbar from "../../components/Navbar/Navbar";
+import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import {jwtDecode} from "jwt-decode"; // Remove curly braces
-import { HeatMapGrid } from 'react-grid-heatmap';
 import axios from "axios";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { Line } from 'react-chartjs-2';
@@ -29,6 +29,7 @@ ChartJS.register(
   Legend
 );
 
+
 function Profile() {
   const [userToken, setUserToken] = useState(null);
   const [decodedUserToken, setDecodedUserToken] = useState(null);
@@ -42,9 +43,8 @@ function Profile() {
   const [technicalCount, setTechnicalCount] = useState(0);
   const [caseStudyCount, setCaseStudyCount] = useState(0);
   const [behavioralCount, setBehavioralCount] = useState(0);
+  const navigate = useNavigate();
   const { getToken } = useAuth();
-
-  
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -67,7 +67,6 @@ function Profile() {
           setUserToken(data.token);
         } else {
           console.error("Failed to fetch token");
-        
         }
       } catch (error) {
         console.error("Error fetching token:", error);
@@ -78,7 +77,6 @@ function Profile() {
   }, [getToken]);
 
   useEffect(() => {
-    
     if (userToken) {
       try {
         const decoded = jwtDecode(userToken);
@@ -91,7 +89,6 @@ function Profile() {
   }, [userToken]);
 
   useEffect(() => {
-    
     const fetchUsername = async () => {
       setTotalVisits(0);
       if (decodedUserToken && decodedUserToken.userId) {
@@ -104,13 +101,7 @@ function Profile() {
             setUserQuestions(response.data.questions);
             setUserSessions(response.data.sessions);
             setTotalVisits(response.data.sessions.length);
-            // if(response.data.updatedAt !== updatedAt) {
-            //   setUpdatedAt(response.data.updatedAt);
-            //   setTotalVisits((prev) => prev + 1);
-              
-            // }
             console.log(response.data);
-            // console.log(userSessions);
           } else {
             console.error("Failed to fetch username");
           }
@@ -129,23 +120,21 @@ function Profile() {
     setCaseStudyCount(0);
     setUserScores([]);
     const calculatePieChartData = async () => {
-      //await gatherData();
       if (userData && userData.sessions) {
-        // setUserSessions(userData.sessions);
         userData.sessions.forEach((session) => {
-          if(session.feedback.length > 0) {  
+          if (session.feedback.length > 0) {
             const feedbackk = session.feedback[0];
             setUserScores((prevScore) => [...prevScore, feedbackk.score]);
           }
           session.questions.forEach((question) => {
-              if (question.question.keyword[0] === "technical") setTechnicalCount((prev) => prev + 1);
-              if (question.question.keyword[0] === "behavioral") setBehavioralCount((prev) => prev + 1);
-              if (question.question.keyword[0] === "case study") setCaseStudyCount((prev) => prev + 1);
-            });
+            if (question.question.keyword[0] === "technical") setTechnicalCount((prev) => prev + 1);
+            if (question.question.keyword[0] === "behavioral") setBehavioralCount((prev) => prev + 1);
+            if (question.question.keyword[0] === "case study") setCaseStudyCount((prev) => prev + 1);
+          });
         });
       }
     };
-    
+
     calculatePieChartData();
   }, [userData]);
 
@@ -153,30 +142,22 @@ function Profile() {
     return `${formatDistanceToNowStrict(date)} ago`;
   }
 
-  const generateBookmarkedQuestions = () => {
-    if(userData && userData.questions) {
-      return userData.questions.map((question) => {
-        return (
-          <div className="bookmarked-question">
-            <p>{question.question}</p>
-          </div>
-        );
-      });
-    }
-  }
-  
+  const handleOnClick = (questionId) => {
+    navigate(`/mockai/${questionId}`);
+  };
+
   const pieChartData = [
     { id: 0, value: technicalCount, label: 'Technical' },
     { id: 1, value: behavioralCount, label: 'Behavioral' },
     { id: 2, value: caseStudyCount, label: 'Case Study' },
   ];
-  
+
   const lineChartData = {
-    labels: userScores.map((_, index) => `Session ${index + 1} Score`), // Adjusted labels array
+    labels: userScores.map((_, index) => `Session ${index + 1} Score`),
     datasets: [
       {
         label: 'Grades',
-        data: userScores, 
+        data: userScores,
         backgroundColor: 'rgba(54, 162, 235, 0.2)',
         borderColor: 'rgba(54, 162, 235, 1)',
         borderWidth: 1,
@@ -210,13 +191,6 @@ function Profile() {
     },
   };
 
-  // Dummy data for the heatmap
-  const xLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const yLabels = ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'];
-  const heatmapData = new Array(yLabels.length).fill(0).map(() =>
-    new Array(xLabels.length).fill(0).map(() => Math.floor(Math.random() * 100))
-  );
-  
   return (
     <div>
       <Navbar />
@@ -226,9 +200,9 @@ function Profile() {
             {userData && (
               <div className="profile-info">
                 <strong>
-                  <span style={{display: "flex", gap:".25rem"}}>
-                      <p>{userData.firstName}</p>
-                      <p>{userData.lastName}</p>
+                  <span style={{ display: "flex", gap: ".25rem" }}>
+                    <p>{userData.firstName}</p>
+                    <p>{userData.lastName}</p>
                   </span>
                 </strong>
                 <p>{userData.username}</p>
@@ -236,7 +210,19 @@ function Profile() {
                 <p>Last seen <strong>{formatTimeAgo(new Date(userData.updatedAt))}</strong></p>
               </div>
             )}
-            <div className="Bookmarked Questions">Bookmarked Questions</div>
+            <div className="bookmarked-questions">
+              <h3>Bookmarked Questions</h3>
+              {userQuestions.map((question, index) => (
+                <div
+                  key={index}
+                  className="questions"
+                  onClick={() => handleOnClick(question.questionId)}
+                  style={{ cursor: "pointer", position: "relative" }}
+                >
+                  <p>{question.questionContent}</p>
+                </div>
+              ))}
+            </div>
           </div>
           <div className="right-container">
             <div className="stats-container">
@@ -279,31 +265,8 @@ function Profile() {
               </div>
             </div>
 
-            <div className="heatmap-container">
-              <h2 className="heatmap-title">Activity Breakdown</h2>
-              <HeatMapGrid
-                data={heatmapData}
-                xLabels={xLabels}
-                yLabels={yLabels}
-                cellRender={(x, y, value) => (
-                  <div title={`${xLabels[x]} ${yLabels[y]}: ${value}`}>{value}</div>
-                )}
-                cellStyle={(x, y, ratio) => ({
-                  background: `rgb(12, 160, 44, ${ratio})`,
-                  fontSize: '11px',
-                  color: `rgb(0, 0, 0, ${ratio > 0.5 ? 1 : 0})`
-                })}
-                cellHeight="30px"
-                cellWidth="40px"
-                xLabelsStyle={() => ({
-                  fontSize: '12px',
-                  textTransform: 'uppercase'
-                })}
-                yLabelsStyle={() => ({
-                  fontSize: '12px',
-                  textTransform: 'uppercase'
-                })}
-              />
+            <div className="sessions-container">
+              <h2 className="sessions-title">Activity Breakdown</h2>
             </div>
           </div>
         </div>
@@ -313,3 +276,8 @@ function Profile() {
 }
 
 export default Profile;
+
+
+
+
+
