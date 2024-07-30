@@ -2,6 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import { Box, Typography, Button } from "@mui/material";
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import "./QuestionBank.css";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -169,7 +171,8 @@ const topics = [
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const questionsPerPage = 10;
-  const { isSignedIn } = useAuthContext();
+  const { isSignedIn, userId  } = useAuthContext();
+  const [bookmarkedQuestions, setBookmarkedQuestions] = useState([]);
 
   const navigate = useNavigate();
 
@@ -188,6 +191,22 @@ const topics = [
 
     fetchQuestions();
   }, []);
+
+  useEffect(() => {
+    const fetchBookmarkedQuestions = async () => {
+      if (isSignedIn && userId) {
+        try {
+          const response = await axios.get(`https://ftl-capstone.onrender.com/user/${userId}`);
+          console.log(response)
+          setBookmarkedQuestions(response.data.questions.map(q => q.questionId));
+        } catch (error) {
+          console.error("Error fetching bookmarked questions:", error);
+        }
+      }
+    };
+  
+    fetchBookmarkedQuestions();
+  }, [isSignedIn, userId]);
 
   const handleSearchChange = (event) => {
     setSearchQuery(event.target.value);
@@ -211,6 +230,8 @@ const topics = [
 
   const handleQuestionClick = (id) => {
     if (!isSignedIn) {
+      // Store the question ID in localStorage before redirecting
+      localStorage.setItem('pendingQuestionId', id);
       navigate("/signup");
     } else {
       navigate(`/mockai/${id}`);
@@ -234,6 +255,42 @@ const topics = [
 
   const clearIndustryFilter = () => {
     setSelectedIndustry(null);
+  };
+
+  const handleBookmark = async (questionId, event) => {
+    event.stopPropagation(); // Prevent triggering the question click event
+    
+    if (!isSignedIn) {
+      localStorage.setItem('pendingQuestionIdMark', questionId);
+      navigate("/signup");
+      return;
+    }
+  
+    // Immediately update UI
+    setBookmarkedQuestions(prevBookmarks => 
+      prevBookmarks.includes(questionId)
+        ? prevBookmarks.filter(id => id !== questionId)
+        : [...prevBookmarks, questionId]
+    );
+  
+    try {
+      console.log('question id',questionId)
+      console.log("bookmaked ones",bookmarkedQuestions)
+      if (bookmarkedQuestions.includes(questionId)) {
+        console.log('next question id', questionId)
+        await axios.delete(`https://ftl-capstone.onrender.com/user/${userId}/question/`, {data:{questionId: questionId}});
+      } else {
+        await axios.post(`https://ftl-capstone.onrender.com/user/${userId}/question/`, {questionId: questionId});
+      }
+    } catch (error) {
+      console.error("Error updating bookmark:", error);
+      // Revert UI change if API call fails
+      setBookmarkedQuestions(prevBookmarks => 
+        prevBookmarks.includes(questionId)
+          ? prevBookmarks.filter(id => id !== questionId)
+          : [...prevBookmarks, questionId]
+      );
+    }
   };
 
   const filteredRows = questions.filter(
@@ -439,27 +496,37 @@ const topics = [
               </div>
             </div>
             <div className="question-list-container">
-              <ul>
-                {paginatedRows.map((row) => (
-                  <li
-                    key={row.questionId}
-                    className="question-container"
-                    onClick={() => handleQuestionClick(row.questionId)}
-                    style={{ fontSize: "1.2rem", cursor: "pointer" }}
-                  >
-                    <div>
-                      {row.questionId}. {row.questionContent}
-                    </div>
-                    <div className="question-topics">
-                      {row.keyword.map((word, index) => (
-                        <span key={index} className="keyword">
-                          {word}
-                        </span>
-                      ))}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+            <ul>
+  {paginatedRows.map((row) => (
+    <li
+      key={row.questionId}
+      className="question-container"
+      onClick={() => handleQuestionClick(row.questionId)}
+      style={{ fontSize: "1.2rem", cursor: "pointer", position: "relative" }}
+    >
+      <div>
+        {row.questionId}. {row.questionContent}
+      </div>
+      <div className="question-topics">
+        {row.keyword.map((word, index) => (
+          <span key={index} className="keyword">
+            {word}
+          </span>
+        ))}
+      </div>
+      <div 
+  className={`bookmark-icon ${bookmarkedQuestions.includes(row.questionId) ? 'bookmarked' : ''}`}
+  onClick={(e) => handleBookmark(row.questionId, e)}
+>
+  {bookmarkedQuestions.includes(row.questionId) ? (
+    <BookmarkIcon style={{ color: "white" }} />
+  ) : (
+    <BookmarkBorderIcon style={{ color: "white" }} />
+  )}
+</div>
+    </li>
+  ))}
+</ul>
             </div>
             <StyledPagination
               count={totalPages}
