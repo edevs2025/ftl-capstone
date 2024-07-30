@@ -44,12 +44,7 @@ function Profile() {
   const [behavioralCount, setBehavioralCount] = useState(0);
   const { getToken } = useAuth();
 
-  // Dummy data for the heatmap
-  const xLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const yLabels = ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'];
-  const heatmapData = new Array(yLabels.length).fill(0).map(() =>
-    new Array(xLabels.length).fill(0).map(() => Math.floor(Math.random() * 100))
-  );
+  
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -72,6 +67,7 @@ function Profile() {
           setUserToken(data.token);
         } else {
           console.error("Failed to fetch token");
+        
         }
       } catch (error) {
         console.error("Error fetching token:", error);
@@ -82,6 +78,7 @@ function Profile() {
   }, [getToken]);
 
   useEffect(() => {
+    
     if (userToken) {
       try {
         const decoded = jwtDecode(userToken);
@@ -94,7 +91,9 @@ function Profile() {
   }, [userToken]);
 
   useEffect(() => {
+    
     const fetchUsername = async () => {
+      setTotalVisits(0);
       if (decodedUserToken && decodedUserToken.userId) {
         try {
           const response = await axios.get(
@@ -102,12 +101,14 @@ function Profile() {
           );
           if (response.status === 200) {
             setUserData(response.data);
+            setUserQuestions(response.data.questions);
             setUserSessions(response.data.sessions);
             setTotalVisits(response.data.sessions.length);
-            if(response.data.updatedAt !== updatedAt) {
-              setUpdatedAt(response.data.updatedAt);
-              setTotalVisits((prev) => prev + 1);
-            }
+            // if(response.data.updatedAt !== updatedAt) {
+            //   setUpdatedAt(response.data.updatedAt);
+            //   setTotalVisits((prev) => prev + 1);
+              
+            // }
             console.log(response.data);
             // console.log(userSessions);
           } else {
@@ -123,26 +124,12 @@ function Profile() {
   }, [decodedUserToken]);
 
   useEffect(() => {
-    const gatherData = async () => {
-      if (userSessions.length > 0) {
-        console.log("feedback: ",userFeedback);
-        for (const session of userSessions) {
-          const sessionQuestions = await Promise.all(
-            session.questions.map(async (question) => {
-              const response = await axios.get(
-                `https://ftl-capstone.onrender.com/questions/${question.questionId}`
-              );
-              return response.data;
-            })
-          );
-
-          setUserQuestions((prevQuestions) => [...prevQuestions, ...sessionQuestions]);
-          // setUserFeedback((prevFeedback) => [...prevFeedback, ...session.feedback]);
-        }
-      }
-    };
+    setTechnicalCount(0);
+    setBehavioralCount(0);
+    setCaseStudyCount(0);
+    setUserScores([]);
     const calculatePieChartData = async () => {
-      await gatherData();
+      //await gatherData();
       if (userData && userData.sessions) {
         // setUserSessions(userData.sessions);
         userData.sessions.forEach((session) => {
@@ -164,6 +151,18 @@ function Profile() {
 
   function formatTimeAgo(date) {
     return `${formatDistanceToNowStrict(date)} ago`;
+  }
+
+  const generateBookmarkedQuestions = () => {
+    if(userData && userData.questions) {
+      return userData.questions.map((question) => {
+        return (
+          <div className="bookmarked-question">
+            <p>{question.question}</p>
+          </div>
+        );
+      });
+    }
   }
   
   const pieChartData = [
@@ -210,6 +209,13 @@ function Profile() {
       },
     },
   };
+
+  // Dummy data for the heatmap
+  const xLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const yLabels = ['12am', '3am', '6am', '9am', '12pm', '3pm', '6pm', '9pm'];
+  const heatmapData = new Array(yLabels.length).fill(0).map(() =>
+    new Array(xLabels.length).fill(0).map(() => Math.floor(Math.random() * 100))
+  );
   
   return (
     <div>
@@ -226,11 +232,11 @@ function Profile() {
                   </span>
                 </strong>
                 <p>{userData.username}</p>
-                <p>Questions solved: <strong>10</strong></p>
                 <p>Joined <strong>{formatTimeAgo(new Date(userData.createdAt))}</strong></p>
                 <p>Last seen <strong>{formatTimeAgo(new Date(userData.updatedAt))}</strong></p>
               </div>
             )}
+            <div className="Bookmarked Questions">Bookmarked Questions</div>
           </div>
           <div className="right-container">
             <div className="stats-container">
