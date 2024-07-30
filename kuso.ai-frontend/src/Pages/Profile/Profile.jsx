@@ -67,6 +67,7 @@ function Profile() {
           setUserToken(data.token);
         } else {
           console.error("Failed to fetch token");
+        
         }
       } catch (error) {
         console.error("Error fetching token:", error);
@@ -218,11 +219,11 @@ function Profile() {
                   </span>
                 </strong>
                 <p>{userData.username}</p>
-                <p>Questions solved: <strong>10</strong></p>
                 <p>Joined <strong>{formatTimeAgo(new Date(userData.createdAt))}</strong></p>
                 <p>Last seen <strong>{formatTimeAgo(new Date(userData.updatedAt))}</strong></p>
               </div>
             )}
+            <div className="Bookmarked Questions">Bookmarked Questions</div>
           </div>
           <div className="right-container">
             <div className="stats-container">
