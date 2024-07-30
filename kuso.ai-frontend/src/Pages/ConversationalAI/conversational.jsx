@@ -19,13 +19,31 @@ const ConversationalSession = () => {
   const [messages, setMessages] = useState([]);
   const [sessionStarted, setSessionStarted] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const { authToken, userId } = useAuthContext();
+  const { authToken, isSignedIn, userId } = useAuthContext();
   const lastProcessedTranscriptRef = useRef("");
   const recognitionRef = useRef(null);
   const silenceTimeoutRef = useRef(null);
   const [audioContext, setAudioContext] = useState(null);
   const [audioSources, setAudioSources] = useState([]);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (isSignedIn && userId) {
+        try {
+          const sessionResponse = await axios.get(
+            `https://ftl-capstone.onrender.com/user/${userId}`
+          );
+          setUserData(sessionResponse.data);
+        } catch (error) {
+          console.error("Error fetching session data:", error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [isSignedIn, userId]);
 
   useEffect(() => {
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
@@ -243,8 +261,7 @@ const ConversationalSession = () => {
 
   const startSession = async () => {
     setSessionStarted(true);
-    const initialPrompt =
-      "You are an interviewer conducting a behavioral interview. Start the interview with a brief introduction and the first question.";
+    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION`;
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
@@ -258,6 +275,7 @@ const ConversationalSession = () => {
       setCurrentQuestion(
         "I'm sorry, I'm having trouble starting the session. Please try again later."
       );
+      s;
     }
   };
 
