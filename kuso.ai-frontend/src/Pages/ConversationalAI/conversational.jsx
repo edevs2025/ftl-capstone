@@ -4,6 +4,11 @@ import { fetchOpenAIResponse } from "../../utils";
 import "./conversational.css";
 import Navbar from "../../components/Navbar/Navbar";
 import { useAuthContext } from "../../AuthContext";
+import { Box, Button, Typography } from "@mui/material";
+import AiEffect from "../Landing/AiEffect";
+import Stack from "@mui/material/Stack";
+import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
+import Avatar from "@mui/material/Avatar";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -13,7 +18,6 @@ const ConversationalSession = () => {
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [messages, setMessages] = useState([]);
   const [sessionStarted, setSessionStarted] = useState(false);
-  const [isAISpeaking, setIsAISpeaking] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const { authToken, userId } = useAuthContext();
   const lastProcessedTranscriptRef = useRef("");
@@ -21,6 +25,7 @@ const ConversationalSession = () => {
   const silenceTimeoutRef = useRef(null);
   const [audioContext, setAudioContext] = useState(null);
   const [audioSources, setAudioSources] = useState([]);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
 
   useEffect(() => {
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
@@ -123,11 +128,33 @@ const ConversationalSession = () => {
         { speaker: "Interviewer", text: aiResponse },
       ]);
       await speakText(aiResponse);
+      const nextQuestion = await getNextQuestion();
+      setCurrentQuestion(nextQuestion);
+      await speakText(nextQuestion);
     } else {
       console.log("Empty response received, not processing.");
       startListening();
     }
     setTranscript("");
+  };
+
+  const getNextQuestion = async () => {
+    const nextQuestionPrompt = "Please ask the next interview question.";
+    try {
+      const response = await fetchOpenAIResponse(
+        apiKey,
+        messages,
+        nextQuestionPrompt
+      );
+      setMessages((prev) => [
+        ...prev,
+        { role: "assistant", content: response },
+      ]);
+      return response;
+    } catch (error) {
+      console.error("Error fetching next question:", error);
+      return "I'm sorry, I'm having trouble continuing the interview. Please try again later.";
+    }
   };
 
   const getAIResponse = async (userMessage) => {
@@ -175,6 +202,7 @@ const ConversationalSession = () => {
 
   const speakText = async (text) => {
     setIsInterviewerSpeaking(true);
+    stopListening(); // Stop listening when AI starts speaking
     const chunkSize = 1000;
     const chunks = [];
     for (let i = 0; i < text.length; i += chunkSize) {
@@ -210,13 +238,13 @@ const ConversationalSession = () => {
 
     setAudioSources(newAudioSources);
     setIsInterviewerSpeaking(false);
-    // Remove the startListening() call from here
+    startListening(); // Start listening after AI finishes speaking
   };
 
   const startSession = async () => {
     setSessionStarted(true);
     const initialPrompt =
-      "You are an AI interviewer conducting a behavioral interview. Start the interview with a brief introduction and the first question.";
+      "You are an interviewer conducting a behavioral interview. Start the interview with a brief introduction and the first question.";
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
@@ -245,8 +273,74 @@ const ConversationalSession = () => {
   return (
     <div>
       <Navbar />
-      <h1>Behavioral Interview Simulation</h1>
-      {!sessionStarted && <button onClick={startSession}>Start Session</button>}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1, // Ensure AiEffect is in the background
+        }}
+      >
+        <AiEffect />
+      </Box>
+      <>
+        {!sessionStarted ? (
+          <div className="pre-mockai-container">
+            <div className="pre-mockai-content">
+              <Stack direction="row" spacing={2}>
+                <Avatar
+                  alt="Remy Sharp"
+                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  sx={{
+                    width: "200px",
+                    height: "200px",
+                    fontSize: "10rem",
+                    margin: "0 auto",
+                  }}
+                  className={isAISpeaking ? "avatar-speaking" : ""}
+                />
+              </Stack>
+              <p>Dog</p>
+              <Button
+                className="start-session-button"
+                onClick={startSession}
+                sx={{ color: "black ", backgroundColor: "white" }}
+              >
+                Start Session
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="mockai-container">
+            <div className="ai-content">
+              <Stack
+                direction="column"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                spacing={2}
+              >
+                <Avatar
+                  alt="Remy Sharp"
+                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  sx={{
+                    width: "400px",
+                    height: "400px",
+                    fontSize: "10rem",
+                    margin: "0 auto",
+                  }}
+                  className={isAISpeaking ? "avatar-speaking" : ""}
+                />
+              </Stack>
+            </div>
+          </div>
+        )}
+      </>
+
       {sessionStarted && (
         <>
           <div>
