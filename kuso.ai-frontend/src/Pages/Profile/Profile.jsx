@@ -101,6 +101,7 @@ function Profile() {
           );
           if (response.status === 200) {
             setUserData(response.data);
+            setUserQuestions(response.data.questions);
             setUserSessions(response.data.sessions);
             setTotalVisits(response.data.sessions.length);
             // if(response.data.updatedAt !== updatedAt) {
@@ -150,6 +151,18 @@ function Profile() {
 
   function formatTimeAgo(date) {
     return `${formatDistanceToNowStrict(date)} ago`;
+  }
+
+  const generateBookmarkedQuestions = () => {
+    if(userData && userData.questions) {
+      return userData.questions.map((question) => {
+        return (
+          <div className="bookmarked-question">
+            <p>{question.question}</p>
+          </div>
+        );
+      });
+    }
   }
   
   const pieChartData = [
