@@ -51,7 +51,8 @@ function MockAI() {
   const recognitionRef = useRef(null);
   const { authToken, userId } = useAuthContext();
   const [audioContext, setAudioContext] = useState(null);
-const [audioSources, setAudioSources] = useState([]);
+  const [audioSources, setAudioSources] = useState([]);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -83,12 +84,18 @@ const [audioSources, setAudioSources] = useState([]);
 
       const sessionQData = sessionQResponse.data;
       setSessionQ(sessionQData);
-
-      console.log(sessionQData);
-      console.log(sessionQData.question.questionContent);
       setSessionQuestion(sessionQData.question.questionContent);
+
+      const introductionText =
+        "Hello, I'm your AI interviewer for today. Here's your question:";
+      const fullText = `${introductionText} ${sessionQData.question.questionContent}`;
+
+      setIsAISpeaking(true);
+      await speakFeedback(fullText);
+      setIsAISpeaking(false);
     } catch (error) {
       console.error("Error creating session or session question:", error);
+      setIsAISpeaking(false);
     }
   };
 
@@ -135,7 +142,7 @@ const [audioSources, setAudioSources] = useState([]);
   useEffect(() => {
     return () => {
       if (audioContext) {
-        audioSources.forEach(source => {
+        audioSources.forEach((source) => {
           if (source.stop) {
             source.stop();
           }
@@ -185,29 +192,31 @@ const [audioSources, setAudioSources] = useState([]);
   };
 
   const speakFeedback = async (feedback, speedFactor = 1.15) => {
+    setIsAISpeaking(true);
     const chunkSize = 1000;
     const chunks = [];
     for (let i = 0; i < feedback.length; i += chunkSize) {
       chunks.push(feedback.slice(i, i + chunkSize));
     }
-  
-    const newAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    const newAudioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
     setAudioContext(newAudioContext);
     const newAudioSources = [];
-  
+
     for (const chunk of chunks) {
       try {
         const audioUrl = await fetchTTS(chunk);
         const response = await fetch(audioUrl);
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = await newAudioContext.decodeAudioData(arrayBuffer);
-  
+
         const source = newAudioContext.createBufferSource();
         source.buffer = audioBuffer;
         source.playbackRate.value = speedFactor;
         source.connect(newAudioContext.destination);
         newAudioSources.push(source);
-  
+
         await new Promise((resolve) => {
           source.onended = resolve;
           source.start();
@@ -216,7 +225,8 @@ const [audioSources, setAudioSources] = useState([]);
         console.error("Error playing audio chunk:", error);
       }
     }
-  
+
+    setIsAISpeaking(false);
     setAudioSources(newAudioSources);
   };
 
@@ -259,7 +269,6 @@ const [audioSources, setAudioSources] = useState([]);
       const data = await result.json();
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const responseContent = data.choices[0].message.content;
-        console.log("Full AI Response:", responseContent);
 
         const parsedResponse = JSON.parse(responseContent);
         const feedback = parsedResponse.feedback;
@@ -417,6 +426,7 @@ const [audioSources, setAudioSources] = useState([]);
                     fontSize: "10rem",
                     margin: "0 auto",
                   }}
+                  className={isAISpeaking ? "avatar-speaking" : ""}
                 />
               </Stack>
               <p>Dog</p>
@@ -453,6 +463,7 @@ const [audioSources, setAudioSources] = useState([]);
                   fontSize: "10rem",
                   margin: "0 auto",
                 }}
+                className={isAISpeaking ? "avatar-speaking" : ""}
               />
             </Stack>
             <Button
