@@ -13,12 +13,12 @@ function Signup() {
 
   useEffect(() => {
     if (isSignedIn) {
-      const pendingQuestionId = localStorage.getItem('pendingQuestionId');
-      if (pendingQuestionId) {
-        localStorage.removeItem('pendingQuestionId');
-        navigate(`/mockai/${pendingQuestionId}`);
+      const pendingUrl = localStorage.getItem('pendingUrl');
+      if (pendingUrl) {
+        localStorage.removeItem('pendingUrl');
+        navigate(pendingUrl);
       } else {
-        navigate('/question-bank');
+        navigate('/question-bank'); // Default page after sign-up
       }
     }
   }, [isSignedIn, navigate]);
@@ -39,7 +39,7 @@ function Signup() {
         <ModifiedParticleEffect />
       </Box>
       <div className="signup-container">
-        <SignUp forceRedirectUrl='signup'/>
+        <SignUp forceRedirectUrl='/signup' />
       </div>
     </>
   );
