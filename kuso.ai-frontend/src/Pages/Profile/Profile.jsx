@@ -35,6 +35,7 @@ function Profile() {
   const [decodedUserToken, setDecodedUserToken] = useState(null);
   const [userData, setUserData] = useState(null);
   const [userSessions, setUserSessions] = useState([]);
+  const [overallScore, setOverallScore] = useState(0);
   const [userQuestions, setUserQuestions] = useState([]);
   const [updatedAt, setUpdatedAt] = useState(null);
   const [totalVisits, setTotalVisits] = useState(1);
@@ -119,24 +120,34 @@ function Profile() {
     setBehavioralCount(0);
     setCaseStudyCount(0);
     setUserScores([]);
-    const calculatePieChartData = async () => {
-      if (userData && userData.sessions) {
-        userData.sessions.forEach((session) => {
-          if (session.feedback.length > 0) {
-            const feedbackk = session.feedback[0];
-            setUserScores((prevScore) => [...prevScore, feedbackk.score]);
-          }
-          session.questions.forEach((question) => {
-            if (question.question.keyword[0] === "technical") setTechnicalCount((prev) => prev + 1);
-            if (question.question.keyword[0] === "behavioral") setBehavioralCount((prev) => prev + 1);
-            if (question.question.keyword[0] === "case study") setCaseStudyCount((prev) => prev + 1);
-          });
-        });
-      }
-    };
+      const calculatePieChartData = async () => {
+    if (userData && userData.sessions) {
+      let totalScore = 0;
+      let scoreCount = 0;
 
-    calculatePieChartData();
-  }, [userData]);
+      userData.sessions.forEach((session) => {
+        if (session.feedback.length > 0) {
+          const feedback = session.feedback[0];
+          setUserScores((prevScores) => [...prevScores, feedback.score]);
+          totalScore += feedback.score;
+          scoreCount += 1;
+        }
+
+        session.questions.forEach((question) => {
+          if (question.question.keyword[0] === "technical") setTechnicalCount((prev) => prev + 1);
+          if (question.question.keyword[0] === "behavioral") setBehavioralCount((prev) => prev + 1);
+          if (question.question.keyword[0] === "case study") setCaseStudyCount((prev) => prev + 1);
+        });
+      });
+
+      if (scoreCount > 0) {
+        setOverallScore(totalScore / scoreCount); // Calculate the average score
+      }
+    }
+  };
+
+  calculatePieChartData();
+}, [userData]);
 
   function formatTimeAgo(date) {
     return `${formatDistanceToNowStrict(date)} ago`;
@@ -144,6 +155,10 @@ function Profile() {
 
   const handleOnClick = (questionId) => {
     navigate(`/mockai/${questionId}`);
+  };
+
+  const handleOnClickSession = () => {
+    
   };
 
   const pieChartData = [
@@ -205,9 +220,9 @@ function Profile() {
                     <p>{userData.lastName}</p>
                   </span>
                 </strong>
-                <p>{userData.username}</p>
+                <p>Username: {userData.username}</p>
                 <p>Joined <strong>{formatTimeAgo(new Date(userData.createdAt))}</strong></p>
-                <p>Last seen <strong>{formatTimeAgo(new Date(userData.updatedAt))}</strong></p>
+                <p>Last seen <strong>{formatTimeAgo(new Date(userSessions[userSessions.length - 1].createdAt))}</strong></p>
               </div>
             )}
             <div className="bookmarked-questions">
@@ -227,7 +242,7 @@ function Profile() {
           <div className="right-container">
             <div className="stats-container">
               <div className="stat-box">
-                <h2 className="stat-title">Total Visits</h2>
+                <h2 className="stat-title">Total Pratice Sessions</h2>
                 <p className="stat-value">{totalVisits}</p>
               </div>
               <div className="stat-box">
@@ -235,8 +250,8 @@ function Profile() {
                 <p className="stat-value">{behavioralCount + technicalCount + caseStudyCount}</p>
               </div>
               <div className="stat-box">
-                <h2 className="stat-title">Bounce Rate</h2>
-                <p className="stat-value">40%</p>
+                <h2 className="stat-title">Overall Average Score</h2>
+                <p className="stat-value">{Math.round(overallScore * 1000) / 1000}</p>
               </div>
             </div>
 
@@ -266,7 +281,18 @@ function Profile() {
             </div>
 
             <div className="sessions-container">
-              <h2 className="sessions-title">Activity Breakdown</h2>
+              <h2 className="sessions-title">Past Sessions</h2>
+              {userSessions.map((session, index) => (
+                <div
+                  key={index}
+                  className="sessions"
+                  onClick={() => handleOnClickSession()}
+                  style={{ cursor: "pointer", position: "relative" }}
+                >
+                  <p>Session: {index + 1}</p>
+                  <p>Session Date: {session.createdAt.substring(0, 10)}</p>
+                </div>
+              ))}
             </div>
           </div>
         </div>
