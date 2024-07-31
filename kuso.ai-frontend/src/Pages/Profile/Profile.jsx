@@ -301,17 +301,37 @@ function Profile() {
   ) : (
     <p>No sessions available.</p>
   )}
-  {currentSession && ( <Modal show={currentSession !== null} on onClose={() => setCurrentSession(null)}>
-                    <h2 style={{color: "white"}}>Session {sessionNumber}</h2>
-                    {currentSession.questions.map((question, index) => (
-                      <div
-                      key={index}
-                      className="sessionModal"
-                      style={{color: "white" }}>
-                        <h3>Question: {question.question.questionContent}</h3>
-                        <h3>Your Answer: {}</h3>
-                      </div>))}
-                </Modal>)}
+  {currentSession && (
+  <Modal show={currentSession !== null} onClose={() => setCurrentSession(null)}>
+  <h2 style={{ color: "white" }}>Session {sessionNumber}</h2>
+  {currentSession.questions.length > 0 ? (
+    currentSession.questions.map((question, index) => (
+      <div
+        key={index}
+        className="sessionModal"
+        style={{ color: "white" }}
+      >
+        <h3>Question: {question.question.questionContent}</h3>
+        {question.feedback && question.feedback.length > 0 ? (
+          <>
+            <h3>Your Answer: {question.feedback[0].userAnswer}</h3>
+            <h3>Score: {question.feedback[0].score}</h3>
+            <h3>Answer Evaluation: {question.feedback[0].gptResponse}</h3>
+          </>
+        ) : (
+          <p>No feedback available for this question.</p>
+        )}
+      </div>
+    ))
+  ) : (
+    <p style={{ color: "white" }}>No questions available for this session.</p>
+  )}
+  
+</Modal>
+
+
+)}
+
             </div>
           </div>
         </div>
