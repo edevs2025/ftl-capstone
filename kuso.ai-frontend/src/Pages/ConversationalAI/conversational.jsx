@@ -81,7 +81,7 @@ const ConversationalSession = () => {
       };
 
       recognitionRef.current.onend = () => {
-        if (isListening) {
+        if (isListening && !isAISpeaking) {
           recognitionRef.current.start();
         }
       };
@@ -97,7 +97,7 @@ const ConversationalSession = () => {
         clearTimeout(silenceTimeoutRef.current);
       }
     };
-  }, [isListening]);
+  }, [isListening, isAISpeaking]);
 
   const resetSilenceTimeout = () => {
     if (silenceTimeoutRef.current) {
@@ -115,10 +115,12 @@ const ConversationalSession = () => {
   };
 
   const startListening = () => {
-    setTranscript("");
-    setIsListening(true);
-    recognitionRef.current.start();
-    resetSilenceTimeout();
+    if (!isAISpeaking) {
+      setTranscript("");
+      setIsListening(true);
+      recognitionRef.current.start();
+      resetSilenceTimeout();
+    }
   };
 
   const stopListening = () => {
@@ -146,9 +148,6 @@ const ConversationalSession = () => {
         { speaker: "Interviewer", text: aiResponse },
       ]);
       await speakText(aiResponse);
-      // const nextQuestion = await getNextQuestion();
-      // setCurrentQuestion(nextQuestion);
-      // await speakText(nextQuestion);
     } else {
       console.log("Empty response received, not processing.");
       startListening();
@@ -220,7 +219,7 @@ const ConversationalSession = () => {
 
   const speakText = async (text) => {
     setIsInterviewerSpeaking(true);
-    stopListening(); // Stop listening when AI starts speaking
+    stopListening();
     const chunkSize = 1000;
     const chunks = [];
     for (let i = 0; i < text.length; i += chunkSize) {
@@ -256,7 +255,7 @@ const ConversationalSession = () => {
 
     setAudioSources(newAudioSources);
     setIsInterviewerSpeaking(false);
-    startListening(); // Start listening after AI finishes speaking
+    startListening();
   };
 
   const startSession = async () => {
