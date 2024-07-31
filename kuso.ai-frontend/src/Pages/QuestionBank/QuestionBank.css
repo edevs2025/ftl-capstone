@@ -312,6 +312,7 @@ html {
   cursor: pointer;
   opacity: 0;
   transition: opacity 0.3s;
+  padding: 8px;
 }
 
 .question-container:hover .bookmark-icon {
