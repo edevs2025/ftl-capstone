@@ -1,0 +1,41 @@
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.5); 
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px); 
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+.modal-content {
+    padding: 20px;
+    border-radius: 8px;
+    position: relative;
+    max-width: 80%;
+    max-height: 80%;
+    overflow: auto;
+}
+
+.modal-content img{
+    border-radius: 8px;
+    
+}
+
+.modal-foot {
+    position: relative;
+    bottom: 0;
+    margin: 0 auto;
+    align-self: center;
+    background: none;
+    padding: auto;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+}

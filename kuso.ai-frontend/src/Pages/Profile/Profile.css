@@ -18,6 +18,7 @@
     flex-direction: row;
     
   }
+  
 
   .right-container {
     width: 100vh;
@@ -138,4 +139,15 @@
     color: #333;
     margin-bottom: 15px;
   }
+  .modal-foot {
+    position: relative;
+    bottom: 0;
+    margin: 0 auto;
+    align-self: center;
+    background: none;
+    padding: auto;
+    border: none;
+    font-size: 1.5em;
+    cursor: pointer;
+}
   

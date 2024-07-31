@@ -7,6 +7,7 @@ import {jwtDecode} from "jwt-decode"; // Remove curly braces
 import axios from "axios";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { Line } from 'react-chartjs-2';
+import Modal from "./Modal";
 import { formatDistanceToNowStrict, set } from 'date-fns';
 import {
   Chart as ChartJS,
@@ -40,10 +41,12 @@ function Profile() {
   const [updatedAt, setUpdatedAt] = useState(null);
   const [totalVisits, setTotalVisits] = useState(1);
   const [userFeedback, setUserFeedback] = useState([]);
+  const [sessionNumber, setSessionNumber] = useState(0);
   const [userScores, setUserScores] = useState([]);
   const [technicalCount, setTechnicalCount] = useState(0);
   const [caseStudyCount, setCaseStudyCount] = useState(0);
   const [behavioralCount, setBehavioralCount] = useState(0);
+  const [currentSession, setCurrentSession] = useState(null);
   const navigate = useNavigate();
   const { getToken } = useAuth();
 
@@ -157,8 +160,9 @@ function Profile() {
     navigate(`/mockai/${questionId}`);
   };
 
-  const handleOnClickSession = () => {
-    
+  const handleOnClickSession = (session, index) => {
+    setCurrentSession(session);
+    setSessionNumber(index);
   };
 
   const pieChartData = [
@@ -287,16 +291,47 @@ function Profile() {
       <div
         key={index}
         className="sessions"
-        onClick={() => handleOnClickSession()}
+        onClick={() => handleOnClickSession(session, (index + 1))}
         style={{ cursor: "pointer", position: "relative" }}
       >
-        <p>Session: {index + 1}</p>
-        <p>Session Date: {session.createdAt.substring(0, 10)}</p>
+        <p>Session {index + 1}</p>
+        <p>Date: {session.createdAt.substring(0, 10)}</p>
       </div>
     ))
   ) : (
     <p>No sessions available.</p>
   )}
+  {currentSession && (
+  <Modal show={currentSession !== null} onClose={() => setCurrentSession(null)}>
+  <h2 style={{ color: "white" }}>Session {sessionNumber}</h2>
+  {currentSession.questions.length > 0 ? (
+    currentSession.questions.map((question, index) => (
+      <div
+        key={index}
+        className="sessionModal"
+        style={{ color: "white" }}
+      >
+        <h3>Question: {question.question.questionContent}</h3>
+        {question.feedback && question.feedback.length > 0 ? (
+          <>
+            <h3>Your Answer: {question.feedback[0].userAnswer}</h3>
+            <h3>Score: {question.feedback[0].score}</h3>
+            <h3>Answer Evaluation: {question.feedback[0].gptResponse}</h3>
+          </>
+        ) : (
+          <p>No feedback available for this question.</p>
+        )}
+      </div>
+    ))
+  ) : (
+    <p style={{ color: "white" }}>No questions available for this session.</p>
+  )}
+  
+</Modal>
+
+
+)}
+
             </div>
           </div>
         </div>
