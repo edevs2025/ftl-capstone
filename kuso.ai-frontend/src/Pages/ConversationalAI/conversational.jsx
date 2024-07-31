@@ -4,6 +4,10 @@ import { fetchOpenAIResponse } from "../../utils";
 import "./conversational.css";
 import Navbar from "../../components/Navbar/Navbar";
 import { useAuthContext } from "../../AuthContext";
+import { Box, Button, Typography } from "@mui/material";
+import AiEffect from "../Landing/AiEffect";
+import Stack from "@mui/material/Stack";
+import Avatar from "@mui/material/Avatar";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -13,14 +17,32 @@ const ConversationalSession = () => {
   const [isInterviewerSpeaking, setIsInterviewerSpeaking] = useState(false);
   const [messages, setMessages] = useState([]);
   const [sessionStarted, setSessionStarted] = useState(false);
-  const [isAISpeaking, setIsAISpeaking] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const { authToken, userId } = useAuthContext();
+  const { isSignedIn, userId } = useAuthContext();
   const lastProcessedTranscriptRef = useRef("");
   const recognitionRef = useRef(null);
   const silenceTimeoutRef = useRef(null);
   const [audioContext, setAudioContext] = useState(null);
   const [audioSources, setAudioSources] = useState([]);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (isSignedIn && userId) {
+        try {
+          const sessionResponse = await axios.get(
+            `https://ftl-capstone.onrender.com/user/${userId}`
+          );
+          setUserData(sessionResponse.data);
+        } catch (error) {
+          console.error("Error fetching session data:", error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [isSignedIn, userId]);
 
   useEffect(() => {
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
@@ -123,6 +145,8 @@ const ConversationalSession = () => {
         { speaker: "Interviewer", text: aiResponse },
       ]);
       await speakText(aiResponse);
+
+      startListening();
     } else {
       console.log("Empty response received, not processing.");
       startListening();
@@ -174,49 +198,56 @@ const ConversationalSession = () => {
   };
 
   const speakText = async (text) => {
-    setIsInterviewerSpeaking(true);
-    const chunkSize = 1000;
-    const chunks = [];
-    for (let i = 0; i < text.length; i += chunkSize) {
-      chunks.push(text.slice(i, i + chunkSize));
-    }
+    return new Promise(async (resolve) => {
+      setIsAISpeaking(true);
+      setIsInterviewerSpeaking(true);
+      stopListening();
 
-    const newAudioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
-    setAudioContext(newAudioContext);
-    const newAudioSources = [];
-
-    for (const chunk of chunks) {
-      try {
-        const audioUrl = await fetchTTS(chunk);
-        const response = await fetch(audioUrl);
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await newAudioContext.decodeAudioData(arrayBuffer);
-
-        const source = newAudioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.playbackRate.value = 1.15;
-        source.connect(newAudioContext.destination);
-        newAudioSources.push(source);
-
-        await new Promise((resolve) => {
-          source.onended = resolve;
-          source.start();
-        });
-      } catch (error) {
-        console.error("Error playing audio chunk:", error);
+      const chunkSize = 1000;
+      const chunks = [];
+      for (let i = 0; i < text.length; i += chunkSize) {
+        chunks.push(text.slice(i, i + chunkSize));
       }
-    }
 
-    setAudioSources(newAudioSources);
-    setIsInterviewerSpeaking(false);
-    // Remove the startListening() call from here
+      const newAudioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      setAudioContext(newAudioContext);
+      const newAudioSources = [];
+
+      for (const chunk of chunks) {
+        try {
+          const audioUrl = await fetchTTS(chunk);
+          const response = await fetch(audioUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await newAudioContext.decodeAudioData(
+            arrayBuffer
+          );
+
+          const source = newAudioContext.createBufferSource();
+          source.buffer = audioBuffer;
+          source.playbackRate.value = 1.15;
+          source.connect(newAudioContext.destination);
+          newAudioSources.push(source);
+
+          await new Promise((resolveChunk) => {
+            source.onended = resolveChunk;
+            source.start();
+          });
+        } catch (error) {
+          console.error("Error playing audio chunk:", error);
+        }
+      }
+
+      setAudioSources(newAudioSources);
+      setIsAISpeaking(false);
+      setIsInterviewerSpeaking(false);
+      resolve();
+    });
   };
 
   const startSession = async () => {
     setSessionStarted(true);
-    const initialPrompt =
-      "You are an AI interviewer conducting a behavioral interview. Start the interview with a brief introduction and the first question.";
+    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please prompt the user to the next question.`;
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
@@ -224,7 +255,8 @@ const ConversationalSession = () => {
         { role: "assistant", content: response },
       ]);
       setCurrentQuestion(response);
-      speakText(response);
+      await speakText(response);
+      startListening();
     } catch (error) {
       console.error("Error starting session:", error);
       setCurrentQuestion(
@@ -245,8 +277,74 @@ const ConversationalSession = () => {
   return (
     <div>
       <Navbar />
-      <h1>Behavioral Interview Simulation</h1>
-      {!sessionStarted && <button onClick={startSession}>Start Session</button>}
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1, // Ensure AiEffect is in the background
+        }}
+      >
+        <AiEffect />
+      </Box>
+      <>
+        {!sessionStarted ? (
+          <div className="pre-mockai-container">
+            <div className="pre-mockai-content">
+              <Stack direction="row" spacing={2}>
+                <Avatar
+                  alt="Remy Sharp"
+                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  sx={{
+                    width: "200px",
+                    height: "200px",
+                    fontSize: "10rem",
+                    margin: "0 auto",
+                  }}
+                  className={isAISpeaking ? "avatar-speaking" : ""}
+                />
+              </Stack>
+              <p>Dog</p>
+              <Button
+                className="start-session-button"
+                onClick={startSession}
+                sx={{ color: "black ", backgroundColor: "white" }}
+              >
+                Start Session
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <div className="mockai-container">
+            <div className="ai-content">
+              <Stack
+                direction="column"
+                sx={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+                spacing={2}
+              >
+                <Avatar
+                  alt="Remy Sharp"
+                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  sx={{
+                    width: "400px",
+                    height: "400px",
+                    fontSize: "10rem",
+                    margin: "0 auto",
+                  }}
+                  className={isAISpeaking ? "avatar-speaking" : ""}
+                />
+              </Stack>
+            </div>
+          </div>
+        )}
+      </>
+
       {sessionStarted && (
         <>
           <div>

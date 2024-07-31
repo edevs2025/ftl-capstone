@@ -49,10 +49,12 @@ function MockAI() {
   const [sessionQuestion, setSessionQuestion] = useState(null);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const recognitionRef = useRef(null);
-  const { authToken, userId } = useAuthContext();
+  const { authToken, isSignedIn, userId } = useAuthContext();
   const [audioContext, setAudioContext] = useState(null);
   const [audioSources, setAudioSources] = useState([]);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -63,6 +65,23 @@ function MockAI() {
       setSelectedQuestion(question.question);
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (isSignedIn && userId) {
+        try {
+          const sessionResponse = await axios.get(
+            `https://ftl-capstone.onrender.com/user/${userId}`
+          );
+          setUserData(sessionResponse.data);
+        } catch (error) {
+          console.error("Error fetching session data:", error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [isSignedIn, userId, id]);
 
   const toggleSessionStatus = async () => {
     const newSessionStatus = !sessionIsStarted;
@@ -86,8 +105,7 @@ function MockAI() {
       setSessionQ(sessionQData);
       setSessionQuestion(sessionQData.question.questionContent);
 
-      const introductionText =
-        "Hello, I'm your AI interviewer for today. Here's your question:";
+      const introductionText = `Hello, ${userData.firstName}, I hope you're doing well, I'm your interviewer for today. Here's your question:`;
       const fullText = `${introductionText} ${sessionQData.question.questionContent}`;
 
       setIsAISpeaking(true);
@@ -239,7 +257,7 @@ function MockAI() {
 
   const fetchAIResponse = async (prompt) => {
     const API_KEY = apiKey;
-    const fullPrompt = `You are an interviewer. The following is the question: "${sessionQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
+    const fullPrompt = `You are an interviewer interviewing ${userData.firstName}. The following is the question: "${sessionQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
       const result = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -333,6 +351,7 @@ function MockAI() {
   const handleSubmit = () => {
     setIsLoading(true);
     fetchAIResponse(transcript);
+    setIsSubmitted(true);
   };
 
   const barColors = [
@@ -469,7 +488,7 @@ function MockAI() {
             <Button
               variant="contained"
               onClick={startRecording}
-              disabled={recording}
+              disabled={recording || isSubmitted}
               sx={{ mr: 2 }}
             >
               Start Recording
@@ -485,7 +504,7 @@ function MockAI() {
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={recording || !transcript}
+              disabled={recording || !transcript || isSubmitted}
               sx={{ mr: 2, color: "white" }}
             >
               {isLoading ? "Thinking..." : "Submit"}
