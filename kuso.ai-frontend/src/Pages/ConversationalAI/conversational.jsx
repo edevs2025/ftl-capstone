@@ -26,6 +26,34 @@ const ConversationalSession = () => {
   const [audioSources, setAudioSources] = useState([]);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [selectedInterviewer, setSelectedInterviewer] = useState(null);
+
+  const interviewers = [
+    {
+      name: "Dog",
+      voice: "shimmer",
+      image:
+        "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040",
+    },
+    {
+      name: "Man",
+      voice: "Alloy",
+      image:
+        "https://s3-alpha.figma.com/checkpoints/T7L/thp/HrUl6sYUAMJxLJdw/52767_23922.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWCVDFANMME%2F20240728%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20240728T120000Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=81a3fd438d5561b8ff4053ea1e10ca1f5028e28a7316db68b81292d2415f5e3e",
+    },
+    {
+      name: "Man 2",
+      voice: "Echo",
+      image:
+        "https://www.figma.com/component/26fc6dc8630017f4cc236c31b4662626533cf919/thumbnail?ver=52767%3A24210&fuid=1228001826103345040",
+    },
+    {
+      name: "Woman",
+      voice: "Fable",
+      image:
+        "https://www.figma.com/component/252fc33c0305364520a23f439789194c70172416/thumbnail?ver=52767%3A24221&fuid=1228001826103345040",
+    },
+  ];
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -45,6 +73,11 @@ const ConversationalSession = () => {
   }, [isSignedIn, userId]);
 
   useEffect(() => {
+    // Randomly select an interviewer
+    const randomInterviewer =
+      interviewers[Math.floor(Math.random() * interviewers.length)];
+    setSelectedInterviewer(randomInterviewer);
+
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -182,7 +215,7 @@ const ConversationalSession = () => {
         body: JSON.stringify({
           model: "tts-1-hd",
           input: text,
-          voice: "shimmer",
+          voice: selectedInterviewer.voice, // Use the selected interviewer's voice
         }),
       });
 
@@ -295,8 +328,12 @@ const ConversationalSession = () => {
             <div className="pre-mockai-content">
               <Stack direction="row" spacing={2}>
                 <Avatar
-                  alt="Remy Sharp"
-                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  alt={
+                    selectedInterviewer
+                      ? selectedInterviewer.name
+                      : "Interviewer"
+                  }
+                  src={selectedInterviewer ? selectedInterviewer.image : ""}
                   sx={{
                     width: "200px",
                     height: "200px",
@@ -306,7 +343,9 @@ const ConversationalSession = () => {
                   className={isAISpeaking ? "avatar-speaking" : ""}
                 />
               </Stack>
-              <p>Dog</p>
+              <p>
+                {selectedInterviewer ? selectedInterviewer.name : "Interviewer"}
+              </p>
               <Button
                 className="start-session-button"
                 onClick={startSession}
@@ -329,8 +368,12 @@ const ConversationalSession = () => {
                 spacing={2}
               >
                 <Avatar
-                  alt="Remy Sharp"
-                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  alt={
+                    selectedInterviewer
+                      ? selectedInterviewer.name
+                      : "Interviewer"
+                  }
+                  src={selectedInterviewer ? selectedInterviewer.image : ""}
                   sx={{
                     width: "400px",
                     height: "400px",
