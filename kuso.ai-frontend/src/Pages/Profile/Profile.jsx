@@ -282,17 +282,21 @@ function Profile() {
 
             <div className="sessions-container">
               <h2 className="sessions-title">Past Sessions</h2>
-              {userSessions.map((session, index) => (
-                <div
-                  key={index}
-                  className="sessions"
-                  onClick={() => handleOnClickSession()}
-                  style={{ cursor: "pointer", position: "relative" }}
-                >
-                  <p>Session: {index + 1}</p>
-                  <p>Session Date: {session.createdAt.substring(0, 10)}</p>
-                </div>
-              ))}
+              {userSessions.length > 0 ? (
+    userSessions.map((session, index) => (
+      <div
+        key={index}
+        className="sessions"
+        onClick={() => handleOnClickSession()}
+        style={{ cursor: "pointer", position: "relative" }}
+      >
+        <p>Session: {index + 1}</p>
+        <p>Session Date: {session.createdAt.substring(0, 10)}</p>
+      </div>
+    ))
+  ) : (
+    <p>No sessions available.</p>
+  )}
             </div>
           </div>
         </div>
