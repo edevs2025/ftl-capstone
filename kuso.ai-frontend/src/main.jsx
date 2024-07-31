@@ -17,7 +17,6 @@ ReactDOM.createRoot(document.getElementById('root')).render(
     <ClerkProvider appearance={{
         baseTheme: [dark, neobrutalism],
         variables: { colorPrimary: '#646CFF' },
-        // elements:{footer: 'orange'}
        
       }} publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
       <App />
