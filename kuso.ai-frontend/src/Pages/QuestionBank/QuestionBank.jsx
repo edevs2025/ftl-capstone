@@ -228,10 +228,12 @@ const topics = [
     setPage(1);
   };
 
+  
   const handleQuestionClick = (id) => {
     if (!isSignedIn) {
-      // Store the question ID in localStorage before redirecting
+      // Store the question ID and URL in localStorage before redirecting
       localStorage.setItem('pendingQuestionId', id);
+      localStorage.setItem('pendingUrl', `/mockai/${id}`);
       navigate("/signup");
     } else {
       navigate(`/mockai/${id}`);

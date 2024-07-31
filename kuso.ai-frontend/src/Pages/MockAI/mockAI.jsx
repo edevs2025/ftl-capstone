@@ -49,9 +49,12 @@ function MockAI() {
   const [sessionQuestion, setSessionQuestion] = useState(null);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
   const recognitionRef = useRef(null);
-  const { authToken, userId } = useAuthContext();
+  const { authToken, isSignedIn, userId } = useAuthContext();
   const [audioContext, setAudioContext] = useState(null);
-const [audioSources, setAudioSources] = useState([]);
+  const [audioSources, setAudioSources] = useState([]);
+  const [isAISpeaking, setIsAISpeaking] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [userData, setUserData] = useState(null);
 
   useEffect(() => {
     const question = questionsData.questions.find(
@@ -62,6 +65,23 @@ const [audioSources, setAudioSources] = useState([]);
       setSelectedQuestion(question.question);
     }
   }, [id]);
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      if (isSignedIn && userId) {
+        try {
+          const sessionResponse = await axios.get(
+            `https://ftl-capstone.onrender.com/user/${userId}`
+          );
+          setUserData(sessionResponse.data);
+        } catch (error) {
+          console.error("Error fetching session data:", error);
+        }
+      }
+    };
+
+    fetchUserData();
+  }, [isSignedIn, userId, id]);
 
   const toggleSessionStatus = async () => {
     const newSessionStatus = !sessionIsStarted;
@@ -83,12 +103,17 @@ const [audioSources, setAudioSources] = useState([]);
 
       const sessionQData = sessionQResponse.data;
       setSessionQ(sessionQData);
-
-      console.log(sessionQData);
-      console.log(sessionQData.question.questionContent);
       setSessionQuestion(sessionQData.question.questionContent);
+
+      const introductionText = `Hello, ${userData.firstName}, I hope you're doing well, I'm your interviewer for today. Here's your question:`;
+      const fullText = `${introductionText} ${sessionQData.question.questionContent}`;
+
+      setIsAISpeaking(true);
+      await speakFeedback(fullText);
+      setIsAISpeaking(false);
     } catch (error) {
       console.error("Error creating session or session question:", error);
+      setIsAISpeaking(false);
     }
   };
 
@@ -135,7 +160,7 @@ const [audioSources, setAudioSources] = useState([]);
   useEffect(() => {
     return () => {
       if (audioContext) {
-        audioSources.forEach(source => {
+        audioSources.forEach((source) => {
           if (source.stop) {
             source.stop();
           }
@@ -185,29 +210,31 @@ const [audioSources, setAudioSources] = useState([]);
   };
 
   const speakFeedback = async (feedback, speedFactor = 1.15) => {
+    setIsAISpeaking(true);
     const chunkSize = 1000;
     const chunks = [];
     for (let i = 0; i < feedback.length; i += chunkSize) {
       chunks.push(feedback.slice(i, i + chunkSize));
     }
-  
-    const newAudioContext = new (window.AudioContext || window.webkitAudioContext)();
+
+    const newAudioContext = new (window.AudioContext ||
+      window.webkitAudioContext)();
     setAudioContext(newAudioContext);
     const newAudioSources = [];
-  
+
     for (const chunk of chunks) {
       try {
         const audioUrl = await fetchTTS(chunk);
         const response = await fetch(audioUrl);
         const arrayBuffer = await response.arrayBuffer();
         const audioBuffer = await newAudioContext.decodeAudioData(arrayBuffer);
-  
+
         const source = newAudioContext.createBufferSource();
         source.buffer = audioBuffer;
         source.playbackRate.value = speedFactor;
         source.connect(newAudioContext.destination);
         newAudioSources.push(source);
-  
+
         await new Promise((resolve) => {
           source.onended = resolve;
           source.start();
@@ -216,7 +243,8 @@ const [audioSources, setAudioSources] = useState([]);
         console.error("Error playing audio chunk:", error);
       }
     }
-  
+
+    setIsAISpeaking(false);
     setAudioSources(newAudioSources);
   };
 
@@ -229,7 +257,7 @@ const [audioSources, setAudioSources] = useState([]);
 
   const fetchAIResponse = async (prompt) => {
     const API_KEY = apiKey;
-    const fullPrompt = `You are an interviewer. The following is the question: "${sessionQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
+    const fullPrompt = `You are an interviewer interviewing ${userData.firstName}. The following is the question: "${sessionQuestion}". The candidate's response is: "${prompt}". Please provide feedback and respond in 2nd person. and also return the grades in the following categories: Relevance, Clarity, Problem-Solving from 0.0 to 5.0. The response should be in the following JSON format: { "feedback": "<your feedback here>", "grades": { "Relevance": <grade>, "Clarity": <grade>, "Problem-Solving": <grade> } }`;
 
     try {
       const result = await fetch("https://api.openai.com/v1/chat/completions", {
@@ -259,7 +287,6 @@ const [audioSources, setAudioSources] = useState([]);
       const data = await result.json();
       if (data.choices && data.choices[0] && data.choices[0].message) {
         const responseContent = data.choices[0].message.content;
-        console.log("Full AI Response:", responseContent);
 
         const parsedResponse = JSON.parse(responseContent);
         const feedback = parsedResponse.feedback;
@@ -324,6 +351,7 @@ const [audioSources, setAudioSources] = useState([]);
   const handleSubmit = () => {
     setIsLoading(true);
     fetchAIResponse(transcript);
+    setIsSubmitted(true);
   };
 
   const barColors = [
@@ -417,6 +445,7 @@ const [audioSources, setAudioSources] = useState([]);
                     fontSize: "10rem",
                     margin: "0 auto",
                   }}
+                  className={isAISpeaking ? "avatar-speaking" : ""}
                 />
               </Stack>
               <p>Dog</p>
@@ -453,12 +482,13 @@ const [audioSources, setAudioSources] = useState([]);
                   fontSize: "10rem",
                   margin: "0 auto",
                 }}
+                className={isAISpeaking ? "avatar-speaking" : ""}
               />
             </Stack>
             <Button
               variant="contained"
               onClick={startRecording}
-              disabled={recording}
+              disabled={recording || isSubmitted}
               sx={{ mr: 2 }}
             >
               Start Recording
@@ -474,7 +504,7 @@ const [audioSources, setAudioSources] = useState([]);
             <Button
               variant="contained"
               onClick={handleSubmit}
-              disabled={recording || !transcript}
+              disabled={recording || !transcript || isSubmitted}
               sx={{ mr: 2, color: "white" }}
             >
               {isLoading ? "Thinking..." : "Submit"}

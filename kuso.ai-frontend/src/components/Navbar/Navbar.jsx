@@ -7,19 +7,19 @@ const Navbar = () => {
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const [visible, setVisible] = useState(true);
 
-  useEffect(() => {
-    const handleScroll = () => {
-      const currentScrollPos = window.pageYOffset;
-      const visible = prevScrollPos > currentScrollPos || currentScrollPos < 10;
+  // useEffect(() => {
+  //   const handleScroll = () => {
+  //     const currentScrollPos = window.pageYOffset;
+  //     const visible = prevScrollPos > currentScrollPos || currentScrollPos < 10;
 
-      setPrevScrollPos(currentScrollPos);
-      setVisible(visible);
-    };
+  //     setPrevScrollPos(currentScrollPos);
+  //     setVisible(visible);
+  //   };
 
-    window.addEventListener("scroll", handleScroll);
+  //   window.addEventListener("scroll", handleScroll);
 
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, [prevScrollPos, visible]);
+  //   return () => window.removeEventListener("scroll", handleScroll);
+  // }, [prevScrollPos, visible]);
 
   useEffect(() => {
     const handleScroll = () => {

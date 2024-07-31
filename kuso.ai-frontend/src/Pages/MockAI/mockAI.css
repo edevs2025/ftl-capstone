@@ -7,7 +7,6 @@ body {
   justify-content: center;
   align-items: center;
   height: 100vh;
-  /* background-color: #242424; */
 }
 
 .pre-mockai-content {
@@ -101,4 +100,20 @@ body {
 
 .ai-feedback.expanded {
   width: 50%;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 255, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+  }
+}
+
+.avatar-speaking {
+  animation: pulse 1s infinite;
 }
