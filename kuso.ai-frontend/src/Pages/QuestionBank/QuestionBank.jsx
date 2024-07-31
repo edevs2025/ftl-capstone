@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "../../components/Navbar/Navbar";
 import { Box, Typography, Button } from "@mui/material";
-import BookmarkBorderIcon from "@mui/icons-material/BookmarkBorder";
-import BookmarkIcon from "@mui/icons-material/Bookmark";
+import BookmarkBorderIcon from '@mui/icons-material/BookmarkBorder';
+import BookmarkIcon from '@mui/icons-material/Bookmark';
 import "./QuestionBank.css";
 import TextField from "@mui/material/TextField";
 import Autocomplete from "@mui/material/Autocomplete";
@@ -156,7 +156,12 @@ function QuestionBank() {
     "professional development",
     "regulatory compliance",
   ];
-  const topics = ["behavioral", "case study", "technical"];
+const topics = [
+  "behavioral",
+  "case study",
+  "technical",
+]
+
 
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTopic, setSelectedTopic] = useState(null);
@@ -166,7 +171,7 @@ function QuestionBank() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const questionsPerPage = 10;
-  const { isSignedIn, userId } = useAuthContext();
+  const { isSignedIn, userId  } = useAuthContext();
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState([]);
 
   const navigate = useNavigate();
@@ -191,19 +196,15 @@ function QuestionBank() {
     const fetchBookmarkedQuestions = async () => {
       if (isSignedIn && userId) {
         try {
-          const response = await axios.get(
-            `https://ftl-capstone.onrender.com/user/${userId}`
-          );
-          console.log("responses:", response);
-          setBookmarkedQuestions(
-            response.data.questions.map((q) => q.questionId)
-          );
+          const response = await axios.get(`https://ftl-capstone.onrender.com/user/${userId}`);
+          console.log(response)
+          setBookmarkedQuestions(response.data.questions.map(q => q.questionId));
         } catch (error) {
           console.error("Error fetching bookmarked questions:", error);
         }
       }
     };
-
+  
     fetchBookmarkedQuestions();
   }, [isSignedIn, userId]);
 
@@ -260,41 +261,35 @@ function QuestionBank() {
 
   const handleBookmark = async (questionId, event) => {
     event.stopPropagation(); // Prevent triggering the question click event
-
+    
     if (!isSignedIn) {
-      localStorage.setItem("pendingQuestionIdMark", questionId);
+      localStorage.setItem('pendingQuestionIdMark', questionId);
       navigate("/signup");
       return;
     }
-
+  
     // Immediately update UI
-    setBookmarkedQuestions((prevBookmarks) =>
+    setBookmarkedQuestions(prevBookmarks => 
       prevBookmarks.includes(questionId)
-        ? prevBookmarks.filter((id) => id !== questionId)
+        ? prevBookmarks.filter(id => id !== questionId)
         : [...prevBookmarks, questionId]
     );
-
+  
     try {
-      console.log("question id", questionId);
-      console.log("bookmaked ones", bookmarkedQuestions);
+      console.log('question id',questionId)
+      console.log("bookmaked ones",bookmarkedQuestions)
       if (bookmarkedQuestions.includes(questionId)) {
-        console.log("next question id", questionId);
-        await axios.delete(
-          `https://ftl-capstone.onrender.com/user/${userId}/question/`,
-          { data: { questionId: questionId } }
-        );
+        console.log('next question id', questionId)
+        await axios.delete(`https://ftl-capstone.onrender.com/user/${userId}/question/`, {data:{questionId: questionId}});
       } else {
-        await axios.post(
-          `https://ftl-capstone.onrender.com/user/${userId}/question/`,
-          { questionId: questionId }
-        );
+        await axios.post(`https://ftl-capstone.onrender.com/user/${userId}/question/`, {questionId: questionId});
       }
     } catch (error) {
       console.error("Error updating bookmark:", error);
       // Revert UI change if API call fails
-      setBookmarkedQuestions((prevBookmarks) =>
+      setBookmarkedQuestions(prevBookmarks => 
         prevBookmarks.includes(questionId)
-          ? prevBookmarks.filter((id) => id !== questionId)
+          ? prevBookmarks.filter(id => id !== questionId)
           : [...prevBookmarks, questionId]
       );
     }
@@ -305,8 +300,7 @@ function QuestionBank() {
       row.questionContent.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (!selectedKeyword || row.keyword.includes(selectedKeyword)) &&
       (!selectedTopic || row.keyword.includes(selectedTopic)) &&
-      (!selectedIndustry ||
-        row.industries.some((ind) => ind.industryName === selectedIndustry))
+      (!selectedIndustry || row.industries.some(ind => ind.industryName === selectedIndustry))
   );
 
   const paginatedRows = filteredRows.slice(
@@ -385,7 +379,7 @@ function QuestionBank() {
               />
               <div className="filter-labels">
                 <Autocomplete
-                  options={keywords}
+                  options={ keywords }
                   value={selectedKeyword}
                   onChange={handleKeywordChange}
                   renderInput={(params) => (
@@ -444,7 +438,7 @@ function QuestionBank() {
                 />
 
                 <Autocomplete
-                  options={topics}
+                  options={ topics }
                   value={selectedTopic}
                   onChange={handleTopicChange}
                   renderInput={(params) => (
@@ -504,45 +498,37 @@ function QuestionBank() {
               </div>
             </div>
             <div className="question-list-container">
-              <ul>
-                {paginatedRows.map((row) => (
-                  <li
-                    key={row.questionId}
-                    className="question-container"
-                    onClick={() => handleQuestionClick(row.questionId)}
-                    style={{
-                      fontSize: "1.2rem",
-                      cursor: "pointer",
-                      position: "relative",
-                    }}
-                  >
-                    <div>
-                      {row.questionId}. {row.questionContent}
-                    </div>
-                    <div className="question-topics">
-                      {row.keyword.map((word, index) => (
-                        <span key={index} className="keyword">
-                          {word}
-                        </span>
-                      ))}
-                    </div>
-                    <div
-                      className={`bookmark-icon ${
-                        bookmarkedQuestions.includes(row.questionId)
-                          ? "bookmarked"
-                          : ""
-                      }`}
-                      onClick={(e) => handleBookmark(row.questionId, e)}
-                    >
-                      {bookmarkedQuestions.includes(row.questionId) ? (
-                        <BookmarkIcon style={{ color: "white" }} />
-                      ) : (
-                        <BookmarkBorderIcon style={{ color: "white" }} />
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+            <ul>
+  {paginatedRows.map((row) => (
+    <li
+      key={row.questionId}
+      className="question-container"
+      onClick={() => handleQuestionClick(row.questionId)}
+      style={{ fontSize: "1.2rem", cursor: "pointer", position: "relative" }}
+    >
+      <div>
+        {row.questionId}. {row.questionContent}
+      </div>
+      <div className="question-topics">
+        {row.keyword.map((word, index) => (
+          <span key={index} className="keyword">
+            {word}
+          </span>
+        ))}
+      </div>
+      <div 
+  className={`bookmark-icon ${bookmarkedQuestions.includes(row.questionId) ? 'bookmarked' : ''}`}
+  onClick={(e) => handleBookmark(row.questionId, e)}
+>
+  {bookmarkedQuestions.includes(row.questionId) ? (
+    <BookmarkIcon style={{ color: "white" }} />
+  ) : (
+    <BookmarkBorderIcon style={{ color: "white" }} />
+  )}
+</div>
+    </li>
+  ))}
+</ul>
             </div>
             <StyledPagination
               count={totalPages}
@@ -575,17 +561,15 @@ function QuestionBank() {
                   "Pharmaceuticals and Biotechnology",
                   "Legal Services",
                   "Environmental Services",
-                  "Arts, Media, and Entertainment",
+                  "Arts, Media, and Entertainment"
                 ].map((industry, index) => (
-                  <li
-                    key={index}
+                  <li 
+                    key={index} 
                     onClick={() => handleIndustryClick(industry)}
                     style={{
-                      cursor: "pointer",
-                      color:
-                        selectedIndustry === industry ? "#000000" : "inherit",
-                      fontWeight:
-                        selectedIndustry === industry ? "bold" : "normal",
+                      cursor: 'pointer',
+                      color: selectedIndustry === industry ? '#000000' : 'inherit',
+                      fontWeight: selectedIndustry === industry ? 'bold' : 'normal'
                     }}
                   >
                     {industry}
