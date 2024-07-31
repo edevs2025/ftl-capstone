@@ -7,7 +7,6 @@ import { useAuthContext } from "../../AuthContext";
 import { Box, Button, Typography } from "@mui/material";
 import AiEffect from "../Landing/AiEffect";
 import Stack from "@mui/material/Stack";
-import ArrowBackIosIcon from "@mui/icons-material/ArrowBackIos";
 import Avatar from "@mui/material/Avatar";
 
 const ConversationalSession = () => {
@@ -19,7 +18,7 @@ const ConversationalSession = () => {
   const [messages, setMessages] = useState([]);
   const [sessionStarted, setSessionStarted] = useState(false);
   const apiKey = import.meta.env.VITE_OPENAI_API_KEY;
-  const { authToken, isSignedIn, userId } = useAuthContext();
+  const { isSignedIn, userId } = useAuthContext();
   const lastProcessedTranscriptRef = useRef("");
   const recognitionRef = useRef(null);
   const silenceTimeoutRef = useRef(null);
@@ -81,7 +80,7 @@ const ConversationalSession = () => {
       };
 
       recognitionRef.current.onend = () => {
-        if (isListening && !isAISpeaking) {
+        if (isListening) {
           recognitionRef.current.start();
         }
       };
@@ -97,7 +96,7 @@ const ConversationalSession = () => {
         clearTimeout(silenceTimeoutRef.current);
       }
     };
-  }, [isListening, isAISpeaking]);
+  }, [isListening]);
 
   const resetSilenceTimeout = () => {
     if (silenceTimeoutRef.current) {
@@ -115,12 +114,10 @@ const ConversationalSession = () => {
   };
 
   const startListening = () => {
-    if (!isAISpeaking) {
-      setTranscript("");
-      setIsListening(true);
-      recognitionRef.current.start();
-      resetSilenceTimeout();
-    }
+    setTranscript("");
+    setIsListening(true);
+    recognitionRef.current.start();
+    resetSilenceTimeout();
   };
 
   const stopListening = () => {
@@ -148,30 +145,13 @@ const ConversationalSession = () => {
         { speaker: "Interviewer", text: aiResponse },
       ]);
       await speakText(aiResponse);
+
+      startListening();
     } else {
       console.log("Empty response received, not processing.");
       startListening();
     }
     setTranscript("");
-  };
-
-  const getNextQuestion = async () => {
-    const nextQuestionPrompt = "Please ask the next interview question.";
-    try {
-      const response = await fetchOpenAIResponse(
-        apiKey,
-        messages,
-        nextQuestionPrompt
-      );
-      setMessages((prev) => [
-        ...prev,
-        { role: "assistant", content: response },
-      ]);
-      return response;
-    } catch (error) {
-      console.error("Error fetching next question:", error);
-      return "I'm sorry, I'm having trouble continuing the interview. Please try again later.";
-    }
   };
 
   const getAIResponse = async (userMessage) => {
@@ -218,49 +198,56 @@ const ConversationalSession = () => {
   };
 
   const speakText = async (text) => {
-    setIsInterviewerSpeaking(true);
-    stopListening();
-    const chunkSize = 1000;
-    const chunks = [];
-    for (let i = 0; i < text.length; i += chunkSize) {
-      chunks.push(text.slice(i, i + chunkSize));
-    }
+    return new Promise(async (resolve) => {
+      setIsAISpeaking(true);
+      setIsInterviewerSpeaking(true);
+      stopListening();
 
-    const newAudioContext = new (window.AudioContext ||
-      window.webkitAudioContext)();
-    setAudioContext(newAudioContext);
-    const newAudioSources = [];
-
-    for (const chunk of chunks) {
-      try {
-        const audioUrl = await fetchTTS(chunk);
-        const response = await fetch(audioUrl);
-        const arrayBuffer = await response.arrayBuffer();
-        const audioBuffer = await newAudioContext.decodeAudioData(arrayBuffer);
-
-        const source = newAudioContext.createBufferSource();
-        source.buffer = audioBuffer;
-        source.playbackRate.value = 1.15;
-        source.connect(newAudioContext.destination);
-        newAudioSources.push(source);
-
-        await new Promise((resolve) => {
-          source.onended = resolve;
-          source.start();
-        });
-      } catch (error) {
-        console.error("Error playing audio chunk:", error);
+      const chunkSize = 1000;
+      const chunks = [];
+      for (let i = 0; i < text.length; i += chunkSize) {
+        chunks.push(text.slice(i, i + chunkSize));
       }
-    }
 
-    setAudioSources(newAudioSources);
-    setIsInterviewerSpeaking(false);
-    startListening();
+      const newAudioContext = new (window.AudioContext ||
+        window.webkitAudioContext)();
+      setAudioContext(newAudioContext);
+      const newAudioSources = [];
+
+      for (const chunk of chunks) {
+        try {
+          const audioUrl = await fetchTTS(chunk);
+          const response = await fetch(audioUrl);
+          const arrayBuffer = await response.arrayBuffer();
+          const audioBuffer = await newAudioContext.decodeAudioData(
+            arrayBuffer
+          );
+
+          const source = newAudioContext.createBufferSource();
+          source.buffer = audioBuffer;
+          source.playbackRate.value = 1.15;
+          source.connect(newAudioContext.destination);
+          newAudioSources.push(source);
+
+          await new Promise((resolveChunk) => {
+            source.onended = resolveChunk;
+            source.start();
+          });
+        } catch (error) {
+          console.error("Error playing audio chunk:", error);
+        }
+      }
+
+      setAudioSources(newAudioSources);
+      setIsAISpeaking(false);
+      setIsInterviewerSpeaking(false);
+      resolve();
+    });
   };
 
   const startSession = async () => {
     setSessionStarted(true);
-    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After apporpriate responses, please prompt the user to the next question.`;
+    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please prompt the user to the next question.`;
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
@@ -268,13 +255,13 @@ const ConversationalSession = () => {
         { role: "assistant", content: response },
       ]);
       setCurrentQuestion(response);
-      speakText(response);
+      await speakText(response);
+      startListening();
     } catch (error) {
       console.error("Error starting session:", error);
       setCurrentQuestion(
         "I'm sorry, I'm having trouble starting the session. Please try again later."
       );
-      s;
     }
   };
 
