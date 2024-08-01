@@ -56,6 +56,9 @@ const ConversationalSession = () => {
   ];
 
   useEffect(() => {
+    const randomInterviewer =
+      interviewers[Math.floor(Math.random() * interviewers.length)];
+    setSelectedInterviewer(randomInterviewer);
     const fetchUserData = async () => {
       if (isSignedIn && userId) {
         try {
@@ -73,11 +76,6 @@ const ConversationalSession = () => {
   }, [isSignedIn, userId]);
 
   useEffect(() => {
-    // Randomly select an interviewer
-    const randomInterviewer =
-      interviewers[Math.floor(Math.random() * interviewers.length)];
-    setSelectedInterviewer(randomInterviewer);
-
     if ("SpeechRecognition" in window || "webkitSpeechRecognition" in window) {
       const SpeechRecognition =
         window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -215,7 +213,7 @@ const ConversationalSession = () => {
         body: JSON.stringify({
           model: "tts-1-hd",
           input: text,
-          voice: selectedInterviewer.voice, // Use the selected interviewer's voice
+          voice: "shimmer",
         }),
       });
 

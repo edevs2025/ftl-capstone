@@ -495,7 +495,9 @@ function MockAI() {
                   className={isAISpeaking ? "avatar-speaking" : ""}
                 />
               </Stack>
-              <p>{selectedInterviewer ? selectedInterviewer.name : ""}</p>
+              <p style={{ fontSize: "2rem" }}>
+                {selectedInterviewer ? selectedInterviewer.name : ""}
+              </p>
               <Button
                 className="start-session-button"
                 onClick={toggleSessionStatus}
