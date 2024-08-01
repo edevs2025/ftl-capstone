@@ -78,6 +78,7 @@ const updateUser = async (id, userData) => {
     const updatedData = {
         ...existingUser,
         ...userData,
+        age: userData.age != null ? parseInt(userData.age, 10) : null,
     };
     return prisma.user.update({
         where: { userId: parseInt(id) },
