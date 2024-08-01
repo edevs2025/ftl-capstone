@@ -36,14 +36,11 @@ function MockAI() {
   const { id } = useParams();
   const [selectedQuestion, setSelectedQuestion] = useState("");
   const [response, setResponse] = useState("");
-  const [transcript, setTranscript] = useState(
-    "At my previous job, we faced a significant challenge when our main product experienced a critical bug just before an important client presentation. The bug caused the software to crash, and we had less than 24 hours to fix it. I coordinated with the development team to identify the root cause and worked overnight to implement and test the solution. We managed to resolve the issue and successfully delivered the presentation on time. This experience taught me the importance of teamwork and staying calm under pressure."
-  );
+  const [transcript, setTranscript] = useState("");
   const [recording, setRecording] = useState(false);
   const [grades, setGrades] = useState(null);
   const [sessionIsStarted, setSessionIsStarted] = useState(false);
   const [isFeedbackExpanded, setIsFeedbackExpanded] = useState(false);
-  const [initialAIResponse, setInitialAIResponse] = useState("");
   const [sessionQ, setSessionQ] = useState(null);
   const [isLoading, setIsLoading] = useState(false);
   const [sessionQuestion, setSessionQuestion] = useState(null);
@@ -97,20 +94,6 @@ function MockAI() {
   ];
 
   useEffect(() => {
-    const question = questionsData.questions.find(
-      (q) => q.id === parseInt(id, 10)
-    );
-
-    if (question) {
-      setSelectedQuestion(question.question);
-    }
-
-    const randomInterviewer =
-      interviewers[Math.floor(Math.random() * interviewers.length)];
-    setSelectedInterviewer(randomInterviewer);
-  }, [id]);
-
-  useEffect(() => {
     const fetchUserData = async () => {
       if (isSignedIn && userId) {
         try {
@@ -127,9 +110,13 @@ function MockAI() {
     fetchUserData();
   }, [isSignedIn, userId, id]);
 
-  const toggleSessionStatus = async () => {
-    const newSessionStatus = !sessionIsStarted;
-    setSessionIsStarted(newSessionStatus);
+  useEffect(() => {
+    if (userId) {
+      getSessionData();
+    }
+  }, [userId]);
+
+  const getSessionData = async () => {
     try {
       const sessionResponse = await axios.post(
         `https://ftl-capstone.onrender.com/session`,
@@ -148,9 +135,22 @@ function MockAI() {
       const sessionQData = sessionQResponse.data;
       setSessionQ(sessionQData);
       setSessionQuestion(sessionQData.question.questionContent);
+      console.log(sessionQuestion);
 
+      const randomInterviewer =
+        interviewers[Math.floor(Math.random() * interviewers.length)];
+      setSelectedInterviewer(randomInterviewer);
+    } catch (error) {
+      console.error("Error fetching session data:", error);
+    }
+  };
+
+  const toggleSessionStatus = async () => {
+    const newSessionStatus = !sessionIsStarted;
+    setSessionIsStarted(newSessionStatus);
+    try {
       const introductionText = `Hello, ${userData.firstName}, I hope you're doing well, I'm your interviewer for today. Here's your question:`;
-      const fullText = `${introductionText} ${sessionQData.question.questionContent}`;
+      const fullText = `${introductionText} ${sessionQuestion}`;
 
       setIsAISpeaking(true);
       await speakFeedback(fullText);
@@ -478,6 +478,9 @@ function MockAI() {
       {!sessionIsStarted ? (
         <>
           <div className="pre-mockai-container">
+            <h1 style={{ color: "white", marginBottom: "5rem" }}>
+              {sessionQuestion}
+            </h1>
             <div className="pre-mockai-content">
               <Stack direction="row" spacing={2}>
                 <Avatar
