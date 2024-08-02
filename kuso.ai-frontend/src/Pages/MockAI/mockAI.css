@@ -1,0 +1,120 @@
+body {
+  color: white;
+}
+
+.pre-mockai-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  flex-direction: column;
+}
+
+.pre-mockai-content {
+  position: relative;
+  border-radius: 15px;
+  padding: 2rem;
+  width: 400px;
+  height: 400px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  background: #1a1a1a;
+  border: 1px solid #646cff;
+  color: white;
+  overflow: hidden;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.pre-mockai-content::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 100%;
+  background: linear-gradient(145deg, transparent 35%, #646cff, #40c9ff);
+  transition: left 0.3s ease;
+  z-index: 0;
+  opacity: 0.7;
+}
+
+.pre-mockai-content:hover {
+  box-shadow: 0 12px 24px rgba(100, 108, 255, 0.3);
+  border-color: #40c9ff;
+}
+
+.pre-mockai-content:hover::before {
+  left: 0;
+}
+
+.pre-mockai-content > * {
+  position: relative;
+  z-index: 1;
+}
+
+.pre-mockai-content p {
+  font-size: 1.25rem;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+  color: white;
+}
+
+.start-session-button {
+  background-color: white !important;
+  color: #646cff !important;
+  border: none !important;
+}
+
+.start-session-button:hover {
+  background-color: #f0f0f0 !important;
+}
+
+.mockai-container {
+  display: flex;
+  width: 100vw;
+}
+
+.ai-content {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 80%;
+  padding: 2rem;
+  margin: 0 auto;
+  justify-content: center;
+  align-items: center;
+}
+
+.ai-feedback {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 0px;
+  overflow-y: auto;
+  max-height: 100vh;
+  background-color: #373737;
+  min-height: 100vh;
+  transition: width 0.5s ease;
+}
+
+.ai-feedback.expanded {
+  width: 50%;
+}
+
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0.7);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(0, 255, 0, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(0, 255, 0, 0);
+  }
+}
+
+.avatar-speaking {
+  animation: pulse 1s infinite;
+}
