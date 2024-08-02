@@ -194,13 +194,12 @@ const ConversationalSession = () => {
       stopListening();
       setIsProcessing(true);
 
-      // Update session history with the user response
       setSessionHistory((prev) => {
         const updatedHistory = [
           ...prev,
           { speaker: "User", text: trimmedResponse },
         ];
-        processAIResponse(trimmedResponse, updatedHistory); // Call the function to process AI response
+        processAIResponse(trimmedResponse, updatedHistory);
         return updatedHistory;
       });
     } else {
