@@ -4,7 +4,6 @@ import App from "./App.jsx";
 import "./index.css";
 import { ClerkProvider } from "@clerk/clerk-react";
 import { dark, neobrutalism, shadesOfPurple } from "@clerk/themes";
-import "bootstrap/dist/css/bootstrap.min.css";
 
 // Import your publishable key
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY;

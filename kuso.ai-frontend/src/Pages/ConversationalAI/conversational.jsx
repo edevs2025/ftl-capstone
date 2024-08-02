@@ -7,7 +7,6 @@ import { Box, Button, Typography } from "@mui/material";
 import AiEffect from "../Landing/AiEffect";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
-import "bootstrap/dist/css/bootstrap.min.css";
 import "./conversational.css";
 
 const ConversationalSession = () => {
