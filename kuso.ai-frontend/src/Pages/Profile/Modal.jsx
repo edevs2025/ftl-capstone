@@ -12,7 +12,7 @@ const Modal = ({ show, onClose, children }) => {
           {children}
         </div>
         <div className="modal-foot">
-          <button style={{ padding: '7px' }} onClick={onClose}>Close</button>
+          <button style={{ padding: '7px', fontSize: '10px' }} onClick={onClose}>Close</button>
         </div>
       </div>
     </div>

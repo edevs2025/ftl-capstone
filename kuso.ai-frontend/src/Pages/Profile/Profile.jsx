@@ -277,7 +277,7 @@ const checkProfileCompletion = (data) => {
         beginAtZero: true,
         max: 5,
         ticks: {
-          stepSize: 1,
+          stepSize: .5,
         },
         title: {
           display: true,
@@ -400,7 +400,7 @@ const checkProfileCompletion = (data) => {
   )}
   {currentSession && (
   <Modal show={currentSession !== null} onClose={() => setCurrentSession(null)}>
-  <h2 style={{ color: "white" }}>Session {sessionNumber}</h2>
+  <h2 style={{ color: "white", textAlign: "center"}}>Session {sessionNumber}</h2><br />
   {currentSession.questions.length > 0 ? (
     currentSession.questions.map((question, index) => (
       <div
@@ -408,12 +408,14 @@ const checkProfileCompletion = (data) => {
         className="sessionModal"
         style={{ color: "white" }}
       >
-        <h3>Question: {question.question.questionContent}</h3>
+        <h2>Question: {question.question.questionContent}</h2><br />
         {question.feedback && question.feedback.length > 0 ? (
           <>
-            <h3>Your Answer: {question.feedback[0].userAnswer}</h3>
-            <h3>Score: {question.feedback[0].score}</h3>
-            <h3>Answer Evaluation: {question.feedback[0].gptResponse}</h3>
+            <h3>Your Answer:</h3>
+            <p>{question.feedback[0].userAnswer}</p><br />
+            <h3>Answer Evaluation:</h3>
+            <p>{question.feedback[0].gptResponse}</p><br />
+            <h3>Score: {question.feedback[0].score}</h3><br />
           </>
         ) : (
           <p>No feedback available for this question.</p>
