@@ -7,6 +7,7 @@ import { Box, Button, Typography } from "@mui/material";
 import AiEffect from "../Landing/AiEffect";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
+import "bootstrap/dist/css/bootstrap.min.css";
 import "./conversational.css";
 
 const ConversationalSession = () => {
@@ -29,6 +30,7 @@ const ConversationalSession = () => {
   const [selectedInterviewer, setSelectedInterviewer] = useState(null);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [interviewVoice, setInterviewVoice] = useState("shimmer");
+  const [isProcessing, setIsProcessing] = useState(false);
 
   const interviewers = [
     {
@@ -38,14 +40,14 @@ const ConversationalSession = () => {
         "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040",
     },
     {
-      name: "Alloy",
-      voice: "alloy",
+      name: "Echo",
+      voice: "echo",
       image:
         "https://s3-alpha.figma.com/checkpoints/T7L/thp/HrUl6sYUAMJxLJdw/52767_23922.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWCVDFANMME%2F20240728%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20240728T120000Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=81a3fd438d5561b8ff4053ea1e10ca1f5028e28a7316db68b81292d2415f5e3e",
     },
     {
-      name: "Echo",
-      voice: "echo",
+      name: "Onyx",
+      voice: "onyx",
       image:
         "https://www.figma.com/component/26fc6dc8630017f4cc236c31b4662626533cf919/thumbnail?ver=52767%3A24210&fuid=1228001826103345040",
     },
@@ -54,6 +56,18 @@ const ConversationalSession = () => {
       voice: "fable",
       image:
         "https://www.figma.com/component/252fc33c0305364520a23f439789194c70172416/thumbnail?ver=52767%3A24221&fuid=1228001826103345040",
+    },
+    {
+      name: "Alloy",
+      voice: "alloy",
+      image:
+        "https://www.figma.com/component/59ec62c78c561af2a25fb4ea1e9834cab431859a/thumbnail?ver=52767%3A24225&fuid=1228001826103345040",
+    },
+    {
+      name: "Nova",
+      voice: "nova",
+      image:
+        "https://www.figma.com/component/ed4dd15c23f84f0bbb4e56d0bd63887508ea7386/thumbnail?ver=52767%3A24219&fuid=1228001826103345040",
     },
   ];
 
@@ -164,7 +178,6 @@ const ConversationalSession = () => {
       recognitionRef.current.start();
     }
     resetSilenceTimeout();
-    console.log("AI stopped speaking:");
   };
 
   const stopListening = () => {
@@ -173,29 +186,23 @@ const ConversationalSession = () => {
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
     }
-    console.log("Stopped listening; AI speaking:");
   };
 
   const handleUserResponse = async (response) => {
-    console.log("User response received:", response);
     const trimmedResponse = response.trim();
-    if (trimmedResponse !== "") {
+    if (trimmedResponse !== "" && !isProcessing) {
       stopListening();
-      setSessionHistory((prev) => [
-        ...prev,
-        { speaker: "User", text: trimmedResponse },
-      ]);
+      setIsProcessing(true);
 
-      const userMessage = `User's response: "${trimmedResponse}"`;
-      const aiResponse = await getAIResponse(userMessage);
-
-      setSessionHistory((prev) => [
-        ...prev,
-        { speaker: "Interviewer", text: aiResponse },
-      ]);
-
-      await speakText(aiResponse);
-      startListening();
+      // Update session history with the user response
+      setSessionHistory((prev) => {
+        const updatedHistory = [
+          ...prev,
+          { speaker: "User", text: trimmedResponse },
+        ];
+        processAIResponse(trimmedResponse, updatedHistory); // Call the function to process AI response
+        return updatedHistory;
+      });
     } else {
       console.log("Empty response received, not processing.");
       startListening();
@@ -203,20 +210,33 @@ const ConversationalSession = () => {
     setTranscript("");
   };
 
-  const getAIResponse = async (userMessage) => {
-    const history = sessionHistory.map(
-      (entry) => `${entry.speaker}: ${entry.text}`
-    );
-    const fullPrompt = [...history, `User: ${userMessage}`].join("\n");
+  const processAIResponse = async (userMessage, updatedHistory) => {
+    const aiResponse = await getAIResponse(userMessage, updatedHistory);
 
-    console.log(fullPrompt);
+    // Update session history with the AI response
+    setSessionHistory((prev) => [
+      ...prev,
+      { speaker: "Interviewer", text: aiResponse },
+    ]);
+
+    await speakText(aiResponse);
+    setIsProcessing(false);
+    startListening();
+  };
+
+  const getAIResponse = async (userMessage, sessionHistory) => {
+    console.log("sessionHistory in getAIResponse", sessionHistory);
+    const fullHistory = sessionHistory
+      .map((entry) => `${entry.speaker}: ${entry.text}`)
+      .join("\n");
+    const fullPrompt = `${fullHistory}\nUser: ${userMessage}\nInterviewer:`;
+
+    console.log("Full conversation history:", fullPrompt); // Log the full conversation history
     try {
-      const response = await fetchOpenAIResponse(apiKey, messages, fullPrompt);
-      setMessages((prev) => [
-        ...prev,
-        { role: "user", content: userMessage },
-        { role: "assistant", content: response },
+      const response = await fetchOpenAIResponse(apiKey, [
+        { role: "user", content: fullPrompt },
       ]);
+
       return response;
     } catch (error) {
       console.error("Error fetching AI response:", error);
@@ -303,8 +323,15 @@ const ConversationalSession = () => {
     setSessionStarted(true);
     const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please prompt the user to the next question. If the user ever gets off track redirect them to the question. If the user asks for clarification, provide it.`;
     try {
-      const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
-      setMessages([
+      const response = await fetchOpenAIResponse(apiKey, [
+        { role: "user", content: initialPrompt },
+      ]);
+      setSessionHistory([
+        { speaker: "System", text: initialPrompt },
+        { speaker: "Interviewer", text: response },
+      ]);
+      setMessages((prev) => [
+        ...prev,
         { role: "system", content: initialPrompt },
         { role: "assistant", content: response },
       ]);
@@ -318,6 +345,10 @@ const ConversationalSession = () => {
       );
     }
   };
+
+  useEffect(() => {
+    console.log("Interviewer:", sessionHistory);
+  }, [sessionHistory]);
 
   const finishSession = () => {
     stopListening();
