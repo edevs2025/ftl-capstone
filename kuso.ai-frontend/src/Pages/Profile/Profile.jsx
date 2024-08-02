@@ -8,6 +8,7 @@ import axios from "axios";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { Line } from 'react-chartjs-2';
 import Modal from "./Modal";
+import ProfileModal from "./ProfileModal";
 import { formatDistanceToNowStrict, set } from 'date-fns';
 import {
   Chart as ChartJS,
@@ -47,8 +48,10 @@ function Profile() {
   const [caseStudyCount, setCaseStudyCount] = useState(0);
   const [behavioralCount, setBehavioralCount] = useState(0);
   const [currentSession, setCurrentSession] = useState(null);
+  const [isProfileComplete, setIsProfileComplete] = useState(false);
+const [showProfileModal, setShowProfileModal] = useState(false);
   const navigate = useNavigate();
-  const { getToken } = useAuth();
+  const { getToken, userId } = useAuth();
 
   useEffect(() => {
     const fetchToken = async () => {
@@ -93,30 +96,36 @@ function Profile() {
   }, [userToken]);
 
   useEffect(() => {
-    const fetchUsername = async () => {
+    const fetchUserData = async () => {
       setTotalVisits(0);
       if (decodedUserToken && decodedUserToken.userId) {
         try {
           const response = await axios.get(
-            `https://ftl-capstone.onrender.com/user/${decodedUserToken.userId}/session`
+            `https://ftl-capstone.onrender.com/user/${decodedUserToken.userId}/session`,
+            {
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+              },
+            }
           );
           if (response.status === 200) {
             setUserData(response.data);
             setUserQuestions(response.data.questions);
             setUserSessions(response.data.sessions);
             setTotalVisits(response.data.sessions.length);
+            checkProfileCompletion(response.data);
             console.log(response.data);
           } else {
-            console.error("Failed to fetch username");
+            console.error("Failed to fetch user data");
           }
         } catch (error) {
-          console.error("Error fetching username:", error);
+          console.error("Error fetching user data:", error);
         }
       }
     };
-
-    fetchUsername();
-  }, [decodedUserToken]);
+  
+    fetchUserData();
+  }, [decodedUserToken, userToken]);
 
   useEffect(() => {
     setTechnicalCount(0);
@@ -152,6 +161,16 @@ function Profile() {
   calculatePieChartData();
 }, [userData]);
 
+const checkProfileCompletion = (data) => {
+  if (data && (data.age || (data.industries && data.industries.length > 0))) {
+    setIsProfileComplete(true);
+  } else {
+    setIsProfileComplete(false);
+  }
+};
+
+
+
   function formatTimeAgo(date) {
     return `${formatDistanceToNowStrict(date)} ago`;
   }
@@ -163,6 +182,73 @@ function Profile() {
   const handleOnClickSession = (session, index) => {
     setCurrentSession(session);
     setSessionNumber(index);
+  };
+
+  const handleProfileUpdate = async (profileData) => {
+    try {
+      // Update age and employed status
+      const response = await axios.put(
+        `https://ftl-capstone.onrender.com/user/${decodedUserToken.userId}`,
+        {
+          age: profileData.age,
+          employed: profileData.employed
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${userToken}`,
+          },
+        }
+      );
+  
+      if (response.status === 200) {
+        // Update industries
+        const currentIndustryIds = userData?.industries.map(ind => ind.industryId) || [];
+        const newIndustryIds = profileData.industries;
+  
+        // Industries to add
+        const industriesToAdd = newIndustryIds.filter(id => !currentIndustryIds.includes(id));
+        for (let industryId of industriesToAdd) {
+          await axios.post(
+            `https://ftl-capstone.onrender.com/user/${decodedUserToken.userId}/industry`,
+            { industryId },
+            {
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+              },
+            }
+          );
+        }
+  
+        // Industries to remove
+        const industriesToRemove = currentIndustryIds.filter(id => !newIndustryIds.includes(id));
+        for (let industryId of industriesToRemove) {
+          await axios.delete(
+            `https://ftl-capstone.onrender.com/user/${decodedUserToken.userId}/industry`,
+            { 
+              data: { industryId },
+              headers: {
+                Authorization: `Bearer ${userToken}`,
+              },
+            }
+          );
+        }
+  
+        // Fetch updated user data
+        const updatedUserResponse = await axios.get(
+          `https://ftl-capstone.onrender.com/user/${decodedUserToken.userId}/session`,
+          {
+            headers: {
+              Authorization: `Bearer ${userToken}`,
+            },
+          }
+        );
+  
+        setUserData(updatedUserResponse.data);
+        checkProfileCompletion();
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+    }
   };
 
   const pieChartData = [
@@ -210,6 +296,8 @@ function Profile() {
     },
   };
 
+ 
+
   return (
     <div>
       <Navbar />
@@ -227,8 +315,17 @@ function Profile() {
                 <p>Username: {userData.username}</p>
                 <p>Joined <strong>{formatTimeAgo(new Date(userData.createdAt))}</strong></p>
                 <p>Last seen <strong>{formatTimeAgo(new Date(userSessions[userSessions.length - 1].createdAt))}</strong></p>
+                <button onClick={() => setShowProfileModal(true)}>
+                  {isProfileComplete ? 'Edit Profile' : 'Complete Profile'}
+                </button>
               </div>
             )}
+            <ProfileModal
+              isOpen={showProfileModal}
+              onClose={() => setShowProfileModal(false)}
+              userData={userData}
+              onSave={handleProfileUpdate}
+            />
             <div className="bookmarked-questions">
               <h3>Bookmarked Questions</h3>
               {userQuestions.map((question, index) => (
