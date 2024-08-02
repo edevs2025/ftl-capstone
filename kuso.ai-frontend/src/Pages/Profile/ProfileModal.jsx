@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef } from 'react';
 import Select from 'react-select';
 import './ProfileModal.css'
 import axios from "axios";
@@ -22,81 +22,93 @@ const INDUSTRIES = [
     { value: 8, label: "Arts, Media, and Entertainment" }
   ];
 
-  function ProfileModal({ isOpen, onClose, userData, onSave }) {
-    const [age, setAge] = useState(userData?.age || '');
-    const [employed, setEmployed] = useState(userData?.employed || false);
-    const [selectedIndustries, setSelectedIndustries] = useState([]);
-  
-    useEffect(() => {
-      if (userData) {
-        setAge(userData.age || '');
-        setEmployed(userData.employed || false);
-        setSelectedIndustries(
-          userData.industries.map(ind => INDUSTRIES.find(i => i.value === ind.industryId)) || []
-        );
+  function ProfileDropdown({ isOpen, onClose, userData, onSave }) {
+  const [age, setAge] = useState(userData?.age || '');
+  const [employed, setEmployed] = useState(userData?.employed || false);
+  const [selectedIndustries, setSelectedIndustries] = useState([]);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    if (userData) {
+      setAge(userData.age || '');
+      setEmployed(userData.employed || false);
+      setSelectedIndustries(
+        userData.industries.map(ind => INDUSTRIES.find(i => i.value === ind.industryId)) || []
+      );
+    }
+  }, [userData]);
+
+  useEffect(() => {
+    function handleClickOutside(event) {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        onClose();
       }
-    }, [userData]);
-  
-    const handleSubmit = async (e) => {
-      e.preventDefault();
-      const ageInt = age ? parseInt(age, 10) : null;
-      await onSave({ 
-        age: ageInt, 
-        employed, 
-        industries: selectedIndustries.map(ind => ind.value)
-      });
-      onClose();
+    }
+
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
     };
-  
-    if (!isOpen) return null;
-  
-    return (
-      <div className="modal-overlay">
-        <div className="modal-content">
-          <h2>{userData?.age || userData?.industries.length > 0 ? 'Edit Profile' : 'Complete Profile'}</h2>
-          <form onSubmit={handleSubmit}>
-            <div className="form-group">
-              <label htmlFor="age">Age:</label>
-              <input 
-                id="age"
-                type="number" 
-                value={age} 
-                onChange={(e) => setAge(e.target.value)} 
-                min="0"
-                max="120"
-              />
-            </div>
-            <div className="form-group">
-              <label className="toggle-container">
-                <span className="toggle-label">Employed:</span>
-                <div className="toggle-switch">
-                  <input
-                    type="checkbox"
-                    checked={employed}
-                    onChange={() => setEmployed(!employed)}
-                  />
-                  <span className="slider round"></span>
-                </div>
-              </label>
-            </div>
-            <div className="form-group">
-              <label htmlFor="industries">Industries:</label>
-              <Select
-                id="industries"
-                isMulti
-                options={INDUSTRIES}
-                value={selectedIndustries}
-                onChange={setSelectedIndustries}
-              />
-            </div>
-            <div className="button-group">
-              <button type="submit">Save</button>
-              <button type="button" onClick={onClose}>Cancel</button>
-            </div>
-          </form>
+  }, [onClose]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const ageInt = age ? parseInt(age, 10) : null;
+    await onSave({ 
+      age: ageInt, 
+      employed, 
+      industries: selectedIndustries.map(ind => ind.value)
+    });
+    onClose();
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="profile-dropdown" ref={dropdownRef}>
+      <h2>{userData?.age || userData?.industries.length > 0 ? 'Edit Profile' : 'Complete Profile'}</h2>
+      <form onSubmit={handleSubmit}>
+        <div className="form-group">
+          <label htmlFor="age">Age:</label>
+          <input 
+            id="age"
+            type="number" 
+            value={age} 
+            onChange={(e) => setAge(e.target.value)} 
+            min="0"
+            max="120"
+          />
         </div>
-      </div>
-    );
-  }
-  
-  export default ProfileModal;
+        <div className="form-group">
+          <label className="toggle-container">
+            <span className="toggle-label">Employed:</span>
+            <div className="toggle-switch">
+              <input
+                type="checkbox"
+                checked={employed}
+                onChange={() => setEmployed(!employed)}
+              />
+              <span className="slider round"></span>
+            </div>
+          </label>
+        </div>
+        <div className="form-group">
+          <label htmlFor="industries">Industries:</label>
+          <Select
+            id="industries"
+            isMulti
+            options={INDUSTRIES}
+            value={selectedIndustries}
+            onChange={setSelectedIndustries}
+          />
+        </div>
+        <div className="button-group">
+          <button type="submit">Save</button>
+          <button type="button" onClick={onClose}>Cancel</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
+export default ProfileDropdown;

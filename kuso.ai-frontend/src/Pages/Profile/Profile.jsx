@@ -8,7 +8,7 @@ import axios from "axios";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { Line } from 'react-chartjs-2';
 import Modal from "./Modal";
-import ProfileModal from "./ProfileModal";
+import ProfileDropdown from "./ProfileModal";
 import { formatDistanceToNowStrict, set } from 'date-fns';
 import {
   Chart as ChartJS,
@@ -49,7 +49,7 @@ function Profile() {
   const [behavioralCount, setBehavioralCount] = useState(0);
   const [currentSession, setCurrentSession] = useState(null);
   const [isProfileComplete, setIsProfileComplete] = useState(false);
-const [showProfileModal, setShowProfileModal] = useState(false);
+  const [showProfileDropdown, setShowProfileDropdown] = useState(false);
   const navigate = useNavigate();
   const { getToken, userId } = useAuth();
 
@@ -315,17 +315,17 @@ const checkProfileCompletion = (data) => {
                 <p>Username: {userData.username}</p>
                 <p>Joined <strong>{formatTimeAgo(new Date(userData.createdAt))}</strong></p>
                 <p>Last seen <strong>{formatTimeAgo(new Date(userSessions[userSessions.length - 1].createdAt))}</strong></p>
-                <button onClick={() => setShowProfileModal(true)}>
+                <button onClick={() => setShowProfileDropdown(!showProfileDropdown)}>
                   {isProfileComplete ? 'Edit Profile' : 'Complete Profile'}
                 </button>
+                <ProfileDropdown
+                  isOpen={showProfileDropdown}
+                  onClose={() => setShowProfileDropdown(false)}
+                  userData={userData}
+                  onSave={handleProfileUpdate}
+                />
               </div>
             )}
-            <ProfileModal
-              isOpen={showProfileModal}
-              onClose={() => setShowProfileModal(false)}
-              userData={userData}
-              onSave={handleProfileUpdate}
-            />
             <div className="bookmarked-questions">
               <h3>Bookmarked Questions</h3>
               {userQuestions.map((question, index) => (
@@ -343,7 +343,7 @@ const checkProfileCompletion = (data) => {
           <div className="right-container">
             <div className="stats-container">
               <div className="stat-box">
-                <h2 className="stat-title">Total Pratice Sessions</h2>
+                <h2 className="stat-title">Total Practice Sessions</h2>
                 <p className="stat-value">{totalVisits}</p>
               </div>
               <div className="stat-box">
@@ -355,7 +355,7 @@ const checkProfileCompletion = (data) => {
                 <p className="stat-value">{Math.round(overallScore * 1000) / 1000}</p>
               </div>
             </div>
-
+  
             <div className="charts-container">
               <div className="chart-box pie-chart">
                 <h2 className="chart-title">Question Breakdown By Topic</h2>
@@ -380,57 +380,53 @@ const checkProfileCompletion = (data) => {
                 </div>
               </div>
             </div>
-
+  
             <div className="sessions-container">
               <h2 className="sessions-title">Past Sessions</h2>
               {userSessions.length > 0 ? (
-    userSessions.map((session, index) => (
-      <div
-        key={index}
-        className="sessions"
-        onClick={() => handleOnClickSession(session, (index + 1))}
-        style={{ cursor: "pointer", position: "relative" }}
-      >
-        <p>Session {index + 1}</p>
-        <p>Date: {session.createdAt.substring(0, 10)}</p>
-      </div>
-    ))
-  ) : (
-    <p>No sessions available.</p>
-  )}
-  {currentSession && (
-  <Modal show={currentSession !== null} onClose={() => setCurrentSession(null)}>
-  <h2 style={{ color: "white", textAlign: "center"}}>Session {sessionNumber}</h2><br />
-  {currentSession.questions.length > 0 ? (
-    currentSession.questions.map((question, index) => (
-      <div
-        key={index}
-        className="sessionModal"
-        style={{ color: "white" }}
-      >
-        <h2>Question: {question.question.questionContent}</h2><br />
-        {question.feedback && question.feedback.length > 0 ? (
-          <>
-            <h3>Your Answer:</h3>
-            <p>{question.feedback[0].userAnswer}</p><br />
-            <h3>Answer Evaluation:</h3>
-            <p>{question.feedback[0].gptResponse}</p><br />
-            <h3>Score: {question.feedback[0].score}</h3><br />
-          </>
-        ) : (
-          <p>No feedback available for this question.</p>
-        )}
-      </div>
-    ))
-  ) : (
-    <p style={{ color: "white" }}>No questions available for this session.</p>
-  )}
-  
-</Modal>
-
-
-)}
-
+                userSessions.map((session, index) => (
+                  <div
+                    key={index}
+                    className="sessions"
+                    onClick={() => handleOnClickSession(session, (index + 1))}
+                    style={{ cursor: "pointer", position: "relative" }}
+                  >
+                    <p>Session {index + 1}</p>
+                    <p>Date: {session.createdAt.substring(0, 10)}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No sessions available.</p>
+              )}
+              {currentSession && (
+                <Modal show={currentSession !== null} onClose={() => setCurrentSession(null)}>
+                  <h2 style={{ color: "white", textAlign: "center"}}>Session {sessionNumber}</h2><br />
+                  {currentSession.questions.length > 0 ? (
+                    currentSession.questions.map((question, index) => (
+                      <div
+                        key={index}
+                        className="sessionModal"
+                        style={{ color: "white" }}
+                      >
+                        <h2>Question: {question.question.questionContent}</h2><br />
+                        {question.feedback && question.feedback.length > 0 ? (
+                          <>
+                            <h3>Your Answer:</h3>
+                            <p>{question.feedback[0].userAnswer}</p><br />
+                            <h3>Answer Evaluation:</h3>
+                            <p>{question.feedback[0].gptResponse}</p><br />
+                            <h3>Score: {question.feedback[0].score}</h3><br />
+                          </>
+                        ) : (
+                          <p>No feedback available for this question.</p>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p style={{ color: "white" }}>No questions available for this session.</p>
+                  )}
+                </Modal>
+              )}
             </div>
           </div>
         </div>
