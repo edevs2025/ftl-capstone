@@ -1,5 +1,16 @@
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 *{
     font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+    
 }
 .profile-page {
 
@@ -8,7 +19,10 @@
     display: flex;
     align-items: center;
     margin: auto;
+    animation: fadeIn .5s forwards;
   }
+
+
   
   .profile-container {
     max-width: 1200px;
@@ -30,7 +44,8 @@
     border-radius: 8px;
     padding: 20px;
     width: 40%;
-    height: fit-content;
+    max-height: 800px;
+    overflow-y: scroll;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
   }
   .profile-info {
@@ -131,7 +146,20 @@
     color: #333;
     padding: 20px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    max-height: 367px;
+    overflow-x: scroll;
   }
+  .sessionModal h2{
+    text-align: center;
+  }
+  .sessionModal h3{
+    text-align: center;
+  }
+  .sessionModal p{
+    text-align: center;
+  }
+  
+  
   
   .sessions-title {
     font-size: 18px;
