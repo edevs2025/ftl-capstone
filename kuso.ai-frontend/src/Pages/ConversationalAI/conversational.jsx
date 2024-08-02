@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 import { fetchOpenAIResponse } from "../../utils";
-import "./conversational.css";
 import Navbar from "../../components/Navbar/Navbar";
 import { useAuthContext } from "../../AuthContext";
 import { Box, Button, Typography } from "@mui/material";
 import AiEffect from "../Landing/AiEffect";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
-import { useTime } from "framer-motion";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./conversational.css";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -128,7 +128,7 @@ const ConversationalSession = () => {
         clearTimeout(silenceTimeoutRef.current);
       }
     };
-  }, []);
+  }, [isListening]);
 
   const resetSilenceTimeout = () => {
     if (silenceTimeoutRef.current) {
@@ -167,7 +167,7 @@ const ConversationalSession = () => {
   const handleUserResponse = async (response) => {
     console.log("User response received:", response);
     const trimmedResponse = response.trim();
-    if (trimmedResponse != "") {
+    if (trimmedResponse !== "") {
       stopListening();
       setSessionHistory((prev) => [
         ...prev,
@@ -186,7 +186,7 @@ const ConversationalSession = () => {
       startListening();
     } else {
       console.log("Empty response received, not processing.");
-      // startListening();
+      startListening();
     }
     setTranscript("");
   };
@@ -238,7 +238,6 @@ const ConversationalSession = () => {
     return new Promise(async (resolve) => {
       setIsAISpeaking(true);
       setIsInterviewerSpeaking(true);
-      // stopListening();
 
       const chunkSize = 1000;
       const chunks = [];
@@ -312,7 +311,7 @@ const ConversationalSession = () => {
   };
 
   return (
-    <div>
+    <div className={isAISpeaking ? "ai-speaking" : "user-speaking"}>
       <Navbar />
       <Box
         sx={{
@@ -347,7 +346,7 @@ const ConversationalSession = () => {
                   className={isAISpeaking ? "avatar-speaking" : ""}
                 />
               </Stack>
-              <p>
+              <p style={{ fontSize: "2rem" }}>
                 {selectedInterviewer ? selectedInterviewer.name : "Interviewer"}
               </p>
               <Button
@@ -360,7 +359,9 @@ const ConversationalSession = () => {
             </div>
           </div>
         ) : (
-          <div className="mockai-container">
+          <div
+            className={`mockai-container ${isAISpeaking ? "ai-speaking" : ""}`}
+          >
             <div className="ai-content">
               <Stack
                 direction="column"
@@ -368,9 +369,11 @@ const ConversationalSession = () => {
                   display: "flex",
                   justifyContent: "center",
                   alignItems: "center",
+                  position: "relative",
                 }}
                 spacing={2}
               >
+                <div className="ai-speaking-indicator"></div>
                 <Avatar
                   alt={
                     selectedInterviewer
@@ -384,35 +387,14 @@ const ConversationalSession = () => {
                     fontSize: "10rem",
                     margin: "0 auto",
                   }}
-                  className={isAISpeaking ? "avatar-speaking" : ""}
                 />
               </Stack>
             </div>
           </div>
         )}
       </>
-
-      {sessionStarted && (
-        <>
-          <div>
-            <h2>Current Question:</h2>
-            <p>{currentQuestion}</p>
-          </div>
-          <div>
-            <h2>Your Response:</h2>
-            <p>{transcript}</p>
-          </div>
-          <div>
-            <h2>Session History:</h2>
-            {sessionHistory.map((entry, index) => (
-              <div key={index}>
-                <strong>{entry.speaker}:</strong> {entry.text}
-              </div>
-            ))}
-          </div>
-          <button onClick={finishSession}>Finish Interview</button>
-        </>
-      )}
+      <button onClick={finishSession}>Finish Interview</button>
+      <div className="user-speaking-indicator"></div>
     </div>
   );
 };
