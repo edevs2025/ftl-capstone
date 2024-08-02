@@ -9,6 +9,7 @@ import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./conversational.css";
+import { set } from "date-fns";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -28,6 +29,8 @@ const ConversationalSession = () => {
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [userData, setUserData] = useState(null);
   const [selectedInterviewer, setSelectedInterviewer] = useState(null);
+  const [isUserSpeaking, setIsUserSpeaking] = useState(false);
+  const [interviewVoice, setInterviewVoice] = useState("shimmer");
 
   const interviewers = [
     {
@@ -60,6 +63,7 @@ const ConversationalSession = () => {
     const randomInterviewer =
       interviewers[Math.floor(Math.random() * interviewers.length)];
     setSelectedInterviewer(randomInterviewer);
+    setInterviewVoice(randomInterviewer.voice);
     const fetchUserData = async () => {
       if (isSignedIn && userId) {
         try {
@@ -108,7 +112,16 @@ const ConversationalSession = () => {
           }
           return prevTranscript;
         });
+        setIsUserSpeaking(true);
         resetSilenceTimeout();
+      };
+
+      recognitionRef.current.onaudiostart = () => {
+        setIsUserSpeaking(true);
+      };
+
+      recognitionRef.current.onaudioend = () => {
+        setIsUserSpeaking(false);
       };
 
       recognitionRef.current.onend = () => {
@@ -128,13 +141,14 @@ const ConversationalSession = () => {
         clearTimeout(silenceTimeoutRef.current);
       }
     };
-  }, [isListening]);
+  }, []);
 
   const resetSilenceTimeout = () => {
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
     }
     silenceTimeoutRef.current = setTimeout(() => {
+      setIsUserSpeaking(false);
       setTranscript((currentTranscript) => {
         if (currentTranscript !== lastProcessedTranscriptRef.current) {
           lastProcessedTranscriptRef.current = currentTranscript;
@@ -142,7 +156,7 @@ const ConversationalSession = () => {
         }
         return currentTranscript;
       });
-    }, 1000);
+    }, 2000);
   };
 
   const startListening = () => {
@@ -167,7 +181,7 @@ const ConversationalSession = () => {
   const handleUserResponse = async (response) => {
     console.log("User response received:", response);
     const trimmedResponse = response.trim();
-    if (trimmedResponse !== "") {
+    if (trimmedResponse != "") {
       stopListening();
       setSessionHistory((prev) => [
         ...prev,
@@ -192,8 +206,14 @@ const ConversationalSession = () => {
   };
 
   const getAIResponse = async (userMessage) => {
+    const history = sessionHistory.map(
+      (entry) => `${entry.speaker}: ${entry.text}`
+    );
+    const fullPrompt = [...history, `User: ${userMessage}`].join("\n");
+
+    console.log(fullPrompt);
     try {
-      const response = await fetchOpenAIResponse(apiKey, messages, userMessage);
+      const response = await fetchOpenAIResponse(apiKey, messages, fullPrompt);
       setMessages((prev) => [
         ...prev,
         { role: "user", content: userMessage },
@@ -219,7 +239,7 @@ const ConversationalSession = () => {
         body: JSON.stringify({
           model: "tts-1-hd",
           input: text,
-          voice: "shimmer",
+          voice: interviewVoice,
         }),
       });
 
@@ -325,76 +345,88 @@ const ConversationalSession = () => {
       >
         <AiEffect />
       </Box>
-      <>
-        {!sessionStarted ? (
-          <div className="pre-mockai-container">
-            <div className="pre-mockai-content">
-              <Stack direction="row" spacing={2}>
-                <Avatar
-                  alt={
-                    selectedInterviewer
-                      ? selectedInterviewer.name
-                      : "Interviewer"
-                  }
-                  src={selectedInterviewer ? selectedInterviewer.image : ""}
-                  sx={{
-                    width: "200px",
-                    height: "200px",
-                    fontSize: "10rem",
-                    margin: "0 auto",
-                  }}
-                  className={isAISpeaking ? "avatar-speaking" : ""}
-                />
-              </Stack>
-              <p style={{ fontSize: "2rem" }}>
-                {selectedInterviewer ? selectedInterviewer.name : "Interviewer"}
-              </p>
-              <Button
-                className="start-session-button"
-                onClick={startSession}
-                sx={{ color: "black ", backgroundColor: "white" }}
-              >
-                Start Session
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <div
-            className={`mockai-container ${isAISpeaking ? "ai-speaking" : ""}`}
-          >
-            <div className="ai-content">
-              <Stack
-                direction="column"
+      {!sessionStarted ? (
+        <div className="pre-mockai-container">
+          <div className="pre-mockai-content">
+            <Stack direction="row" spacing={2}>
+              <Avatar
+                alt={
+                  selectedInterviewer ? selectedInterviewer.name : "Interviewer"
+                }
+                src={selectedInterviewer ? selectedInterviewer.image : ""}
                 sx={{
-                  display: "flex",
-                  justifyContent: "center",
-                  alignItems: "center",
-                  position: "relative",
+                  width: "200px",
+                  height: "200px",
+                  fontSize: "10rem",
+                  margin: "0 auto",
                 }}
-                spacing={2}
-              >
-                <div className="ai-speaking-indicator"></div>
-                <Avatar
-                  alt={
-                    selectedInterviewer
-                      ? selectedInterviewer.name
-                      : "Interviewer"
-                  }
-                  src={selectedInterviewer ? selectedInterviewer.image : ""}
-                  sx={{
-                    width: "400px",
-                    height: "400px",
-                    fontSize: "10rem",
-                    margin: "0 auto",
-                  }}
-                />
-              </Stack>
-            </div>
+                className={isAISpeaking ? "avatar-speaking" : ""}
+              />
+            </Stack>
+            <p style={{ fontSize: "2rem" }}>
+              {selectedInterviewer ? selectedInterviewer.name : "Interviewer"}
+            </p>
+            <Button
+              className="start-session-button"
+              onClick={startSession}
+              sx={{ color: "black ", backgroundColor: "white" }}
+            >
+              Start Session
+            </Button>
           </div>
-        )}
-      </>
-      <button onClick={finishSession}>Finish Interview</button>
-      <div className="user-speaking-indicator"></div>
+        </div>
+      ) : (
+        <div
+          className={`mockai-container ${isAISpeaking ? "ai-speaking" : ""}`}
+        >
+          <Button
+            onClick={finishSession}
+            sx={{
+              width: "150px",
+              margin: "0 auto",
+              color: "white",
+              backgroundColor: "black",
+              marginTop: "3rem",
+            }}
+          >
+            End Session
+          </Button>
+
+          <div className="ai-content">
+            <Stack
+              direction="column"
+              sx={{
+                display: "flex",
+                justifyContent: "center",
+                alignItems: "center",
+                position: "relative",
+              }}
+              spacing={2}
+            >
+              <div className="ai-speaking-indicator"></div>
+              <Avatar
+                alt={
+                  selectedInterviewer ? selectedInterviewer.name : "Interviewer"
+                }
+                src={selectedInterviewer ? selectedInterviewer.image : ""}
+                sx={{
+                  width: "400px",
+                  height: "400px",
+                  fontSize: "10rem",
+                  margin: "0 auto",
+                }}
+              />
+            </Stack>
+          </div>
+        </div>
+      )}
+      {sessionStarted && (
+        <div
+          className={`user-speaking-indicator ${
+            isUserSpeaking ? "pulsating" : "idle"
+          }`}
+        ></div>
+      )}
     </div>
   );
 };
