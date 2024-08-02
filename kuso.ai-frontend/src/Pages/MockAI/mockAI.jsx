@@ -34,7 +34,6 @@ import axios from "axios";
 
 function MockAI() {
   const { id } = useParams();
-  const [selectedQuestion, setSelectedQuestion] = useState("");
   const [response, setResponse] = useState("");
   const [transcript, setTranscript] = useState("");
   const [recording, setRecording] = useState(false);
@@ -520,7 +519,9 @@ function MockAI() {
               }}
               spacing={2}
             >
-              <h1 style={{ marginBottom: "5rem" }}>{sessionQuestion}</h1>
+              <h1 style={{ marginBottom: "5rem", color: "white" }}>
+                {sessionQuestion}
+              </h1>
 
               <Avatar
                 alt="Interviewer"
