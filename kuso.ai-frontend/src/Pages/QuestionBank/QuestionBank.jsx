@@ -504,7 +504,7 @@ function QuestionBank() {
             </div>
             <div className="question-list-container">
               <ul>
-                {paginatedRows.map((row) => (
+                {paginatedRows.map((row, index) => (
                   <li
                     key={row.questionId}
                     className="question-container"
@@ -516,7 +516,7 @@ function QuestionBank() {
                     }}
                   >
                     <div>
-                      {row.questionId}. {row.questionContent}
+                      {(page - 1) * 10 + index + 1}. {row.questionContent}
                     </div>
                     <div className="question-topics">
                       {row.keyword.map((word, index) => (
