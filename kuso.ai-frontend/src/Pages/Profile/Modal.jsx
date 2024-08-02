@@ -19,5 +19,7 @@ const Modal = ({ show, onClose, children }) => {
   );
 };
 
+{children}
+
 export default Modal;
   
