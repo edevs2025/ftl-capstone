@@ -21,6 +21,7 @@
     "@react-three/drei": "^9.108.4",
     "@react-three/fiber": "^8.16.8",
     "axios": "^1.7.2",
+    "bootstrap": "^5.3.3",
     "chart.js": "^4.4.3",
     "chartjs": "^0.3.24",
     "clerk": "^0.6.1",
