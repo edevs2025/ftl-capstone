@@ -8,6 +8,7 @@ import { Box, Button, Typography } from "@mui/material";
 import AiEffect from "../Landing/AiEffect";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
+import { useTime } from "framer-motion";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -26,8 +27,39 @@ const ConversationalSession = () => {
   const [audioSources, setAudioSources] = useState([]);
   const [isAISpeaking, setIsAISpeaking] = useState(false);
   const [userData, setUserData] = useState(null);
+  const [selectedInterviewer, setSelectedInterviewer] = useState(null);
+
+  const interviewers = [
+    {
+      name: "Shimmer",
+      voice: "shimmer",
+      image:
+        "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040",
+    },
+    {
+      name: "Alloy",
+      voice: "alloy",
+      image:
+        "https://s3-alpha.figma.com/checkpoints/T7L/thp/HrUl6sYUAMJxLJdw/52767_23922.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWCVDFANMME%2F20240728%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20240728T120000Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=81a3fd438d5561b8ff4053ea1e10ca1f5028e28a7316db68b81292d2415f5e3e",
+    },
+    {
+      name: "Echo",
+      voice: "echo",
+      image:
+        "https://www.figma.com/component/26fc6dc8630017f4cc236c31b4662626533cf919/thumbnail?ver=52767%3A24210&fuid=1228001826103345040",
+    },
+    {
+      name: "Fable",
+      voice: "fable",
+      image:
+        "https://www.figma.com/component/252fc33c0305364520a23f439789194c70172416/thumbnail?ver=52767%3A24221&fuid=1228001826103345040",
+    },
+  ];
 
   useEffect(() => {
+    const randomInterviewer =
+      interviewers[Math.floor(Math.random() * interviewers.length)];
+    setSelectedInterviewer(randomInterviewer);
     const fetchUserData = async () => {
       if (isSignedIn && userId) {
         try {
@@ -96,7 +128,7 @@ const ConversationalSession = () => {
         clearTimeout(silenceTimeoutRef.current);
       }
     };
-  }, [isListening]);
+  }, []);
 
   const resetSilenceTimeout = () => {
     if (silenceTimeoutRef.current) {
@@ -110,14 +142,17 @@ const ConversationalSession = () => {
         }
         return currentTranscript;
       });
-    }, 2200);
+    }, 1000);
   };
 
   const startListening = () => {
     setTranscript("");
     setIsListening(true);
-    recognitionRef.current.start();
+    if (recognitionRef.current) {
+      recognitionRef.current.start();
+    }
     resetSilenceTimeout();
+    console.log("AI stopped speaking:");
   };
 
   const stopListening = () => {
@@ -126,12 +161,14 @@ const ConversationalSession = () => {
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
     }
+    console.log("Stopped listening; AI speaking:");
   };
 
   const handleUserResponse = async (response) => {
-    stopListening();
+    console.log("User response received:", response);
     const trimmedResponse = response.trim();
-    if (trimmedResponse !== "") {
+    if (trimmedResponse != "") {
+      stopListening();
       setSessionHistory((prev) => [
         ...prev,
         { speaker: "User", text: trimmedResponse },
@@ -144,12 +181,12 @@ const ConversationalSession = () => {
         ...prev,
         { speaker: "Interviewer", text: aiResponse },
       ]);
-      await speakText(aiResponse);
 
+      await speakText(aiResponse);
       startListening();
     } else {
       console.log("Empty response received, not processing.");
-      startListening();
+      // startListening();
     }
     setTranscript("");
   };
@@ -201,7 +238,7 @@ const ConversationalSession = () => {
     return new Promise(async (resolve) => {
       setIsAISpeaking(true);
       setIsInterviewerSpeaking(true);
-      stopListening();
+      // stopListening();
 
       const chunkSize = 1000;
       const chunks = [];
@@ -247,7 +284,7 @@ const ConversationalSession = () => {
 
   const startSession = async () => {
     setSessionStarted(true);
-    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please prompt the user to the next question.`;
+    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please prompt the user to the next question. If the user ever gets off track redirect them to the question. If the user asks for clarification, provide it.`;
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
@@ -295,8 +332,12 @@ const ConversationalSession = () => {
             <div className="pre-mockai-content">
               <Stack direction="row" spacing={2}>
                 <Avatar
-                  alt="Remy Sharp"
-                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  alt={
+                    selectedInterviewer
+                      ? selectedInterviewer.name
+                      : "Interviewer"
+                  }
+                  src={selectedInterviewer ? selectedInterviewer.image : ""}
                   sx={{
                     width: "200px",
                     height: "200px",
@@ -306,7 +347,9 @@ const ConversationalSession = () => {
                   className={isAISpeaking ? "avatar-speaking" : ""}
                 />
               </Stack>
-              <p>Dog</p>
+              <p>
+                {selectedInterviewer ? selectedInterviewer.name : "Interviewer"}
+              </p>
               <Button
                 className="start-session-button"
                 onClick={startSession}
@@ -329,8 +372,12 @@ const ConversationalSession = () => {
                 spacing={2}
               >
                 <Avatar
-                  alt="Remy Sharp"
-                  src="https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
+                  alt={
+                    selectedInterviewer
+                      ? selectedInterviewer.name
+                      : "Interviewer"
+                  }
+                  src={selectedInterviewer ? selectedInterviewer.image : ""}
                   sx={{
                     width: "400px",
                     height: "400px",
