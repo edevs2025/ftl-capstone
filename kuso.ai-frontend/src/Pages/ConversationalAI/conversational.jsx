@@ -165,9 +165,10 @@ const ConversationalSession = () => {
   };
 
   const handleUserResponse = async (response) => {
-    stopListening();
+    console.log("User response received:", response);
     const trimmedResponse = response.trim();
-    if (trimmedResponse !== "") {
+    if (trimmedResponse != "") {
+      stopListening();
       setSessionHistory((prev) => [
         ...prev,
         { speaker: "User", text: trimmedResponse },
@@ -237,7 +238,7 @@ const ConversationalSession = () => {
     return new Promise(async (resolve) => {
       setIsAISpeaking(true);
       setIsInterviewerSpeaking(true);
-      stopListening();
+      // stopListening();
 
       const chunkSize = 1000;
       const chunks = [];
