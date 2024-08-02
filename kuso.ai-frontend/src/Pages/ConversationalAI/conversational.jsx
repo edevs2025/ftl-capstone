@@ -9,7 +9,6 @@ import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./conversational.css";
-import { set } from "date-fns";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -181,7 +180,7 @@ const ConversationalSession = () => {
   const handleUserResponse = async (response) => {
     console.log("User response received:", response);
     const trimmedResponse = response.trim();
-    if (trimmedResponse != "") {
+    if (trimmedResponse !== "") {
       stopListening();
       setSessionHistory((prev) => [
         ...prev,
