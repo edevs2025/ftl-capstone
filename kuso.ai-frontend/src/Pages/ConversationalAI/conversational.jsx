@@ -8,6 +8,7 @@ import { Box, Button, Typography } from "@mui/material";
 import AiEffect from "../Landing/AiEffect";
 import Stack from "@mui/material/Stack";
 import Avatar from "@mui/material/Avatar";
+import { useTime } from "framer-motion";
 
 const ConversationalSession = () => {
   const [isListening, setIsListening] = useState(false);
@@ -30,26 +31,26 @@ const ConversationalSession = () => {
 
   const interviewers = [
     {
-      name: "Dog",
+      name: "Shimmer",
       voice: "shimmer",
       image:
         "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040",
     },
     {
-      name: "Man",
-      voice: "Alloy",
+      name: "Alloy",
+      voice: "alloy",
       image:
         "https://s3-alpha.figma.com/checkpoints/T7L/thp/HrUl6sYUAMJxLJdw/52767_23922.png?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAQ4GOSFWCVDFANMME%2F20240728%2Fus-west-2%2Fs3%2Faws4_request&X-Amz-Date=20240728T120000Z&X-Amz-Expires=604800&X-Amz-SignedHeaders=host&X-Amz-Signature=81a3fd438d5561b8ff4053ea1e10ca1f5028e28a7316db68b81292d2415f5e3e",
     },
     {
-      name: "Man 2",
-      voice: "Echo",
+      name: "Echo",
+      voice: "echo",
       image:
         "https://www.figma.com/component/26fc6dc8630017f4cc236c31b4662626533cf919/thumbnail?ver=52767%3A24210&fuid=1228001826103345040",
     },
     {
-      name: "Woman",
-      voice: "Fable",
+      name: "Fable",
+      voice: "fable",
       image:
         "https://www.figma.com/component/252fc33c0305364520a23f439789194c70172416/thumbnail?ver=52767%3A24221&fuid=1228001826103345040",
     },
@@ -127,7 +128,7 @@ const ConversationalSession = () => {
         clearTimeout(silenceTimeoutRef.current);
       }
     };
-  }, [isListening]);
+  }, []);
 
   const resetSilenceTimeout = () => {
     if (silenceTimeoutRef.current) {
@@ -141,14 +142,17 @@ const ConversationalSession = () => {
         }
         return currentTranscript;
       });
-    }, 2200);
+    }, 1000);
   };
 
   const startListening = () => {
     setTranscript("");
     setIsListening(true);
-    recognitionRef.current.start();
+    if (recognitionRef.current) {
+      recognitionRef.current.start();
+    }
     resetSilenceTimeout();
+    console.log("AI stopped speaking:");
   };
 
   const stopListening = () => {
@@ -157,6 +161,7 @@ const ConversationalSession = () => {
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
     }
+    console.log("Stopped listening; AI speaking:");
   };
 
   const handleUserResponse = async (response) => {
@@ -175,12 +180,12 @@ const ConversationalSession = () => {
         ...prev,
         { speaker: "Interviewer", text: aiResponse },
       ]);
-      await speakText(aiResponse);
 
+      await speakText(aiResponse);
       startListening();
     } else {
       console.log("Empty response received, not processing.");
-      startListening();
+      // startListening();
     }
     setTranscript("");
   };
