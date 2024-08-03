@@ -510,123 +510,135 @@ function MockAI() {
       ) : (
         <div className="mockai-container">
           <div className="ai-content">
-            <Stack
-              direction="column"
-              sx={{
-                display: "flex",
-                justifyContent: "center",
-                alignItems: "center",
-              }}
-              spacing={2}
-            >
-              <h1 style={{ marginBottom: "5rem", color: "white" }}>
-                {sessionQuestion}
-              </h1>
-
-              <Avatar
-                alt="Interviewer"
-                src={selectedInterviewer ? selectedInterviewer.image : ""}
+            <div className="ai-feedback-toggle">
+              <Stack
+                direction="column"
                 sx={{
-                  width: "400px",
-                  height: "400px",
-                  fontSize: "10rem",
-                  margin: "0 auto",
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
                 }}
-                className={isAISpeaking ? "avatar-speaking" : ""}
-              />
-            </Stack>
-            <Button
-              variant="contained"
-              onClick={startRecording}
-              disabled={recording || isSubmitted}
-              sx={{ mr: 2 }}
-            >
-              Start Recording
-            </Button>
-            <Button
-              variant="contained"
-              onClick={stopRecording}
-              disabled={!recording}
-              sx={{ mr: 2, color: "white" }}
-            >
-              Stop Recording
-            </Button>
-            <Button
-              variant="contained"
-              onClick={handleSubmit}
-              disabled={recording || !transcript || isSubmitted}
-              sx={{ mr: 2, color: "white" }}
-            >
-              {isLoading ? "Thinking..." : "Submit"}
-            </Button>
-          </div>
-          <div
-            className={`ai-feedback ${isFeedbackExpanded ? "expanded" : ""}`}
-          >
-            <Box sx={{ p: 2 }}>
-              <Box
-                sx={{
-                  mb: 2,
-                  backgroundColor: "inherit",
-                  p: 2,
-                  borderRadius: 1,
-                }}
+                spacing={2}
               >
-                <Link
-                  to="/question-bank"
-                  style={{ textDecoration: "none", color: "inherit" }}
+                <h1 style={{ marginBottom: "5rem", color: "white" }}>
+                  {sessionQuestion}
+                </h1>
+
+                <Avatar
+                  alt="Interviewer"
+                  src={selectedInterviewer ? selectedInterviewer.image : ""}
+                  sx={{
+                    width: "400px",
+                    height: "400px",
+                    fontSize: "10rem",
+                    margin: "0 auto",
+                  }}
+                  className={isAISpeaking ? "avatar-speaking" : ""}
+                />
+              </Stack>
+              <div className="ai-feedback-toggle-buttons">
+                <Button
+                  variant="contained"
+                  onClick={startRecording}
+                  disabled={recording || isSubmitted}
+                  sx={{ mr: 2 }}
                 >
-                  {" "}
-                  <Typography
-                    variant="subtitle1"
+                  Start Recording
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={stopRecording}
+                  disabled={!recording}
+                  sx={{ mr: 2, color: "white" }}
+                >
+                  Stop Recording
+                </Button>
+                <Button
+                  variant="contained"
+                  onClick={handleSubmit}
+                  disabled={recording || !transcript || isSubmitted}
+                  sx={{ mr: 2, color: "white" }}
+                >
+                  {isLoading ? "Thinking..." : "Submit"}
+                </Button>
+              </div>
+            </div>
+            {sessionIsStarted && (
+              <div
+                className={`ai-feedback ${
+                  isFeedbackExpanded ? "expanded" : ""
+                }`}
+              >
+                <Box sx={{ p: 2, color: "white" }}>
+                  <Box
                     sx={{
-                      display: "flex",
-                      flexDirection: "row",
-                      alignItems: "center",
-                      cursor: "pointer",
-                      "&:hover": {
-                        textDecoration: "underline",
-                      },
+                      mb: 2,
+                      backgroundColor: "inherit",
+                      p: 2,
+                      borderRadius: 1,
                     }}
                   >
-                    <ArrowBackIosIcon fontSize="small" />
-                    <Typography sx={{ fontSize: "medium" }}>
-                      All Questions
+                    <Link
+                      to="/question-bank"
+                      style={{ textDecoration: "none", color: "inherit" }}
+                    >
+                      {" "}
+                      <Typography
+                        variant="subtitle1"
+                        sx={{
+                          display: "flex",
+                          flexDirection: "row",
+                          alignItems: "center",
+                          cursor: "pointer",
+                          "&:hover": {
+                            textDecoration: "underline",
+                          },
+                        }}
+                      >
+                        <ArrowBackIosIcon fontSize="small" />
+                        <Typography sx={{ fontSize: "medium" }}>
+                          All Questions
+                        </Typography>
+                      </Typography>
+                    </Link>
+                    <Typography variant="h6" sx={{ mt: 4 }}></Typography>
+                    <Typography sx={{ fontSize: "2rem" }}>
+                      {sessionQuestion}
                     </Typography>
-                  </Typography>
-                </Link>
-                <Typography variant="h6" sx={{ mt: 4 }}></Typography>
-                <Typography sx={{ fontSize: "2rem" }}>
-                  {sessionQuestion}
-                </Typography>
-              </Box>
+                  </Box>
 
-              <Box sx={{ mt: 6, width: "100%", margin: "0 auto" }}>
-                <Typography variant="h6" sx={{ textAlign: "center" }}>
-                  Transcript:
-                </Typography>
-                <Typography>{transcript}</Typography>
-              </Box>
-              <Box sx={{ mt: 2, width: "100%" }}>
-                <Typography variant="h6" sx={{ textAlign: "center" }}>
-                  AI Response:
-                </Typography>
-                <ReactMarkdown>{response}</ReactMarkdown>
-              </Box>
-              {grades && (
-                <Box
-                  sx={{
-                    width: "600px",
-                    margin: "0 auto",
-                    marginTop: "4rem",
-                    color: "white",
-                  }}
-                >
-                  <Typography variant="h6">Grades:</Typography>
-                  <Bar data={data} options={options} sx={{ color: "white " }} />
+                  <Box sx={{ mt: 6, width: "100%", margin: "0 auto" }}>
+                    <Typography variant="h6" sx={{ textAlign: "center" }}>
+                      Transcript:
+                    </Typography>
+                    <Typography>{transcript}</Typography>
+                  </Box>
+                  <Box sx={{ mt: 2, width: "100%" }}>
+                    <Typography variant="h6" sx={{ textAlign: "center" }}>
+                      AI Response:
+                    </Typography>
+                    <ReactMarkdown>{response}</ReactMarkdown>
+                  </Box>
+                  {grades && (
+                    <Box
+                      sx={{
+                        width: "600px",
+                        margin: "0 auto",
+                        marginTop: "4rem",
+                        color: "white",
+                      }}
+                    >
+                      <Typography variant="h6">Grades:</Typography>
+                      <Bar
+                        data={data}
+                        options={options}
+                        sx={{ color: "white " }}
+                      />
+                    </Box>
+                  )}
                 </Box>
-              )}
-            </Box>
+              </div>
+            )}
           </div>
         </div>
       )}
