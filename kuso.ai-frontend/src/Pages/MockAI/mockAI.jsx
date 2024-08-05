@@ -134,7 +134,6 @@ function MockAI() {
       const sessionQData = sessionQResponse.data;
       setSessionQ(sessionQData);
       setSessionQuestion(sessionQData.question.questionContent);
-      console.log(sessionQuestion);
 
       const randomInterviewer =
         interviewers[Math.floor(Math.random() * interviewers.length)];

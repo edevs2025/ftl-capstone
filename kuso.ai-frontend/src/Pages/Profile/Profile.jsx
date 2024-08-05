@@ -88,7 +88,6 @@ function Profile() {
       try {
         const decoded = jwtDecode(userToken);
         setDecodedUserToken(decoded);
-        console.log(decoded);
       } catch (error) {
         console.error("Error decoding token:", error);
       }
@@ -114,7 +113,6 @@ function Profile() {
             setUserSessions(response.data.sessions);
             setTotalVisits(response.data.sessions.length);
             checkProfileCompletion(response.data);
-            console.log(response.data);
           } else {
             console.error("Failed to fetch user data");
           }

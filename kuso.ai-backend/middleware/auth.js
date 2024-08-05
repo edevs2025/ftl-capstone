@@ -7,7 +7,6 @@ const { clerkClient } = require('@clerk/clerk-sdk-node');
 const clerkAuth = async (req, res, next) => {
   const sessionToken = req.headers.authorization?.split(' ')[1];
   const decodedToken = jwtDecode(sessionToken);
-    console.log(decodedToken)
   if (!sessionToken) {
     return res.status(401).json({ error: "No session token provided" });
   }

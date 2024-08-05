@@ -196,7 +196,6 @@ function QuestionBank() {
           const response = await axios.get(
             `https://ftl-capstone.onrender.com/user/${userId}`
           );
-          console.log(response);
           setBookmarkedQuestions(
             response.data.questions.map((q) => q.questionId)
           );
@@ -218,7 +217,6 @@ function QuestionBank() {
             `https://ftl-capstone.onrender.com/user/${userId}`
           );
           setUserIndustries(response.data.industries);
-          console.log("userIndustries", userIndustries)
        }
        catch (error) {
         console.error("Error fetching industries:", error)
@@ -303,10 +301,7 @@ function QuestionBank() {
     );
 
     try {
-      console.log("question id", questionId);
-      console.log("bookmaked ones", bookmarkedQuestions);
       if (bookmarkedQuestions.includes(questionId)) {
-        console.log("next question id", questionId);
         await axios.delete(
           `https://ftl-capstone.onrender.com/user/${userId}/question/`,
           { data: { questionId: questionId } }
@@ -337,7 +332,6 @@ function QuestionBank() {
        row.industries.some((ind) => selectedIndustry.includes(ind.industryName)))
   );
 
-  console.log("selected industry",selectedIndustry)
 
   const paginatedRows = filteredRows.slice(
     (page - 1) * questionsPerPage,
