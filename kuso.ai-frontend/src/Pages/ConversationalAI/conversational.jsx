@@ -57,11 +57,14 @@ const ConversationalSession = () => {
     },
   ];
 
+  // useEffect(() => {
+  //   const randomInterviewer =
+  //     interviewers[Math.floor(Math.random() * interviewers.length)];
+  //   setSelectedInterviewer(randomInterviewer);
+  //   setInterviewVoice(randomInterviewer.voice);
+  // }, []); // Empty dependency array means this effect runs once on mount
+
   useEffect(() => {
-    const randomInterviewer =
-      interviewers[Math.floor(Math.random() * interviewers.length)];
-    setSelectedInterviewer(randomInterviewer);
-    setInterviewVoice(randomInterviewer.voice);
     const fetchUserData = async () => {
       if (isSignedIn && userId) {
         try {
@@ -164,7 +167,7 @@ const ConversationalSession = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4o",
+        model: "gpt-4",
         messages: fullPrompt,
         max_tokens: 150,
       }),
@@ -268,7 +271,7 @@ const ConversationalSession = () => {
         body: JSON.stringify({
           model: "tts-1-hd",
           input: text,
-          voice: interviewVoice,
+          voice: "shimmer",
         }),
       });
 
@@ -332,9 +335,13 @@ const ConversationalSession = () => {
 
   const startSession = async () => {
     setSessionStarted(true);
-    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please prompt the user to the next question. If the user ever gets off track redirect them to the question. If the user asks for clarification, provide it.`;
-
-    setConversationHistory([{ role: "system", content: initialPrompt }]);
+    const initialPrompt = `You are an interviewer conducting a behavioral interview. 
+    Start the interview by greeting the user and then prompt the first 
+    question. The user's name is ${userData.firstName}\n\n ONLY RETURN 
+    THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please
+     prompt the user to the next question. If the user ever gets off 
+     track redirect them to the question. If the user asks for 
+     clarification, provide it.`;
 
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
@@ -385,10 +392,12 @@ const ConversationalSession = () => {
           <div className="pre-mockai-content">
             <Stack direction="row" spacing={2}>
               <Avatar
-                alt={
-                  selectedInterviewer ? selectedInterviewer.name : "Interviewer"
+                alt={selectedInterviewer ? selectedInterviewer.name : "Shimmer"}
+                src={
+                  selectedInterviewer
+                    ? selectedInterviewer.image
+                    : "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
                 }
-                src={selectedInterviewer ? selectedInterviewer.image : ""}
                 sx={{
                   width: "200px",
                   height: "200px",
@@ -399,7 +408,7 @@ const ConversationalSession = () => {
               />
             </Stack>
             <p style={{ fontSize: "2rem" }}>
-              {selectedInterviewer ? selectedInterviewer.name : "Interviewer"}
+              {selectedInterviewer ? selectedInterviewer.name : "Shimmer"}
             </p>
             <Button
               className="start-session-button"
