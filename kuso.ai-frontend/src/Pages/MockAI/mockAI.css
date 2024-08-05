@@ -72,27 +72,28 @@ body {
 }
 
 .mockai-container {
-  display: flex;
+  display: flex !important;
   width: 100vw;
 }
 
 .ai-content {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   gap: 2rem;
-  width: 80%;
-  padding: 2rem;
+  width: 100%;
+  padding: 0.5rem;
   margin: 0 auto;
   justify-content: center;
   align-items: center;
+  height: 100%;
+  margin-bottom: 0px;
 }
 
 .ai-feedback {
-  display: flex;
+  display: none;
   flex-direction: column;
   gap: 2rem;
   width: 0px;
-  overflow-y: auto;
   max-height: 100vh;
   background-color: #373737;
   min-height: 100vh;
@@ -100,7 +101,10 @@ body {
 }
 
 .ai-feedback.expanded {
+  transition: width 0.5s ease;
   width: 50%;
+  display: flex;
+  flex-direction: column;
 }
 
 @keyframes pulse {
@@ -117,4 +121,12 @@ body {
 
 .avatar-speaking {
   animation: pulse 1s infinite;
+}
+
+.ai-feedback-toggle-buttons {
+  display: flex;
+  justify-content: column;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 3rem;
 }

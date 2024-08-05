@@ -1,5 +1,4 @@
-export const fetchOpenAIResponse = async (apiKey, messages, userMessage) => {
-  const fullPrompt = [...messages, { role: "user", content: userMessage }];
+export const fetchOpenAIResponse = async (apiKey, messages) => {
   const result = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
     headers: {
@@ -8,12 +7,14 @@ export const fetchOpenAIResponse = async (apiKey, messages, userMessage) => {
     },
     body: JSON.stringify({
       model: "gpt-4o",
-      messages: fullPrompt,
+      messages: messages,
       max_tokens: 150,
     }),
   });
 
   if (!result.ok) {
+    const error = await result.json();
+    console.error("Error details:", error);
     throw new Error("Network response was not ok");
   }
 
