@@ -1,7 +1,6 @@
 const feedbackModel = require('../models/feedback')
 
 const createFeedback = async (req, res) => {
-    // const { score, gptResponse, userAnswer, sessionQuestion } = req.body;
     try {
         const feedback = await feedbackModel.createFeedback(req.body);
         res.json(feedback);

@@ -65,10 +65,6 @@ const updateSessionQuestion = async (sessionId, questionId, data) => {
             }
         },
         data: updatedData
-        // {
-        //     askedAt: data.askedAt,
-        //     isGenerated: data.isGenerated,
-        // }
         ,
         include: {
             session: true,

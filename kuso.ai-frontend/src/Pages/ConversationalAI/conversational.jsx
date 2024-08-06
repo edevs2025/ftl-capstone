@@ -57,13 +57,6 @@ const ConversationalSession = () => {
     },
   ];
 
-  // useEffect(() => {
-  //   const randomInterviewer =
-  //     interviewers[Math.floor(Math.random() * interviewers.length)];
-  //   setSelectedInterviewer(randomInterviewer);
-  //   setInterviewVoice(randomInterviewer.voice);
-  // }, []); // Empty dependency array means this effect runs once on mount
-
   useEffect(() => {
     const fetchUserData = async () => {
       if (isSignedIn && userId) {
