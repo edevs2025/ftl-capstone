@@ -55,12 +55,6 @@ function MockAI() {
 
   const interviewers = [
     {
-      name: "Shimmer",
-      voice: "shimmer",
-      image:
-        "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040",
-    },
-    {
       name: "Echo",
       voice: "echo",
       image:
@@ -309,7 +303,7 @@ function MockAI() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          model: "gpt-4o",
+          model: "gpt-4o-mini",
           messages: [
             {
               role: "system",
