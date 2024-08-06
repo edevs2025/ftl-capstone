@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import "./Navbar.css";
-import { Link } from "react-router-dom";
-import { SignedOut, SignedIn, UserButton } from "@clerk/clerk-react";
+import { Link, useNavigate } from "react-router-dom";
+import { SignedOut, SignedIn, UserButton, useAuth } from "@clerk/clerk-react";
 
 const Navbar = () => {
   const [prevScrollPos, setPrevScrollPos] = useState(0);
   const [visible, setVisible] = useState(true);
-
+  const { isSignedIn } = useAuth();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -30,6 +31,15 @@ const Navbar = () => {
 
     return () => window.removeEventListener("scroll", handleScroll);
   }, [prevScrollPos, visible]);
+
+  const handleProtectedLink = (path) => {
+    if (!isSignedIn) {
+      navigate('/signin');
+    } else {
+      navigate(path);
+    }
+  };
+
   return (
     <nav className={`navbar-container ${visible ? "" : "navbar-hidden"}`}>
       <Link to="/">
@@ -39,22 +49,17 @@ const Navbar = () => {
       </Link>
       <div className="navbar-middle-content">
         <Link to="/question-bank">questions</Link>
-        <Link to="/conversational-ai">conversation</Link>
-        <Link to="/profile">profile</Link>
+        <span className="navbar-link" onClick={() => handleProtectedLink('/conversational-ai')} style={{cursor: 'pointer'}}>conversation</span>
+        <span className="navbar-link" onClick={() => handleProtectedLink('/profile')} style={{cursor: 'pointer'}}>profile</span>
       </div>
       <SignedIn>
         <UserButton />
       </SignedIn>
       <SignedOut>
         <span>
-      <Link to="/signup" className="navbar-signup">
-        signup<span> </span>
-      </Link>
-      /
-      <Link to="/signin" className="navbar-signup">
-      <span> </span>signin
-      </Link>
-
+          <Link to="/signup" className="navbar-signup">signup<span> </span></Link>
+          /
+          <Link to="/signin" className="navbar-signup"><span> </span>signin</Link>
         </span>
       </SignedOut>
     </nav>
