@@ -153,6 +153,14 @@ const ConversationalSession = () => {
       content: message.content,
     }));
 
+    const promptAi = [
+      {
+        role: "system",
+        content: `You are an interviewer interviewing a candidate. If the conversation gets off-track from the interview, revert the conversation topic back to the interview. Here is the conversation history:`,
+      },
+      ...fullPrompt,
+    ];
+
     const result = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -161,8 +169,8 @@ const ConversationalSession = () => {
       },
       body: JSON.stringify({
         model: "gpt-4o",
-        messages: fullPrompt,
-        max_tokens: 150,
+        messages: promptAi,
+        max_tokens: 200,
       }),
     });
     if (!result.ok) {
