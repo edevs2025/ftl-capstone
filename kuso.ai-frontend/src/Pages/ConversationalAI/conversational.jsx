@@ -167,7 +167,7 @@ const ConversationalSession = () => {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "gpt-4",
+        model: "gpt-4o",
         messages: fullPrompt,
         max_tokens: 150,
       }),
@@ -370,6 +370,7 @@ const ConversationalSession = () => {
     setMessages([]);
     setCurrentQuestion("");
     setTranscript("");
+    window.location.reload();
   };
 
   return (
@@ -450,9 +451,9 @@ const ConversationalSession = () => {
               <div className="ai-speaking-indicator"></div>
               <Avatar
                 alt={
-                  selectedInterviewer ? selectedInterviewer.name : "Interviewer"
+                  selectedInterviewer ? selectedInterviewer.name : "Shimmer"
                 }
-                src={selectedInterviewer ? selectedInterviewer.image : ""}
+                src={selectedInterviewer ? selectedInterviewer.image : "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"}
                 sx={{
                   width: "400px",
                   height: "400px",
