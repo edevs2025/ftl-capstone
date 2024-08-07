@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
-import { fetchOpenAIResponse } from "../../utils";
 import Navbar from "../../components/Navbar/Navbar";
 import { useAuthContext } from "../../AuthContext";
 import { Box, Button, Typography } from "@mui/material";
@@ -29,6 +28,7 @@ const ConversationalSession = () => {
   const [selectedInterviewer, setSelectedInterviewer] = useState(null);
   const [isUserSpeaking, setIsUserSpeaking] = useState(false);
   const [interviewVoice, setInterviewVoice] = useState("shimmer");
+  const [conversationHistory, setConversationHistory] = useState([]);
 
   const interviewers = [
     {
@@ -58,10 +58,6 @@ const ConversationalSession = () => {
   ];
 
   useEffect(() => {
-    const randomInterviewer =
-      interviewers[Math.floor(Math.random() * interviewers.length)];
-    setSelectedInterviewer(randomInterviewer);
-    setInterviewVoice(randomInterviewer.voice);
     const fetchUserData = async () => {
       if (isSignedIn && userId) {
         try {
@@ -141,6 +137,50 @@ const ConversationalSession = () => {
     };
   }, []);
 
+  const fetchOpenAIResponse = async (
+    apiKey,
+    conversationHistory,
+    userMessage
+  ) => {
+    const pastHistory = [
+      ...conversationHistory,
+      { role: "user", content: userMessage },
+      { role: "assistant", content: currentQuestion },
+    ];
+
+    const fullPrompt = pastHistory.map((message) => ({
+      role: message.role,
+      content: message.content,
+    }));
+
+    const promptAi = [
+      {
+        role: "system",
+        content: `You are an interviewer interviewing a candidate. If the conversation gets off-track from the interview, revert the conversation topic back to the interview. Here is the conversation history:`,
+      },
+      ...fullPrompt,
+    ];
+
+    const result = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: promptAi,
+        max_tokens: 200,
+      }),
+    });
+    if (!result.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data = await result.json();
+    return data.choices[0].message.content;
+  };
+
   const resetSilenceTimeout = () => {
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
@@ -164,7 +204,6 @@ const ConversationalSession = () => {
       recognitionRef.current.start();
     }
     resetSilenceTimeout();
-    console.log("AI stopped speaking:");
   };
 
   const stopListening = () => {
@@ -173,45 +212,39 @@ const ConversationalSession = () => {
     if (silenceTimeoutRef.current) {
       clearTimeout(silenceTimeoutRef.current);
     }
-    console.log("Stopped listening; AI speaking:");
   };
 
   const handleUserResponse = async (response) => {
-    console.log("User response received:", response);
     const trimmedResponse = response.trim();
     if (trimmedResponse !== "") {
       stopListening();
-      setSessionHistory((prev) => [
-        ...prev,
-        { speaker: "User", text: trimmedResponse },
-      ]);
+
+      setConversationHistory(
+        conversationHistory.push({ role: "user", content: trimmedResponse })
+      );
 
       const userMessage = `User's response: "${trimmedResponse}"`;
       const aiResponse = await getAIResponse(userMessage);
 
-      setSessionHistory((prev) => [
-        ...prev,
-        { speaker: "Interviewer", text: aiResponse },
-      ]);
+      setConversationHistory(
+        conversationHistory.push({ role: "assistant", content: aiResponse })
+      );
 
       await speakText(aiResponse);
       startListening();
     } else {
-      console.log("Empty response received, not processing.");
       startListening();
     }
     setTranscript("");
   };
 
   const getAIResponse = async (userMessage) => {
-    const history = sessionHistory.map(
-      (entry) => `${entry.speaker}: ${entry.text}`
-    );
-    const fullPrompt = [...history, `User: ${userMessage}`].join("\n");
-
-    console.log(fullPrompt);
     try {
-      const response = await fetchOpenAIResponse(apiKey, messages, fullPrompt);
+      const response = await fetchOpenAIResponse(
+        apiKey,
+        conversationHistory,
+        userMessage
+      );
       setMessages((prev) => [
         ...prev,
         { role: "user", content: userMessage },
@@ -223,6 +256,8 @@ const ConversationalSession = () => {
       return "I'm sorry, I'm having trouble responding right now. Could you please repeat that?";
     }
   };
+
+  useEffect(() => {}, [conversationHistory]);
 
   const fetchTTS = async (text) => {
     const API_KEY = apiKey;
@@ -237,7 +272,7 @@ const ConversationalSession = () => {
         body: JSON.stringify({
           model: "tts-1-hd",
           input: text,
-          voice: interviewVoice,
+          voice: "shimmer",
         }),
       });
 
@@ -301,7 +336,14 @@ const ConversationalSession = () => {
 
   const startSession = async () => {
     setSessionStarted(true);
-    const initialPrompt = `You are an interviewer conducting a behavioral interview. Start the interview by greeting the user and then prompt the first question. The user's name is ${userData.firstName}\n\n ONLY RETURN THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please prompt the user to the next question. If the user ever gets off track redirect them to the question. If the user asks for clarification, provide it.`;
+    const initialPrompt = `You are an interviewer conducting a behavioral interview. 
+    Start the interview by greeting the user and then prompt the first 
+    question. The user's name is ${userData.firstName}\n\n ONLY RETURN 
+    THE ACTUAL INTRODUCTION\n\n\n After appropriate responses, please
+     prompt the user to the next question. If the user ever gets off 
+     track redirect them to the question. If the user asks for 
+     clarification, provide it.`;
+
     try {
       const response = await fetchOpenAIResponse(apiKey, [], initialPrompt);
       setMessages([
@@ -309,6 +351,9 @@ const ConversationalSession = () => {
         { role: "assistant", content: response },
       ]);
       setCurrentQuestion(response);
+      setConversationHistory(
+        conversationHistory.push({ role: "assistant", content: response })
+      );
       await speakText(response);
       startListening();
     } catch (error) {
@@ -326,6 +371,7 @@ const ConversationalSession = () => {
     setMessages([]);
     setCurrentQuestion("");
     setTranscript("");
+    window.location.reload();
   };
 
   return (
@@ -348,10 +394,12 @@ const ConversationalSession = () => {
           <div className="pre-mockai-content">
             <Stack direction="row" spacing={2}>
               <Avatar
-                alt={
-                  selectedInterviewer ? selectedInterviewer.name : "Interviewer"
+                alt={selectedInterviewer ? selectedInterviewer.name : "Shimmer"}
+                src={
+                  selectedInterviewer
+                    ? selectedInterviewer.image
+                    : "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"
                 }
-                src={selectedInterviewer ? selectedInterviewer.image : ""}
                 sx={{
                   width: "200px",
                   height: "200px",
@@ -362,7 +410,7 @@ const ConversationalSession = () => {
               />
             </Stack>
             <p style={{ fontSize: "2rem" }}>
-              {selectedInterviewer ? selectedInterviewer.name : "Interviewer"}
+              {selectedInterviewer ? selectedInterviewer.name : "Shimmer"}
             </p>
             <Button
               className="start-session-button"
@@ -404,9 +452,9 @@ const ConversationalSession = () => {
               <div className="ai-speaking-indicator"></div>
               <Avatar
                 alt={
-                  selectedInterviewer ? selectedInterviewer.name : "Interviewer"
+                  selectedInterviewer ? selectedInterviewer.name : "Shimmer"
                 }
-                src={selectedInterviewer ? selectedInterviewer.image : ""}
+                src={selectedInterviewer ? selectedInterviewer.image : "https://www.figma.com/component/e87ba508dce6fb02cc4d09de9fd21bac096663e6/thumbnail?ver=52767%3A24214&fuid=1228001826103345040"}
                 sx={{
                   width: "400px",
                   height: "400px",

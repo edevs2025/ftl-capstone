@@ -1,8 +1,6 @@
 const feedbackModel = require('../models/feedback')
 
 const createFeedback = async (req, res) => {
-    // const { score, gptResponse, userAnswer, sessionQuestion } = req.body;
-    console.log(req.body);
     try {
         const feedback = await feedbackModel.createFeedback(req.body);
         res.json(feedback);
@@ -27,7 +25,6 @@ const updateFeedback = async(req, res) => {
 const getAllFeedbacks = async (req, res) => {
     try {
       feedbacks = await feedbackModel.getAllFeedbacks();
-      console.log(feedbacks);
       res.json(feedbacks);
     } catch (error) {
       res.status(500).json({ error: error.message });

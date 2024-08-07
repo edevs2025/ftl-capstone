@@ -1,4 +1,3 @@
-// src/components/ParticleEffect/ParticleEffect.js
 
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';

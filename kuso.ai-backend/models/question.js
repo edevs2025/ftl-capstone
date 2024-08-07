@@ -57,15 +57,6 @@ const updateQuestion = async (id, questionData) => {
     return prisma.question.update({
         where: { questionId: parseInt(id) },
         data: updatedData
-        // {
-        //     questionContent: questionData.questionContent,
-        //     users: questionData.users ? {
-        //         set: questionData.users.map(id => ({ userId: id }))
-        //     } : undefined,
-        //     industries: questionData.industries ? {
-        //         set: questionData.industries.map(id => ({ industryId: id }))
-        //     } : undefined,
-        // }
         ,
         include: {
             users: true,

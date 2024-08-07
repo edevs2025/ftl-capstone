@@ -161,13 +161,15 @@ function QuestionBank() {
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [selectedKeyword, setSelectedKeyword] = useState(null);
-  const [selectedIndustry, setSelectedIndustry] = useState(null);
+  const [selectedIndustry, setSelectedIndustry] = useState([]);
   const [questions, setQuestions] = useState([]);
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const questionsPerPage = 10;
   const { isSignedIn, userId } = useAuthContext();
   const [bookmarkedQuestions, setBookmarkedQuestions] = useState([]);
+  const [userIndustries, setUserIndustries] = useState([]);
+
 
   const navigate = useNavigate();
 
@@ -194,7 +196,6 @@ function QuestionBank() {
           const response = await axios.get(
             `https://ftl-capstone.onrender.com/user/${userId}`
           );
-          console.log(response);
           setBookmarkedQuestions(
             response.data.questions.map((q) => q.questionId)
           );
@@ -205,6 +206,25 @@ function QuestionBank() {
     };
 
     fetchBookmarkedQuestions();
+  }, [isSignedIn, userId]);
+
+  useEffect(() => {
+    const getUserIndustries = async () => {
+    if (isSignedIn && userId) {
+      try {
+        
+          const response = await axios.get(
+            `https://ftl-capstone.onrender.com/user/${userId}`
+          );
+          setUserIndustries(response.data.industries);
+       }
+       catch (error) {
+        console.error("Error fetching industries:", error)
+      }
+    }
+  }
+
+    getUserIndustries();
   }, [isSignedIn, userId]);
 
   const handleSearchChange = (event) => {
@@ -243,14 +263,21 @@ function QuestionBank() {
   };
 
   const handleIndustryClick = (industry) => {
-    if (selectedIndustry === industry) {
-      // If the clicked industry is already selected, clear the filter
-      setSelectedIndustry(null);
+    if (industry === "My Industries") {
+      // Toggle between user's industries and no selection
+      setSelectedIndustry(prevSelected => 
+        prevSelected.length === userIndustries.length ? [] : userIndustries.map(ind => ind.industryName)
+      );
     } else {
-      // Otherwise, set the new industry
-      setSelectedIndustry(industry);
+      setSelectedIndustry(prevSelected => {
+        if (prevSelected.includes(industry)) {
+          return prevSelected.filter(ind => ind !== industry);
+        } else {
+          return [...prevSelected, industry];
+        }
+      });
     }
-    setPage(1); // Reset to first page when changing or clearing industry
+    setPage(1);
   };
 
   const clearIndustryFilter = () => {
@@ -274,10 +301,7 @@ function QuestionBank() {
     );
 
     try {
-      console.log("question id", questionId);
-      console.log("bookmaked ones", bookmarkedQuestions);
       if (bookmarkedQuestions.includes(questionId)) {
-        console.log("next question id", questionId);
         await axios.delete(
           `https://ftl-capstone.onrender.com/user/${userId}/question/`,
           { data: { questionId: questionId } }
@@ -304,9 +328,10 @@ function QuestionBank() {
       row.questionContent.toLowerCase().includes(searchQuery.toLowerCase()) &&
       (!selectedKeyword || row.keyword.includes(selectedKeyword)) &&
       (!selectedTopic || row.keyword.includes(selectedTopic)) &&
-      (!selectedIndustry ||
-        row.industries.some((ind) => ind.industryName === selectedIndustry))
+      (selectedIndustry.length === 0 || 
+       row.industries.some((ind) => selectedIndustry.includes(ind.industryName)))
   );
+
 
   const paginatedRows = filteredRows.slice(
     (page - 1) * questionsPerPage,
@@ -559,6 +584,7 @@ function QuestionBank() {
               <h3>Industry</h3>
               <ul>
                 {[
+                  "My Industries",
                   "General",
                   "Information Technology",
                   "Healthcare and Medical",
@@ -581,10 +607,9 @@ function QuestionBank() {
                     onClick={() => handleIndustryClick(industry)}
                     style={{
                       cursor: "pointer",
-                      color:
-                        selectedIndustry === industry ? "#000000" : "inherit",
-                      fontWeight:
-                        selectedIndustry === industry ? "bold" : "normal",
+                      color: selectedIndustry.includes(industry) ? "#FFFFFF" : "inherit",
+                      fontWeight: selectedIndustry.includes(industry) ? "bold" : "normal",
+                      backgroundColor: selectedIndustry.includes(industry) ? "#646cff" : "inherit",
                     }}
                   >
                     {industry}

@@ -1,4 +1,5 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import ProtectedRoute from './ProtectedRoute';
 import "./App.css";
 import MockAI from "./Pages/MockAI/mockAI";
 import LandingPage from "./Pages/Landing/landing";
@@ -23,8 +24,15 @@ function App() {
           <Route path="/question-bank" element={<QuestionBank />} />
           <Route path="/signup" element={<Signup />} />
           <Route path="/signin" element={<Signin />} />
-          <Route path="/profile" element={<Profile />} />
-          <Route path="/conversational-ai" element={<ConversationalAI />} />
+          <Route path="/profile" element={
+                <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            } />
+          <Route path="/conversational-ai" element={
+            <ProtectedRoute>
+              <ConversationalAI />
+            </ProtectedRoute>} />
         </Routes>
       </Router>
       </AuthProvider>
