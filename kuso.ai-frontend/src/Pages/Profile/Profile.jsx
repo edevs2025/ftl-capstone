@@ -4,10 +4,12 @@ import Navbar from "../../components/Navbar/Navbar";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@clerk/clerk-react";
 import {jwtDecode} from "jwt-decode"; // Remove curly braces
+import { Box } from "@mui/material";
 import axios from "axios";
 import { PieChart } from '@mui/x-charts/PieChart';
 import { Line } from 'react-chartjs-2';
 import Modal from "./Modal";
+import ModifiedParticleEffect from '../Landing/ModifiedParticleEffect'
 import ProfileDropdown from "./ProfileModal";
 import { formatDistanceToNowStrict, set } from 'date-fns';
 import {
@@ -88,7 +90,6 @@ function Profile() {
       try {
         const decoded = jwtDecode(userToken);
         setDecodedUserToken(decoded);
-        console.log(decoded);
       } catch (error) {
         console.error("Error decoding token:", error);
       }
@@ -114,7 +115,6 @@ function Profile() {
             setUserSessions(response.data.sessions);
             setTotalVisits(response.data.sessions.length);
             checkProfileCompletion(response.data);
-            console.log(response.data);
           } else {
             console.error("Failed to fetch user data");
           }
@@ -301,6 +301,18 @@ const checkProfileCompletion = (data) => {
   return (
     <div>
       <Navbar />
+      <Box
+        sx={{
+          position: "absolute",
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          zIndex: -1,
+        }}
+      >
+        <ModifiedParticleEffect />
+      </Box>
       <div className="profile-page">
         <div className="profile-container">
           <div className="left-container">
@@ -436,7 +448,6 @@ const checkProfileCompletion = (data) => {
 }
 
 export default Profile;
-
 
 
 
