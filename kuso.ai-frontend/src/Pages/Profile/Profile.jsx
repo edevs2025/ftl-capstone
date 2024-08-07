@@ -112,14 +112,7 @@ function Profile() {
           if (response.status === 200) {
             setUserData(response.data);
             setUserQuestions(response.data.questions);
-
-            // Filter out sessions with empty feedback
-          const sessionsWithFeedback = response.data.sessions.map(session => ({
-            ...session,
-            feedback: session.feedback && session.feedback.length > 0 ? session.feedback : undefined
-          }));
-
-            setUserSessions(sessionsWithFeedback);
+            setUserSessions(response.data.sessions);
             setTotalVisits(response.data.sessions.length);
             checkProfileCompletion(response.data);
           } else {
@@ -403,9 +396,7 @@ const checkProfileCompletion = (data) => {
             <div className="sessions-container">
               <h2 className="sessions-title">Past Sessions</h2>
               {userSessions.length > 0 ? (
-                userSessions
-                .filter(session => session.feedback !== undefined)
-                .map((session, index) => (
+                userSessions.map((session, index) => (
                   <div
                     key={index}
                     className="sessions"
