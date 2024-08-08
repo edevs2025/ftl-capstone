@@ -19,7 +19,7 @@ function Signin() {
         localStorage.removeItem('pendingUrl');
         navigate(pendingUrl);
       } else {
-        navigate('/profile'); // Default page after sign-in
+        navigate('/question-bank'); // Default page after sign-in
       }
     }
   }, [isSignedIn, navigate]);
